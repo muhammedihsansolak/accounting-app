@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Entity
 @Table(name = "invoices")
-public class InvoiceEntity extends BaseEntity {
+public class Invoice extends BaseEntity {
 
     @Column(unique = true)
     private String invoiceNo;
