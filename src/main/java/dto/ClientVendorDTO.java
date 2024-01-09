@@ -11,7 +11,7 @@ import lombok.*;
 
 public class ClientVendorDTO {
 
-    private long id;
+    private Long id;
     private String clientVendorName;
     private String phone;
     private String website;
