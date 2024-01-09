@@ -1,13 +1,13 @@
 package dto;
 
 import enums.ClientVendorType;
+import lombok.*;
 
-
-class CompanyDto {
-}
-class AddressDto{
-}
-
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode
 
 public class ClientVendorDTO {
 

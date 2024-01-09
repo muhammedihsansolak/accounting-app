@@ -1,14 +1,18 @@
 package enums;
 
+
+import lombok.*;
+
+
 public enum ClientVendorType {
-    VENDOR("VENDOR"),
+    VENDOR("Vendor"),
     CLIENT("Client");
     
     
 
-    public String value = null;
+    private final String value;
     
-    ClientVendorType(String vendor) {
+    ClientVendorType(String value) {
         this.value = value;
     }
     public String getValue() {

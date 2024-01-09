@@ -2,55 +2,36 @@ package com.cydeo.entity;
 
 
 import enums.ClientVendorType;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
-
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "clients_vendors")
-public class ClientVendor {
+public class ClientVendor extends BaseEntity {
 
-    private String ClientVendorName;
-    private long phone;
+    private String clientVendorName;
+    private String phone;
     private String website;
-    @Id
-    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
 
-    public Long getId() {
-        return id;
-    }
 
     @Enumerated(EnumType.STRING)
     private ClientVendorType clientVendorType;
 
-    public void setId(Class<?> aClass) {
-    }
 
-    @Entity
-     class Address {
-
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
-
-    }
     @OneToOne//annotation api ---one to one relationship
-    @JoinColumn(name = "adress.id")
+    @JoinColumn(name = "address_id")
     private Address adress;
 
 
-    @Entity
-    class Company {
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
-    }
 
     @ManyToOne
-    @JoinColumn(name = "company.id")
+    @JoinColumn(name = "company_id")
     private Company company;
 
 
