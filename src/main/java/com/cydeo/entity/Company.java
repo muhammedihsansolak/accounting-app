@@ -4,7 +4,6 @@ import com.cydeo.enums.CompanyStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.tomcat.jni.Address;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
