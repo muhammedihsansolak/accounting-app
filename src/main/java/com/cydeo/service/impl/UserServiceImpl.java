@@ -1,11 +1,11 @@
 package com.cydeo.service.impl;
 
+import com.cydeo.dto.UserDTO;
+import com.cydeo.entity.User;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.UserRepository;
 import com.cydeo.service.UserService;
 import org.springframework.stereotype.Service;
-
-import java.nio.file.AccessDeniedException;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -18,7 +18,7 @@ public class UserServiceImpl implements UserService {
         this.mapperUtil = mapperUtil;
     }
 
-    public UserDTO findByUserName(String username) throws AccessDeniedException {
+    public UserDTO findByUserName(String username) {
         User user = userRepository.findByUserName(username);
         return mapperUtil.convert(user,new UserDTO());
     }
