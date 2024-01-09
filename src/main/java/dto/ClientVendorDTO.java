@@ -16,7 +16,7 @@ public class ClientVendorDTO {
     private String phone;
     private String website;
     private ClientVendorType clientVendorType;
-    private AddressDto address;
+    private AddressDTO address;
     private boolean hasInvoice;
 
 }
