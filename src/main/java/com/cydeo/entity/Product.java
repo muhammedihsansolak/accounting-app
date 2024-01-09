@@ -14,11 +14,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "products")
 @Where(clause = "is_deleted_false")
-public class Product {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Product extends BaseEntity{
 
     private String name;
     private int quantityInStock;
@@ -27,9 +23,9 @@ public class Product {
     @Enumerated(EnumType.STRING)
     private ProductUnit productUnit;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category")
-    private Category category;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "category")
+//    private Category category;
 
 
 
