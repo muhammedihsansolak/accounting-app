@@ -1,6 +1,6 @@
-package dto;
+package com.cydeo.dto;
 
-import enums.ClientVendorType;
+import com.cydeo.enums.ClientVendorType;
 import lombok.*;
 
 @Getter
