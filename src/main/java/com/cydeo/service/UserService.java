@@ -1,8 +1,8 @@
 package com.cydeo.service;
 
-import java.nio.file.AccessDeniedException;
+import com.cydeo.dto.UserDTO;
 
 public interface UserService {
-    UserDTO findByUserName(String username) throws AccessDeniedException;
+    UserDTO findByUserName(String username);
 
 }
