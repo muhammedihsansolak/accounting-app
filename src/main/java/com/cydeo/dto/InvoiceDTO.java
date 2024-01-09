@@ -3,10 +3,7 @@ package com.cydeo.dto;
 import com.cydeo.enums.InvoiceStatus;
 import com.cydeo.enums.InvoiceType;
 import com.sun.istack.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.EnumType;
@@ -18,16 +15,15 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class InvoiceDTO {
 
     private Long id;
 
     private String invoiceNo;
 
-    @Enumerated(EnumType.STRING)
     private InvoiceStatus invoiceStatus;
 
-    @Enumerated(EnumType.STRING)
     private InvoiceType invoiceType;
 
 
