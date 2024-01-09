@@ -12,5 +12,5 @@ public class CompanyDTO {
 
     private CompanyStatus companyStatus;
 
-    private AddressDto address;
+    private AddressDTO address;
 }

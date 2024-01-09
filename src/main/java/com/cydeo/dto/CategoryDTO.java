@@ -13,6 +13,6 @@ public class CategoryDTO {
 
     private Long id;
     private String description;
-    private CompanyDto company;
+    private CompanyDTO company;
     private boolean hasProduct; //(only DTO)
 }
