@@ -24,7 +24,7 @@ public class ClientVendor extends BaseEntity {
     private ClientVendorType clientVendorType;
 
 
-    @OneToOne//annotation api ---one to one relationship
+    @OneToOne
     @JoinColumn(name = "address_id")
     private Address adress;
 
