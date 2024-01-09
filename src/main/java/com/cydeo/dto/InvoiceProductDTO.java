@@ -25,9 +25,9 @@ public class InvoiceProductDTO {
 
     private Integer remainingQuantity;
 
-    private InvoiceDto invoice;
+    private InvoiceDTO invoice;
 
-    private ProductDto product;
+    private ProductDTO product;
 
 
 }

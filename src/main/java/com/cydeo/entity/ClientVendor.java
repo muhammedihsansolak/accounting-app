@@ -1,7 +1,7 @@
 package com.cydeo.entity;
 
 
-import enums.ClientVendorType;
+import com.cydeo.enums.ClientVendorType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

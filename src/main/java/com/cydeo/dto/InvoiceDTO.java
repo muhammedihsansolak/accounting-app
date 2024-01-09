@@ -30,9 +30,9 @@ public class InvoiceDTO {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
 
-    private CompanyDto company;
+    private CompanyDTO company;
 
-    private ClientVendorDto clientVendor;
+    private ClientVendorDTO clientVendor;
 
     private BigDecimal price;
 
