@@ -13,7 +13,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "products")
-@Where(clause = "is_deleted_false")
+@Where(clause = "is_deleted=false")
 public class Product extends BaseEntity{
 
     private String name;
