@@ -16,7 +16,6 @@ import java.time.LocalDate;
 @Table(name = "invoices")
 public class Invoice extends BaseEntity {
 
-    @Column(unique = true)
     private String invoiceNo;
 
     @Enumerated(EnumType.STRING)
