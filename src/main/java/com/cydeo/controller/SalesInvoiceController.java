@@ -91,11 +91,11 @@ public class SalesInvoiceController {
     @GetMapping("/create")
     public String createInvoice(Model model){
         //invoiceNo differ company to company. In order to auto generate invoiceNo, invoiceCreator() method should know companyTitle
-        String loggedInUsername = "abc@email.com";//TODO replace it with SecurityContextHolder when security implemented
-        UserDTO loggedInUser = userService.findByUserName(loggedInUsername);
+        String loggedInUsername = "admin@greentech.com";//TODO replace it with SecurityContextHolder when security implemented
+        UserDTO loggedInUser = userService.findByUsername(loggedInUsername);
         String companyTitle =  loggedInUser.getCompany().getTitle();
 
-        InvoiceDTO invoice = invoiceService.invoiceCreator(InvoiceType.PURCHASE, companyTitle);
+        InvoiceDTO invoice = invoiceService.invoiceCreator(InvoiceType.SALES, companyTitle);
 
         model.addAttribute("newSalesInvoice", invoice);
         model.addAttribute("vendors", List.of(new ClientVendorDTO()));//TODO Vendor should be a dropdown and be populated with only ClientVendors of Type Vendor.
@@ -104,14 +104,14 @@ public class SalesInvoiceController {
     }
 
     /**
-     * When End-user clicks on SAVE button, a new sales_invoice should be created in the database and end-user should land the purchase_invoice_update page. (because we only created invoice, but there are no products in it... We need to add them in update page)
+     * When End-user clicks on SAVE button, a new sales_invoice should be created in the database and end-user should land the sales_invoice_update page. (because we only created invoice, but there are no products in it... We need to add them in update page)
      */
     @PostMapping("/create")
-    public String createInvoice(@ModelAttribute("newPurchaseInvoice") InvoiceDTO invoice ,Model model){
+    public String createInvoice(@ModelAttribute("newSalesInvoice") InvoiceDTO invoice){
 
         InvoiceDTO createdInvoice = invoiceService.create(invoice);
 
-        return "redirect:/purchaseInvoices/update/"+createdInvoice.getId();
+        return "redirect:/salesInvoices/update/"+createdInvoice.getId();
     }
 
     /**
@@ -121,7 +121,7 @@ public class SalesInvoiceController {
     public String removeInvoiceProductFromInvoice(@PathVariable("invoiceId")Long invoiceId, @PathVariable("invoiceProductId")Long invoiceProductId){
         invoiceProductService.removeInvoiceProductFromInvoice(invoiceId, invoiceProductId);
 
-        return "redirect:/purchaseInvoices/update/"+invoiceId;
+        return "redirect:/salesInvoices/update/"+invoiceId;
     }
 
 }

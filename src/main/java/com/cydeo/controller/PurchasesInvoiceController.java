@@ -46,6 +46,7 @@ public class PurchasesInvoiceController {
 
         model.addAttribute("invoice",foundInvoice);
         model.addAttribute("newInvoiceProduct", new InvoiceProductDTO());
+//        model.addAttribute("products",) //TODO implement productService
         model.addAttribute("invoiceProducts", invoiceProductDTOList);
 
         return "invoice/purchase-invoice-update";
@@ -91,8 +92,8 @@ public class PurchasesInvoiceController {
     @GetMapping("/create")
     public String createInvoice(Model model){
         //invoiceNo differ company to company. In order to auto generate invoiceNo, invoiceCreator() method should know companyTitle
-        String loggedInUsername = "abc@email.com";//TODO replace it with SecurityContextHolder when security implemented
-        UserDTO loggedInUser = userService.findByUserName(loggedInUsername);
+        String loggedInUsername = "admin@greentech.com";//TODO replace it with SecurityContextHolder when security implemented
+        UserDTO loggedInUser = userService.findByUsername(loggedInUsername);
         String companyTitle =  loggedInUser.getCompany().getTitle();
 
         InvoiceDTO invoice = invoiceService.invoiceCreator(InvoiceType.PURCHASE, companyTitle);
@@ -107,7 +108,7 @@ public class PurchasesInvoiceController {
      * When End-user clicks on SAVE button, a new purchase_invoice should be created in the database and end-user should land the purchase_invoice_update page. (because we only created invoice, but there are no products in it... We need to add them in update page)
      */
     @PostMapping("/create")
-    public String createInvoice(@ModelAttribute("newPurchaseInvoice") InvoiceDTO invoice ,Model model){
+    public String createInvoice(@ModelAttribute("newPurchaseInvoice") InvoiceDTO invoice){
 
         InvoiceDTO createdInvoice = invoiceService.create(invoice);
 

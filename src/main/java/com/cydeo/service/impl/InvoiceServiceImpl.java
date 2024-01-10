@@ -38,8 +38,8 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public List<InvoiceDTO> findAllPurchaseInvoices() {
-        String currentlyLoggedInPersonUsername = "abc@email.com";//hardcoded. TODO replace it with SecurityContextHolder when security implemented
-        UserDTO loggedInUser = userService.findByUserName(currentlyLoggedInPersonUsername);
+        String currentlyLoggedInPersonUsername = "admin@greentech.com";//hardcoded. TODO replace it with SecurityContextHolder when security implemented
+        UserDTO loggedInUser = userService.findByUsername(currentlyLoggedInPersonUsername);
 
         List<Invoice> all = invoiceRepository.findInvoiceByInvoiceTypeAndCompany_Title(InvoiceType.PURCHASE, loggedInUser.getCompany().getTitle());
 
@@ -50,8 +50,8 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public List<InvoiceDTO> findAllSalesInvoices() {
-        String currentlyLoggedInPersonUsername = "abc@email.com";//hardcoded. TODO replace it with SecurityContextHolder when security implemented
-        UserDTO loggedInUser = userService.findByUserName(currentlyLoggedInPersonUsername);
+        String currentlyLoggedInPersonUsername = "admin@greentech.com";//hardcoded. TODO replace it with SecurityContextHolder when security implemented
+        UserDTO loggedInUser = userService.findByUsername(currentlyLoggedInPersonUsername);
 
         List<Invoice> all = invoiceRepository.findInvoiceByInvoiceTypeAndCompany_Title(InvoiceType.SALES, loggedInUser.getCompany().getTitle());
 
