@@ -20,6 +20,6 @@ public class UserServiceImpl implements UserService {
 
     public UserDTO findByUserName(String username) {
         User user = userRepository.findByUserName(username);
-        return mapperUtil.convert(user,new UserDTO());
+        return mapperUtil.convert(user, new UserDTO());
     }
 }
