@@ -8,7 +8,7 @@ import com.cydeo.service.ProductService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,13 +24,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDTO findById(Long id) {
-        Optional<Product> product = productRepository.findById(id);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Product can not be found with id: " + id));
         return mapperUtil.convert(product, new ProductDTO());
     }
 
     @Override
     public List<ProductDTO> listAllProducts() {
-        List<Product> productList = productRepository.findAllByIsDeleted(false);
+        List<Product> productList = productRepository.findAll();
         return productList.stream()
                 .map(product -> mapperUtil.convert(product,new ProductDTO()))
                 .collect(Collectors.toList());
