@@ -5,9 +5,7 @@ import com.cydeo.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -25,10 +23,10 @@ public class ProductController {
         return "product/product-list";
     }
 
-    @GetMapping("/update/{id}")
+    @PutMapping("/update/{id}")
     public String updateProduct(@PathVariable("id") Long id, Model model){
         ProductDTO productDTOToBeUpdated = productService.findById(id);
-
+        productService.update();
 
         return "product/product-update";
     }
@@ -36,6 +34,14 @@ public class ProductController {
     @GetMapping("/create")
     public String createProduct(){
 
+
+        return "/product/product-create";
+    }
+
+    @DeleteMapping("/{productId}")
+    public String deleteProduct(@PathVariable("productId") Long id, Model model){
+        ProductDTO productDTOToBeDeleted = productService.findById(id);
+        productService.delete(id);
 
         return "/product/product-create";
     }
