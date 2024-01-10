@@ -84,9 +84,9 @@ public class SalesInvoiceController {
 
         return "redirect:/salesInvoices/list";
     }
-//TODO
+
     /**
-     * When End-User clicks on "Create Purchase Invoice" button, sales_invoice_create page should be displayed
+     * When End-User clicks on "Create Sales Invoice" button, sales_invoice_create page should be displayed
      */
     @GetMapping("/create")
     public String createInvoice(Model model){
@@ -97,7 +97,7 @@ public class SalesInvoiceController {
 
         InvoiceDTO invoice = invoiceService.invoiceCreator(InvoiceType.PURCHASE, companyTitle);
 
-        model.addAttribute("newPurchaseInvoice", invoice);
+        model.addAttribute("newSalesInvoice", invoice);
         model.addAttribute("vendors", List.of(new ClientVendorDTO()));//TODO Vendor should be a dropdown and be populated with only ClientVendors of Type Vendor.
 
         return "invoice/sales-invoice-create";
