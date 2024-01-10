@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -30,7 +31,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDTO> listAllProducts() {
-        return null;
+        List<Product> productList = productRepository.findAllByIsDeleted(false);
+        return productList.stream()
+                .map(product -> mapperUtil.convert(product,new ProductDTO()))
+                .collect(Collectors.toList());
     }
 
     @Override
