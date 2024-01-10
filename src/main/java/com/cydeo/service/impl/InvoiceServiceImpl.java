@@ -1,8 +1,6 @@
 package com.cydeo.service.impl;
 
-import com.cydeo.dto.ClientVendorDTO;
 import com.cydeo.dto.InvoiceDTO;
-import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.dto.UserDTO;
 import com.cydeo.entity.Invoice;
 import com.cydeo.enums.InvoiceStatus;
@@ -13,13 +11,11 @@ import com.cydeo.service.InvoiceProductService;
 import com.cydeo.service.InvoiceService;
 import com.cydeo.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -71,7 +67,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceToUpdate.setId( foundInvoice.getId() );
         invoiceToUpdate.setInvoiceStatus( foundInvoice.getInvoiceStatus() );
         invoiceToUpdate.setInvoiceType( foundInvoice.getInvoiceType() );
-        invoiceToUpdate.setCompany(foundInvoice.getCompany() );
+        invoiceToUpdate.setCompany( foundInvoice.getCompany() );
 
         Invoice converted = mapper.convert(invoiceToUpdate, new Invoice());
         invoiceRepository.save( converted );
@@ -101,9 +97,9 @@ public class InvoiceServiceImpl implements InvoiceService {
     //Invoice_No should be auto generated
     //Invoice_Date should be the date which this invoice is created
     @Override
-    public InvoiceDTO invoiceCreator(InvoiceType invoiceType) {
-        // Get the latest invoice from the database
-        Optional<Invoice> latestInvoice = invoiceRepository.findTopByOrderByDateDesc();
+    public InvoiceDTO invoiceCreator(InvoiceType invoiceType, String companyTitle) {
+        // Get the latest invoice from the database which belongs to that company
+        Optional<Invoice> latestInvoice = invoiceRepository.findTopByCompany_TitleOrderByDateDesc(companyTitle);
         // Generate the new invoice number
         String generatedInvoiceNo = generateNextInvoiceNumber(latestInvoice);
 

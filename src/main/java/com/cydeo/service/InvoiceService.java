@@ -17,7 +17,7 @@ public interface InvoiceService {
 
     void approve(Long invoiceId);
 
-    InvoiceDTO invoiceCreator(InvoiceType invoiceType);
+    InvoiceDTO invoiceCreator(InvoiceType invoiceType, String companyTitle);
 
     InvoiceDTO create(InvoiceDTO invoice);
 

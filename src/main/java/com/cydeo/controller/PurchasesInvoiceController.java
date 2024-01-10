@@ -3,9 +3,11 @@ package com.cydeo.controller;
 import com.cydeo.dto.ClientVendorDTO;
 import com.cydeo.dto.InvoiceDTO;
 import com.cydeo.dto.InvoiceProductDTO;
+import com.cydeo.dto.UserDTO;
 import com.cydeo.enums.InvoiceType;
 import com.cydeo.service.InvoiceProductService;
 import com.cydeo.service.InvoiceService;
+import com.cydeo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,6 +22,7 @@ public class PurchasesInvoiceController {
 
     private final InvoiceService invoiceService;
     private final InvoiceProductService invoiceProductService;
+    private final UserService userService;
 
     /**
      * Lists all purchase invoices in the purchase-invoice-list page
@@ -87,7 +90,12 @@ public class PurchasesInvoiceController {
      */
     @GetMapping("/create")
     public String createInvoice(Model model){
-        InvoiceDTO invoice = invoiceService.invoiceCreator(InvoiceType.PURCHASE);
+        //invoiceNo differ company to company. In order to auto generate invoiceNo, invoiceCreator() method should know companyTitle
+        String loggedInUsername = "abc@email.com";//TODO replace it with SecurityContextHolder when security implemented
+        UserDTO loggedInUser = userService.findByUserName(loggedInUsername);
+        String companyTitle =  loggedInUser.getCompany().getTitle();
+
+        InvoiceDTO invoice = invoiceService.invoiceCreator(InvoiceType.PURCHASE, companyTitle);
 
         model.addAttribute("newPurchaseInvoice", invoice);
         model.addAttribute("vendors", List.of(new ClientVendorDTO()));//TODO Vendor should be a dropdown and be populated with only ClientVendors of Type Vendor.
