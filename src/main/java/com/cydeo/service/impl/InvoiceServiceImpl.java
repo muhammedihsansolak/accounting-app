@@ -52,6 +52,18 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<InvoiceDTO> findAllSalesInvoices() {
+        String currentlyLoggedInPersonUsername = "abc@email.com";//hardcoded. TODO replace it with SecurityContextHolder when security implemented
+        UserDTO loggedInUser = userService.findByUserName(currentlyLoggedInPersonUsername);
+
+        List<Invoice> all = invoiceRepository.findInvoiceByInvoiceTypeAndCompany_Title(InvoiceType.SALES, loggedInUser.getCompany().getTitle());
+
+        return all.stream()
+                .map(invoice -> mapper.convert(invoice, new InvoiceDTO()))
+                .collect(Collectors.toList());
+    }
+
     // invoiceNo, invoiceStatus, invoiceType, date, company cannot be updatable. Update -> ClientVendor
     // id, invoiceStatus, invoiceType, company details should come from DB
     @Override

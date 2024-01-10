@@ -21,4 +21,5 @@ public interface InvoiceService {
 
     InvoiceDTO create(InvoiceDTO invoice);
 
+    List<InvoiceDTO> findAllSalesInvoices();
 }
