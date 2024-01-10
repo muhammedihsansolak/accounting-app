@@ -18,8 +18,8 @@ public class UserServiceImpl implements UserService {
         this.mapperUtil = mapperUtil;
     }
 
-    public UserDTO findByUserName(String username) {
-        User user = userRepository.findByUserName(username);
-        return mapperUtil.convert(user, new UserDTO());
+    public UserDTO findByUsername(String username) {
+        User user = userRepository.findByUsername(username);
+        return mapperUtil.convert(user,new UserDTO());
     }
 }
