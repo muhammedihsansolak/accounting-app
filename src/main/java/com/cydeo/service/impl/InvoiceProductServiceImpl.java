@@ -54,6 +54,6 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
 
         invoiceProductDTOList.stream()
                 .filter(invoiceProductDTO -> invoiceProductDTO.getId() == invoiceProductId)
-                .map(invoiceProductDTO -> deleteById(invoiceProductDTO.getId())); //soft delete
+                .forEach(invoiceProductDTO -> deleteById(invoiceProductDTO.getId())); //soft delete
     }
 }

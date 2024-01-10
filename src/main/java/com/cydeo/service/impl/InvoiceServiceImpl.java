@@ -101,7 +101,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         // Get the latest invoice from the database which belongs to that company
         Optional<Invoice> latestInvoice = invoiceRepository.findTopByCompany_TitleOrderByDateDesc(companyTitle);
         // Generate the new invoice number
-        String generatedInvoiceNo = generateNextInvoiceNumber(latestInvoice);
+        String generatedInvoiceNo = generateNextInvoiceNumber(latestInvoice, invoiceType);
 
         InvoiceDTO invoiceDTO = new InvoiceDTO();
         invoiceDTO.setInvoiceNo( generatedInvoiceNo );
@@ -111,22 +111,35 @@ public class InvoiceServiceImpl implements InvoiceService {
         return invoiceDTO;
     }
 
-    private String generateNextInvoiceNumber(Optional<Invoice> lastInvoice) {
-        if (lastInvoice.isEmpty()) {
-            return "P-000";
-        }
-        String lastInvoiceNumber = lastInvoice.get().getInvoiceNo();
-        int lastNumber = Integer.parseInt(lastInvoiceNumber.substring(2));
-        int nextNumber = lastNumber + 1;
+    private String generateNextInvoiceNumber(Optional<Invoice> lastInvoice, InvoiceType invoiceType) {
+        if (invoiceType.equals(InvoiceType.PURCHASE)) {
+            if (lastInvoice.isEmpty()) {
+                return "P-000";
+            }
+            String lastInvoiceNumber = lastInvoice.get().getInvoiceNo();
+            int lastNumber = Integer.parseInt(lastInvoiceNumber.substring(2));
+            int nextNumber = lastNumber + 1;
 
-        return "P-"+nextNumber;
+            return "P-" + nextNumber;
+        }else if (invoiceType.equals(InvoiceType.SALES)){
+            if (lastInvoice.isEmpty()) {
+                return "S-000";
+            }
+            String lastInvoiceNumber = lastInvoice.get().getInvoiceNo();
+            int lastNumber = Integer.parseInt(lastInvoiceNumber.substring(2));
+            int nextNumber = lastNumber + 1;
+
+            return "S-" + nextNumber;
+        }else {
+            return "";
+        }
     }
 
     @Override
     public InvoiceDTO create(InvoiceDTO invoice) {
         Invoice invoiceToCreate = mapper.convert(invoice, new Invoice());
 
-        //since I need to send Id immediately to UI, I used saveAndFlush() in order to persist the data instantly
+        //since I need to send invoice id immediately to UI, I used saveAndFlush() to persist data instantly
         Invoice savedInvoice = invoiceRepository.saveAndFlush(invoiceToCreate);
 
         return mapper.convert(savedInvoice, new InvoiceDTO());

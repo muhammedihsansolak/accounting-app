@@ -46,6 +46,7 @@ public class SalesInvoiceController {
 
         model.addAttribute("invoice",foundInvoice);
         model.addAttribute("newInvoiceProduct", new InvoiceProductDTO());
+//        model.addAttribute("products",) //TODO implement productService
         model.addAttribute("invoiceProducts", invoiceProductDTOList);
 
         return "invoice/sales-invoice-update";
@@ -98,7 +99,7 @@ public class SalesInvoiceController {
         InvoiceDTO invoice = invoiceService.invoiceCreator(InvoiceType.SALES, companyTitle);
 
         model.addAttribute("newSalesInvoice", invoice);
-        model.addAttribute("vendors", List.of(new ClientVendorDTO()));//TODO Vendor should be a dropdown and be populated with only ClientVendors of Type Vendor.
+        model.addAttribute("clients", List.of(new ClientVendorDTO()));//TODO Vendor should be a dropdown and be populated with only ClientVendors of Type Client.
 
         return "invoice/sales-invoice-create";
     }
