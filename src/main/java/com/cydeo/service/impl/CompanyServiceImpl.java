@@ -17,7 +17,7 @@ public class CompanyServiceImpl implements CompanyService {
     public CompanyDTO getCompanyDtoByLoggedInUser() {
         String loggedInUser_userName = SecurityContextHolder.getContext().getAuthentication().getName();
         if (loggedInUser_userName != null){
-           UserDTO loggedInUserDto = userService.findByUserName(loggedInUser_userName);
+           UserDTO loggedInUserDto = userService.findByUsername(loggedInUser_userName);
            return loggedInUserDto.getCompany();
         }
         return null;
