@@ -5,7 +5,6 @@ import com.cydeo.entity.Product;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.ProductRepository;
 import com.cydeo.service.ProductService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -48,7 +47,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void delete(ProductDTO productDTO) {
+    public void delete(Long id) {
+
+        Product productToBeDeleted = productRepository.findById(id).get();
+        productToBeDeleted.setIsDeleted(true);
+        productRepository.save(productToBeDeleted);
 
     }
 }
