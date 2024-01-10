@@ -1,53 +1,58 @@
 package com.cydeo.controller;
 
+import com.cydeo.dto.ClientVendorDTO;
 import com.cydeo.entity.ClientVendor;
 import com.cydeo.service.ClientVendorService;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/client-vendor")
+@Controller
+@NoArgsConstructor
+@AllArgsConstructor
+@RequestMapping("/clientVendors")
 public class ClientVendorController {
 
     public ClientVendorService clientVendorService;
     @GetMapping("/list")
     public String listClientVendors(Model model) {
-        List<ClientVendor> clientVendors = clientVendorService.getAllClientVendors();
+        List<ClientVendorDTO> clientVendors = clientVendorService.getAllClientVendors();
         model.addAttribute("clientVendors", clientVendors);
-        return "clientVendor_list";
+        return "clientVendor/clientVendor-list";
     }
 
     @GetMapping("/create")
     public String showCreateForm(Model model) {
-        model.addAttribute("clientVendor", new ClientVendor());
-        return "clientVendor_create";
+        model.addAttribute("clientVendor", new ClientVendorDTO());
+        return "clientVendor/clientVendor-create";
     }
     @PostMapping("/create")
-    public String createClientVendor(@ModelAttribute("clientVendor") ClientVendor clientVendor) {
+    public String createClientVendor(@ModelAttribute("clientVendor") ClientVendorDTO clientVendor) {
         clientVendorService.saveClientVendor(clientVendor);
         return "redirect: client-vendors/list";
     }
 
     @GetMapping("/update/{id}")
     public String showUpdateForm(@PathVariable("id") Long id, Model model) {
-        ClientVendor clientVendor = clientVendorService.getClientVendorById(id);
-        model.addAttribute("clientVendor", clientVendor);
-        return "clientVendor_update";
+        ClientVendorDTO clientVendor = clientVendorService.getClientVendorById(id);
+        model.addAttribute("newClientVendor", clientVendor);
+        return "clientVendor/clientVendor-update";
     }
 
     @PostMapping("/update/{id}")
-    public String updateClientVendor(@PathVariable("id") Long id, @ModelAttribute("clientVendor") ClientVendor clientVendor) {
-        clientVendor.setId(id);
-        clientVendorService.saveClientVendor(clientVendor);
-        return "clientVendor_update";
+    public String updateClientVendor(@PathVariable("id") Long id, @ModelAttribute("newClientVendor") ClientVendorDTO clientVendor) {
+       clientVendorService.update(id,clientVendor);
+        return "clientVendor/clientVendor-update";
     }
 
     @GetMapping("/delete/{id}")
     public String deleteClientVendor(@PathVariable("id") Long id) {
-        clientVendorService.deleteClientVendor(id);
-        return "clientVendor_list";
+        clientVendorService.delete(id);
+        return "clientVendor/clientVendor-list";
 
 
     }
