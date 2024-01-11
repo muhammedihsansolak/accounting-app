@@ -51,4 +51,13 @@ public class CompanyServiceImpl implements CompanyService {
         }
         return null;
     }
+
+    @Override
+    public CompanyDTO getCompanyById(Long companyId) {
+        Optional<Company> company = repository.findById(companyId);
+        if (company.isPresent()){
+            mapperUtil.convert(company,new CompanyDTO());
+        }
+        return null;
+    }
 }
