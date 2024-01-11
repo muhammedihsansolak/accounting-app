@@ -7,6 +7,7 @@ import com.cydeo.dto.UserDTO;
 import com.cydeo.enums.InvoiceType;
 import com.cydeo.service.InvoiceProductService;
 import com.cydeo.service.InvoiceService;
+import com.cydeo.service.SecurityService;
 import com.cydeo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -23,6 +24,7 @@ public class SalesInvoiceController {
     private final InvoiceService invoiceService;
     private final InvoiceProductService invoiceProductService;
     private final UserService userService;
+    private final SecurityService securityService;
 
     /**
      * Lists all sales invoices in the sales-invoice-list page
@@ -92,7 +94,7 @@ public class SalesInvoiceController {
     @GetMapping("/create")
     public String createInvoice(Model model){
         //invoiceNo differ company to company. In order to auto generate invoiceNo, invoiceCreator() method should know companyTitle
-        String loggedInUsername = "admin@greentech.com";//TODO replace it with SecurityContextHolder when security implemented
+        String loggedInUsername = securityService.getLoggedInUser().getUsername();
         UserDTO loggedInUser = userService.findByUsername(loggedInUsername);
         String companyTitle =  loggedInUser.getCompany().getTitle();
 
