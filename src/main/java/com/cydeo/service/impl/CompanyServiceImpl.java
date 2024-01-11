@@ -11,7 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +37,17 @@ public class CompanyServiceImpl implements CompanyService {
         Optional<Company> company = repository.findById(companyId);
         if (company.isPresent()) {
             return mapperUtil.convert(company, new CompanyDTO());
+        }
+        return null;
+    }
+
+    @Override
+    public List<CompanyDTO> getCompanyList() {
+        List<Company> companies = repository.findAll();
+        if (companies.size() !=0){
+            return companies.stream()
+                    .map(company -> mapperUtil.convert(company,new CompanyDTO()))
+                    .collect(Collectors.toList());
         }
         return null;
     }
