@@ -67,7 +67,7 @@ public class ClientVendorController {
     @GetMapping("/delete/{id}")
     public String deleteClientVendor(@PathVariable("id") Long id) {
         clientVendorService.delete(id);
-        return "clientVendor/clientVendor-list";
+        return "redirect: clientVendor-list";
 
 
     }
