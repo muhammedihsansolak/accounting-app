@@ -17,29 +17,39 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    @GetMapping("/category-list")
+    @GetMapping("/list")
     public String CategoryList(Model model) {
         model.addAttribute("categories", categoryService.findAll());
         return "/category/category-list";
     }
 
-    @GetMapping("/category-create")
+    @GetMapping("/create")
     public String createCategory(Model model) {
-        model.addAttribute("categories", new CategoryDTO());
+        model.addAttribute("newCategory", new CategoryDTO());
         return "/category/category-create";
 
     }
 
-    @PostMapping("/category-create")
-    public String createCategory(@ModelAttribute("categories") CategoryDTO category){
-        categoryService.save(category);
-        return "/category/category-create";
+    @PostMapping("/create")
+    public String saveCategory(@ModelAttribute("newCategory") CategoryDTO categoryDTO){
+
+        categoryService.save(categoryDTO);
+        return "redirect:/category/category-list";
     }
 
-    @PostMapping ("/category-update")
-    public String updateCategory(@ModelAttribute("category") CategoryDTO category){
-        categoryService.update(category);
-        return "/category/category-list";
+    @PostMapping ("/update/{id}")
+    public String updateCategory(@PathVariable("id") Long id,@ModelAttribute ("category") CategoryDTO category ){
+
+        categoryService.update(category, id);
+        return "redirect:/category/category-list";
+    }
+    @GetMapping("/update/{id}")
+    public String editCategory(@PathVariable("id") Long id, Model model){
+
+        model.addAttribute("category", categoryService.findById(id));
+        model.addAttribute("products", categoryService.listAllCategories());
+
+        return "category/category-update";
     }
 
 
