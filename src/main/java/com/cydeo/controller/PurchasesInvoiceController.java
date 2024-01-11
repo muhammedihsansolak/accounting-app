@@ -1,9 +1,6 @@
 package com.cydeo.controller;
 
-import com.cydeo.dto.ClientVendorDTO;
-import com.cydeo.dto.InvoiceDTO;
-import com.cydeo.dto.InvoiceProductDTO;
-import com.cydeo.dto.UserDTO;
+import com.cydeo.dto.*;
 import com.cydeo.enums.InvoiceType;
 import com.cydeo.service.InvoiceProductService;
 import com.cydeo.service.InvoiceService;
@@ -48,7 +45,7 @@ public class PurchasesInvoiceController {
 
         model.addAttribute("invoice",foundInvoice);
         model.addAttribute("newInvoiceProduct", new InvoiceProductDTO());
-//        model.addAttribute("products",) //TODO implement productService
+        model.addAttribute("products", List.of(new ProductDTO())); //TODO implement productService
         model.addAttribute("invoiceProducts", invoiceProductDTOList);
 
         return "invoice/purchase-invoice-update";
@@ -125,6 +122,21 @@ public class PurchasesInvoiceController {
         invoiceProductService.removeInvoiceProductFromInvoice(invoiceId, invoiceProductId);
 
         return "redirect:/purchaseInvoices/update/"+invoiceId;
+    }
+
+    /**
+     * As a user, I should be able to print approved Purchases Invoices
+     */
+    @GetMapping("/print/{invoiceId}")
+    public String printPurchaseInvoice(@PathVariable("invoiceId")Long invoiceId , Model model){
+        InvoiceDTO invoice = invoiceService.findById(invoiceId);
+        List<InvoiceProductDTO> invoiceProductDTOList =  invoiceProductService.findByInvoiceId(invoiceId);
+
+        model.addAttribute("invoice", invoice);
+        model.addAttribute("company", invoice.getCompany());
+        model.addAttribute("invoiceProducts", invoiceProductDTOList);
+
+        return "invoice/invoice_print";
     }
 
 }
