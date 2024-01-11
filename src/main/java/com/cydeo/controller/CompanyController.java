@@ -48,10 +48,10 @@ public class CompanyController {
         return "/company/company-update";
     }
 
-    @PostMapping("/update/{companyId}")
-    public String updateCompanies(@PathVariable("companyId") Long companyId,
-                                  @ModelAttribute("company")CompanyDTO company){
-        companyService.updateCompany(company,companyId);
+    @PostMapping("/update/{id}")
+    public String updateCompanies(@ModelAttribute("company")CompanyDTO company){
+        System.out.println(company);
+        companyService.updateCompany(company);
         return "redirect:/companies/list";
     }
     @GetMapping("/activate/{company_id}")

@@ -53,17 +53,17 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public CompanyDTO updateCompany(CompanyDTO newCompanyDto, Long companyId) {
-        Optional<Company> oldCompany = repository.findById(companyId);
+    public CompanyDTO updateCompany(CompanyDTO newCompanyDto) {
+        Optional<Company> oldCompany = repository.findById(newCompanyDto.getId());
         if (oldCompany.isPresent()) {
             CompanyStatus oldCompanyStatus = oldCompany.get().getCompanyStatus();
             newCompanyDto.setCompanyStatus(oldCompanyStatus);
-
             Company savedCompany = repository.save(mapperUtil.convert(newCompanyDto,new Company()));
 
             return mapperUtil.convert(savedCompany,newCompanyDto);
         }
-        return null;
+           return null;
+
     }
 
     @Override

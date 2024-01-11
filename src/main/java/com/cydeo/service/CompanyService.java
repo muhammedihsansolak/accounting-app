@@ -11,7 +11,7 @@ public interface CompanyService {
 
     List<CompanyDTO> getCompanyList();
 
-    CompanyDTO updateCompany(CompanyDTO company, Long companyId);
+    CompanyDTO updateCompany(CompanyDTO company);
 
     CompanyDTO createCompany(CompanyDTO newCompany);
 
