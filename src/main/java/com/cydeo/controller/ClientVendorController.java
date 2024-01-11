@@ -17,6 +17,7 @@ import java.util.List;
 public class ClientVendorController {
 
     public ClientVendorService clientVendorService;
+    private final AddressService addressService;
 
     @GetMapping("/list")
     public String listClientVendors(Model model) {
@@ -28,6 +29,7 @@ public class ClientVendorController {
     @GetMapping("/create")
     public String showCreateForm(Model model) {
         model.addAttribute("newClientVendor", new ClientVendorDTO());
+        model.addAttribute("countries", addressService.retrieveCountyList());
         return "clientVendor/clientVendor-create";
     }
     @PostMapping("/create")
