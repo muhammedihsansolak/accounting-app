@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -35,11 +36,9 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public CompanyDTO findById(Long companyId) {
-        Optional<Company> company = repository.findById(companyId);
-        if (company.isPresent()) {
+        Company company = repository.findById(companyId)
+                .orElseThrow(() -> new NoSuchElementException("Company with id: " + companyId + " Not Found "));
             return mapperUtil.convert(company, new CompanyDTO());
-        }
-        return null;
     }
 
     @Override
@@ -49,15 +48,6 @@ public class CompanyServiceImpl implements CompanyService {
             return companies.stream()
                     .map(company -> mapperUtil.convert(company,new CompanyDTO()))
                     .collect(Collectors.toList());
-        }
-        return null;
-    }
-
-    @Override
-    public CompanyDTO getCompanyById(Long companyId) {
-        Optional<Company> company = repository.findById(companyId);
-        if (company.isPresent()){
-            mapperUtil.convert(company,new CompanyDTO());
         }
         return null;
     }
@@ -82,5 +72,22 @@ public class CompanyServiceImpl implements CompanyService {
         Company savedCompany = repository.save(mapperUtil.convert(newCompany,new Company()));
 
         return mapperUtil.convert(savedCompany, new CompanyDTO());
+    }
+
+    @Override
+    public void activateCompany(long companyId) {
+        Company companyToBeActivate = repository.findById(companyId)
+                .orElseThrow(() -> new NoSuchElementException("Company with id: " + companyId + " Not Found "));
+        companyToBeActivate.setCompanyStatus(CompanyStatus.ACTIVE);
+        repository.save(companyToBeActivate);
+
+    }
+
+    @Override
+    public void deactivateCompany(long companyId) {
+        Company companyToBeDeactivate = repository.findById(companyId)
+                .orElseThrow(() -> new NoSuchElementException("Company with id: " + companyId + " Not Found "));
+        companyToBeDeactivate.setCompanyStatus(CompanyStatus.PASSIVE);
+        repository.save(companyToBeDeactivate);
     }
 }
