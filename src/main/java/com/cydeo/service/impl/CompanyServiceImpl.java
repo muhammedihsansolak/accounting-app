@@ -3,6 +3,7 @@ package com.cydeo.service.impl;
 import com.cydeo.dto.CompanyDTO;
 import com.cydeo.dto.UserDTO;
 import com.cydeo.entity.Company;
+import com.cydeo.enums.CompanyStatus;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.CompanyRepository;
 import com.cydeo.service.CompanyService;
@@ -57,6 +58,20 @@ public class CompanyServiceImpl implements CompanyService {
         Optional<Company> company = repository.findById(companyId);
         if (company.isPresent()){
             mapperUtil.convert(company,new CompanyDTO());
+        }
+        return null;
+    }
+
+    @Override
+    public CompanyDTO updateCompany(CompanyDTO newCompanyDto, Long companyId) {
+        Optional<Company> oldCompany = repository.findById(companyId);
+        if (oldCompany.isPresent()) {
+            CompanyStatus oldCompanyStatus = oldCompany.get().getCompanyStatus();
+            newCompanyDto.setCompanyStatus(oldCompanyStatus);
+
+            Company savedCompany = repository.save(mapperUtil.convert(newCompanyDto,new Company()));
+
+            return mapperUtil.convert(savedCompany,newCompanyDto);
         }
         return null;
     }

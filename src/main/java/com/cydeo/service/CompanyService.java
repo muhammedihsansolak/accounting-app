@@ -12,4 +12,6 @@ public interface CompanyService {
     List<CompanyDTO> getCompanyList();
 
     CompanyDTO getCompanyById(Long companyId);
+
+    CompanyDTO updateCompany(CompanyDTO company, Long companyId);
 }
