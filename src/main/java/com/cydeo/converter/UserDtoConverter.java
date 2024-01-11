@@ -8,20 +8,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserDtoConverter implements Converter<String, UserDTO> {
 
-
     UserService userService;
-
     public UserDtoConverter(UserService userService) {
         this.userService = userService;
     }
-
     @Override
     public UserDTO convert(String source) {
-
         if (source == null || source.equals("")) {
             return null;
         }
-
         return userService.findByUsername(source);
 
     }
