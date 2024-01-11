@@ -15,6 +15,8 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    //private final CategoryService categoryService;
+
 
     //End-user should be able to List (display) all products in the product_list page...
     @GetMapping("/list")
@@ -26,20 +28,21 @@ public class ProductController {
     }
 
     //End-user should be able to Edit each product, when click on Edit button, end-user should land on product_update page and the edit form should be populated with the information of that very same product.
-    @GetMapping("/update/{id}")
-    public String getProductToBeUpdated(@PathVariable("id") Long id, Model model){
-        ProductDTO productDTOToBeUpdated = productService.findById(id);
-        model.addAttribute("product",productDTOToBeUpdated);
-
-        return "product/product-update";
-    }
-
-    @PutMapping("/update/{id}")
-    public String updateProduct(@PathVariable("id") Long id, @ModelAttribute("product") ProductDTO updatedProduct) {
-        productService.update(updatedProduct);
-
-        return
-    }
+//    @GetMapping("/update/{id}")
+//    public String editProduct(@PathVariable("id") Long id, Model model){
+//        ProductDTO productToBeUpdated = productService.findById(id);
+//        model.addAttribute("products",productToBeUpdated);
+//        model.addAttribute("categories", productService.getAllCategories());
+//        model.addAttribute("productUnits", productService.getAllProductUnits());
+//        return "/product/product-update";
+//    }
+//
+//    @PostMapping("/update/{id}")
+//    public String updateProduct(@PathVariable("id") Long id, @ModelAttribute("product") ProductDTO productDtoToBeUpdated) {
+//        productService.update(id, productDtoToBeUpdated);
+//
+//        return "redirect:/product/product-list";
+//    }
 
 
     //When End-User clicks on "Create-Product" button, product_create page should be displayed with an Empty product form,

@@ -2,6 +2,7 @@ package com.cydeo.service.impl;
 
 import com.cydeo.dto.ProductDTO;
 import com.cydeo.entity.Product;
+import com.cydeo.enums.ProductUnit;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.ProductRepository;
 import com.cydeo.service.ProductService;
@@ -45,10 +46,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void update(ProductDTO productDTO) {
+    public void update(ProductDTO productDTO, ProductDTO productDtoToBeUpdated) {
 
         Product productToBeUpdated = productRepository.findById(productDTO.getId()).get();
-        productDTO.setId(productToBeUpdated.getId());
+        productToBeUpdated.setId(productDTO.getId());
         productRepository.save(mapperUtil.convert(productToBeUpdated, new Product()));
 
     }
