@@ -1,6 +1,7 @@
 package com.cydeo.controller;
 
 import com.cydeo.dto.UserDTO;
+import com.cydeo.service.CompanyService;
 import com.cydeo.service.RoleService;
 import com.cydeo.service.UserService;
 import org.springframework.stereotype.Controller;
@@ -13,10 +14,12 @@ public class UserController {
 
     private final RoleService roleService;
     private final UserService userService;
+    private final CompanyService companyService;
 
-    public UserController(RoleService roleService, UserService userService) {
+    public UserController(RoleService roleService, UserService userService, CompanyService companyService) {
         this.roleService = roleService;
         this.userService = userService;
+        this.companyService = companyService;
     }
 
     //    End-user should be able to List (display) all Users in the user_list page...
