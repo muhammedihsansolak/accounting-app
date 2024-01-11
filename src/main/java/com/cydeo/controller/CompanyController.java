@@ -17,6 +17,7 @@ public class CompanyController {
 
         model.addAttribute("companies", companyService.getCompanyList());
 
+        System.out.println("hello");
         return "/company/company-list";
     }
 
@@ -24,7 +25,7 @@ public class CompanyController {
     public String createCompany(Model model){
 
         model.addAttribute("newCompany", new CompanyDTO());
-        model.addAttribute("countries", getCountries());
+//        model.addAttribute("countries", getCountries());
 
         return "/company/company-list";
     }
