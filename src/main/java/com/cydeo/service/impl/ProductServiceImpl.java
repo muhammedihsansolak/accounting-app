@@ -46,10 +46,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void update(ProductDTO productDTO, ProductDTO productDtoToBeUpdated) {
+    public void update(Long productId, ProductDTO productDtoToBeUpdated) {
 
-        Product productToBeUpdated = productRepository.findById(productDTO.getId()).get();
-        productToBeUpdated.setId(productDTO.getId());
+        Product productToBeUpdated = productRepository.findById(productId).get();
+        productToBeUpdated.setId(productId);
         productRepository.save(mapperUtil.convert(productToBeUpdated, new Product()));
 
     }

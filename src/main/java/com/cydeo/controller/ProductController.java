@@ -54,7 +54,7 @@ public class ProductController {
     }
 
     //End-user should be able to Delete each product(soft delete), then end up to the product_list page with updated product list.
-    @DeleteMapping("/{productId}")
+    @DeleteMapping("/delete/{productId}")
     public String deleteProduct(@PathVariable("productId") Long id, Model model){
         ProductDTO productDTOToBeDeleted = productService.findById(id);
         productService.delete(id);
