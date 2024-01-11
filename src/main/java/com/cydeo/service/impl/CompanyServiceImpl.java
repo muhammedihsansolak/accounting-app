@@ -75,4 +75,12 @@ public class CompanyServiceImpl implements CompanyService {
         }
         return null;
     }
+
+    @Override
+    public CompanyDTO createCompany(CompanyDTO newCompany) {
+        newCompany.setCompanyStatus(CompanyStatus.PASSIVE);
+        Company savedCompany = repository.save(mapperUtil.convert(newCompany,new Company()));
+
+        return mapperUtil.convert(savedCompany, new CompanyDTO());
+    }
 }

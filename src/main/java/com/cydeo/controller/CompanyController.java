@@ -20,6 +20,22 @@ public class CompanyController {
         return "/company/company-list";
     }
 
+    @GetMapping("/create")
+    public String createCompany(Model model){
+
+        model.addAttribute("newCompany", new CompanyDTO());
+        model.addAttribute("countries", getCountries());
+
+        return "/company/company-list";
+    }
+
+    @PostMapping("/create")
+    public String createCompany(@ModelAttribute("newCompany") CompanyDTO newCompany){
+        companyService.createCompany(newCompany);
+
+        return "redirect:/company/list";
+    }
+
     @GetMapping("/update/{companyId}")
     public String updateCompanies(@PathVariable("companyId") Long companyId, Model model){
 
