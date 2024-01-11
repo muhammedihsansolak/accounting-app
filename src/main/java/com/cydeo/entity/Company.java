@@ -16,6 +16,7 @@ import javax.persistence.*;
 @Table(name = "companies")
 public class Company extends BaseEntity{
 
+    @Column(unique = true)
     private String  title;
 
     private String phone;
