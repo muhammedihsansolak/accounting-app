@@ -1,19 +1,24 @@
 package com.cydeo.converter;
+
 import com.cydeo.dto.ClientVendorDTO;
-import com.cydeo.entity.ClientVendor;
-import org.modelmapper.Converter;
+import com.cydeo.service.ClientVendorService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBinding;
 import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationPropertiesBinding
-public abstract class ClientVendorDTOConverter implements Converter<String, ClientVendorDTO> {
+@RequiredArgsConstructor
+public abstract class ClientVendorDTOConverter implements Converter<Long, ClientVendorDTO> {
 
-    public static ClientVendor convert(ClientVendorDTO clientVendorDTO) {
-        ClientVendor clientVendor = new ClientVendor();
-        clientVendor.setId(clientVendorDTO.getId());
-        return clientVendor;
-    }
+    private final ClientVendorService clientVendorService;
+
+    @Override
+    public ClientVendorDTO convert(Long source){
+       return clientVendorService.findById(source);
+   }
+
 
 }
 

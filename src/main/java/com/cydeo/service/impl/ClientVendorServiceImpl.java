@@ -5,18 +5,15 @@ import com.cydeo.enums.ClientVendorType;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.entity.ClientVendor;
 import com.cydeo.service.ClientVendorService;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.stereotype.Service;
 import com.cydeo.repository.ClientVendorRepository;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 
-@Getter
-@Setter
+
 @Service
 public class ClientVendorServiceImpl implements ClientVendorService {
 
@@ -31,11 +28,10 @@ public class ClientVendorServiceImpl implements ClientVendorService {
 
 
     @Override
-    public ClientVendorDTO getClientVendorById(Long id) {
-        return clientVendorRepository.findById(id).
-                map(clientVendor -> mapperUtil.convert(clientVendor,new ClientVendorDTO()))
-
-                .orElse(null);
+    public ClientVendorDTO findById(Long id) {
+       ClientVendor clientVendor = clientVendorRepository.findById(id).orElseThrow(()->
+               new NoSuchElementException("Client vendor cannot be found with id: "+id));
+       return mapperUtil.convert(clientVendor,new ClientVendorDTO());
     }
 
 

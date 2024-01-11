@@ -1,7 +1,6 @@
 package com.cydeo.controller;
 
 import com.cydeo.dto.ClientVendorDTO;
-import com.cydeo.entity.ClientVendor;
 import com.cydeo.service.ClientVendorService;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -18,6 +17,7 @@ import java.util.List;
 public class ClientVendorController {
 
     public ClientVendorService clientVendorService;
+
     @GetMapping("/list")
     public String listClientVendors(Model model) {
         List<ClientVendorDTO> clientVendors = clientVendorService.getAllClientVendors();
@@ -27,24 +27,26 @@ public class ClientVendorController {
 
     @GetMapping("/create")
     public String showCreateForm(Model model) {
-        model.addAttribute("clientVendor", new ClientVendorDTO());
+        model.addAttribute("newClientVendor", new ClientVendorDTO());
         return "clientVendor/clientVendor-create";
     }
     @PostMapping("/create")
-    public String createClientVendor(@ModelAttribute("clientVendor") ClientVendorDTO clientVendor) {
+    public String createClientVendor(@ModelAttribute("newClientVendor") ClientVendorDTO clientVendor) {
         clientVendorService.saveClientVendor(clientVendor);
+
         return "redirect: client-vendors/list";
     }
 
     @GetMapping("/update/{id}")
     public String showUpdateForm(@PathVariable("id") Long id, Model model) {
-        ClientVendorDTO clientVendor = clientVendorService.getClientVendorById(id);
-        model.addAttribute("newClientVendor", clientVendor);
+        ClientVendorDTO clientVendor = clientVendorService.findById(id);
+        model.addAttribute("clientVendor", clientVendor);
         return "clientVendor/clientVendor-update";
     }
 
     @PostMapping("/update/{id}")
-    public String updateClientVendor(@PathVariable("id") Long id, @ModelAttribute("newClientVendor") ClientVendorDTO clientVendor) {
+    public String updateClientVendor(@PathVariable("id") Long id, @ModelAttribute("ClientVendor")
+    ClientVendorDTO clientVendor) {
        clientVendorService.update(id,clientVendor);
         return "clientVendor/clientVendor-update";
     }
