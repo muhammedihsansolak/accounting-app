@@ -1,9 +1,6 @@
 package com.cydeo.service;
 
-import com.cydeo.dto.InvoiceDTO;
 import com.cydeo.dto.UserDTO;
-import com.cydeo.entity.User;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 

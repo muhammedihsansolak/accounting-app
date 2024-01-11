@@ -7,8 +7,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @Controller
 @RequestMapping("/user")
 public class UserController {
@@ -21,7 +19,6 @@ public class UserController {
         this.userService = userService;
     }
 
-    //    user_list page
     //    End-user should be able to List (display) all Users in the user_list page...
     @GetMapping("/list")
     public String getAllUsers(Model model) {
@@ -41,10 +38,8 @@ public class UserController {
         return "user/user-update";
     }
 
-
     @PostMapping("/update/{id}")
     public String updateUser(@PathVariable("id") Long id, @ModelAttribute("user") UserDTO dto, Model model) {
-
         model.addAttribute("userRoles", roleService.getAllRolesForCurrentUser());
         model.addAttribute("companies", companyService.getAllCompaniesForCurrentUser());
         model.addAttribute("users", userService.getAllUsers());
@@ -72,12 +67,5 @@ public class UserController {
         userService.save(userDTO);
         return "redirect:/user/user-list";
     }
-
-    @PostMapping("/create")
-    public String createUser(@ModelAttribute("user") UserDTO dto, Model model) {
-        userService.save(dto);
-        return "/user/user-create";
-        }
-
 
 }

@@ -1,9 +1,6 @@
 package com.cydeo.service.impl;
 
-import com.cydeo.dto.InvoiceDTO;
-import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.dto.UserDTO;
-import com.cydeo.entity.Invoice;
 import com.cydeo.entity.User;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.UserRepository;
@@ -11,8 +8,6 @@ import com.cydeo.service.UserService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,8 +36,6 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
-
-
     @Override
     public void save(UserDTO user) {
         userRepository.save(mapperUtil.convert(user, new User()));
@@ -53,7 +46,6 @@ public class UserServiceImpl implements UserService {
         User converted = mapperUtil.convert(userDtoToUpdate, new User());
         userRepository.save(converted);
     }
-
 
     @Override
     public void delete(Long id) {
@@ -68,6 +60,5 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id).orElseThrow();
         return mapperUtil.convert(user, new UserDTO());
     }
-
 
 }
