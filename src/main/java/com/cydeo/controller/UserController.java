@@ -61,7 +61,7 @@ public class UserController {
     public String createUser(Model model) {
         model.addAttribute("user", new UserDTO());
         model.addAttribute("userRoles", roleService.getAllRolesForCurrentUser());
-        model.addAttribute("companies", companyService.getAllCompaniesForCurrentUser());
+        model.addAttribute("companies", companyService.getCompanyDtoByLoggedInUser());
         return "user/user-create";
     }
 
