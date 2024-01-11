@@ -9,9 +9,9 @@ import java.util.List;
 
 public interface UserService {
     UserDTO findByUsername(String username);
-    List<UserDTO> listAllUsers();
+    List<UserDTO>getAllUsers();
     void save(UserDTO user);
     void update(UserDTO userDTO, UserDTO userDtoToUpdate);
-    void deleteUser(Long id);
-    UserDTO findUserById(Long id);
+    void delete(Long id);
+    UserDTO findById(Long id);
 }

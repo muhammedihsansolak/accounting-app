@@ -1,8 +1,6 @@
 package com.cydeo.controller;
 
-import com.cydeo.dto.InvoiceDTO;
 import com.cydeo.dto.UserDTO;
-import com.cydeo.entity.User;
 import com.cydeo.service.RoleService;
 import com.cydeo.service.UserService;
 import org.springframework.stereotype.Controller;
@@ -26,49 +24,60 @@ public class UserController {
     //    user_list page
     //    End-user should be able to List (display) all Users in the user_list page...
     @GetMapping("/list")
-    public String listUser(Model model) {
-        List<UserDTO> userDTOList = userService.listAllUsers();
-        model.addAttribute("users", userDTOList);
-        return "/user/user-list";
-
+    public String getAllUsers(Model model) {
+        model.addAttribute("roles", roleService.getAllRoles());
+        model.addAttribute("users", userService.getAllUsers());
+        return "user/user-list";
     }
 
     //    End-user should be able to Edit each User, when click on Edit button, end-user should land on user_update
     //    page and the edit form should be populated with the information of that very same User.
-    @GetMapping("/edit/{id}")
-    public String editUser(@PathVariable("id") Long id, Model model) {
-        UserDTO user = userService.findUserById(id);
-        model.addAttribute("users", user);
-        return "/user/user-update";
+    @GetMapping("/update/{id}")
+    public String updateUser(@PathVariable("id") Long id, Model model) {
+        model.addAttribute("user", userService.findById(id));
+        model.addAttribute("userRoles", roleService.getAllRolesForCurrentUser());
+        model.addAttribute("companies", companyService.getAllCompaniesForCurrentUser());
+        model.addAttribute("users", userService.getAllUsers());
+        return "user/user-update";
     }
 
-    @PostMapping("/update/{id}")
-    public String updateUser(@PathVariable("id") Long id, @ModelAttribute("user") UserDTO userDtoToUpdate) {
-        UserDTO userDTO = userService.findUserById(id);
-        userService.update(userDTO, userDtoToUpdate);
 
-        return "redirect:/user/user-list";
+    @PostMapping("/update/{id}")
+    public String updateUser(@PathVariable("id") Long id, @ModelAttribute("user") UserDTO dto, Model model) {
+
+        model.addAttribute("userRoles", roleService.getAllRolesForCurrentUser());
+        model.addAttribute("companies", companyService.getAllCompaniesForCurrentUser());
+        model.addAttribute("users", userService.getAllUsers());
+        return "user/user-update";
     }
 
     //    End-user should be able to Delete each User (soft delete), then end up to the user_list page with updated User list.
-    @DeleteMapping("/delete/{id}")
+    @GetMapping("/delete/{id}")
     public String deleteUser(@PathVariable("id") Long id) {
-        userService.deleteUser(id);
-        return "redirect:/user/user-list";
+        userService.delete(id);
+        return "redirect:/users/list";
     }
 
     //    When End-User clicks on "Create-User" button, user_create page should be displayed with an Empty user form,
+    @GetMapping("/create")
+    public String createUser(Model model) {
+        model.addAttribute("user", new UserDTO());
+        model.addAttribute("userRoles", roleService.getAllRolesForCurrentUser());
+        model.addAttribute("companies", companyService.getAllCompaniesForCurrentUser());
+        return "user/user-create";
+    }
+
     @PostMapping("/create")
     public String createUser(@ModelAttribute UserDTO userDTO) {
         userService.save(userDTO);
         return "redirect:/user/user-list";
     }
 
-    @GetMapping("/create")
-    public String createUserForm(Model model) {
-        model.addAttribute("newUser", new UserDTO());
-        return "user/user-create";
-    }
+    @PostMapping("/create")
+    public String createUser(@ModelAttribute("user") UserDTO dto, Model model) {
+        userService.save(dto);
+        return "/user/user-create";
+        }
 
 
 }

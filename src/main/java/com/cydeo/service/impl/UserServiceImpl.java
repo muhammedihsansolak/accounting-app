@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDTO> listAllUsers() {
+    public List<UserDTO> getAllUsers() {
 
         List<User> userList = userRepository.findAll();
 
@@ -40,6 +40,8 @@ public class UserServiceImpl implements UserService {
                 .map(user -> mapperUtil.convert(user, new UserDTO()))
                 .collect(Collectors.toList());
     }
+
+
 
     @Override
     public void save(UserDTO user) {
@@ -52,18 +54,18 @@ public class UserServiceImpl implements UserService {
         userRepository.save(converted);
     }
 
-    @Override
-    public void deleteUser(Long id) {
-        User userToDelete = userRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("User can not found with id: " + id));
 
-        userToDelete.setIsDeleted(Boolean.TRUE);
-        userRepository.save(userToDelete);
+    @Override
+    public void delete(Long id) {
+        User user = userRepository.findByIdAndIsDeleted(id, false);
+        user.setIsDeleted(true);
+        user.setUsername(user.getUsername() + " "+user.getId());
+        userRepository.save(user);
     }
 
     @Override
-    public UserDTO findUserById(Long id) {
-        Optional<User> user = userRepository.findById(id);
+    public UserDTO findById(Long id) {
+        User user = userRepository.findById(id).orElseThrow();
         return mapperUtil.convert(user, new UserDTO());
     }
 
