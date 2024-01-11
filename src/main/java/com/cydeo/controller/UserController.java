@@ -36,7 +36,7 @@ public class UserController {
     public String updateUser(@PathVariable("id") Long id, Model model) {
         model.addAttribute("user", userService.findById(id));
         model.addAttribute("userRoles", roleService.getAllRolesForCurrentUser());
-        model.addAttribute("companies", companyService.getAllCompaniesForCurrentUser());
+        model.addAttribute("companies", companyService.getCompanyDtoByLoggedInUser());
         model.addAttribute("users", userService.getAllUsers());
         return "user/user-update";
     }
@@ -44,7 +44,7 @@ public class UserController {
     @PostMapping("/update/{id}")
     public String updateUser(@PathVariable("id") Long id, @ModelAttribute("user") UserDTO dto, Model model) {
         model.addAttribute("userRoles", roleService.getAllRolesForCurrentUser());
-        model.addAttribute("companies", companyService.getAllCompaniesForCurrentUser());
+        model.addAttribute("companies", companyService.getCompanyDtoByLoggedInUser());
         model.addAttribute("users", userService.getAllUsers());
         return "user/user-update";
     }
