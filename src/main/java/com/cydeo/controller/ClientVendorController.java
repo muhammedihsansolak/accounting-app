@@ -2,35 +2,40 @@ package com.cydeo.controller;
 
 import com.cydeo.dto.ClientVendorDTO;
 import com.cydeo.service.ClientVendorService;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Controller
-@NoArgsConstructor
-@AllArgsConstructor
 @RequestMapping("/clientVendors")
 public class ClientVendorController {
 
-    public ClientVendorService clientVendorService;
-    private final AddressService addressService;
+    public final ClientVendorService clientVendorService;
+
+    public ClientVendorController(ClientVendorService clientVendorService) {
+        this.clientVendorService = clientVendorService;
+    }
+
+
+    @GetMapping("/create")
+    public String showCreateForm(Model model) {
+        List<String> countries = new ArrayList<>();
+        countries.addAll(Arrays.asList("UK", "USA"));
+        model.addAttribute("newClientVendor", new ClientVendorDTO());
+        model.addAttribute("countries", countries);
+        return "clientVendor/clientVendor-create";
+
+    }
 
     @GetMapping("/list")
     public String listClientVendors(Model model) {
         List<ClientVendorDTO> clientVendors = clientVendorService.getAllClientVendors();
         model.addAttribute("clientVendors", clientVendors);
         return "clientVendor/clientVendor-list";
-    }
-
-    @GetMapping("/create")
-    public String showCreateForm(Model model) {
-        model.addAttribute("newClientVendor", new ClientVendorDTO());
-        model.addAttribute("countries", addressService.retrieveCountyList());
-        return "clientVendor/clientVendor-create";
     }
     @PostMapping("/create")
     public String createClientVendor(@ModelAttribute("newClientVendor") ClientVendorDTO clientVendor) {

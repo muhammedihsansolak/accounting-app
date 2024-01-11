@@ -5,6 +5,7 @@ import com.cydeo.enums.ClientVendorType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 @Getter
@@ -20,15 +21,15 @@ public class ClientVendor extends BaseEntity {
 
 
 
+
     @Enumerated(EnumType.STRING)
     private ClientVendorType clientVendorType;
 
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id")
-    private Address adress;
 
-
+    private Address address;
 
     @ManyToOne
     @JoinColumn(name = "company_id")
