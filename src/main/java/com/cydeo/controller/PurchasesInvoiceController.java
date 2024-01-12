@@ -1,7 +1,9 @@
 package com.cydeo.controller;
 
 import com.cydeo.dto.*;
+import com.cydeo.enums.ClientVendorType;
 import com.cydeo.enums.InvoiceType;
+import com.cydeo.enums.ProductUnit;
 import com.cydeo.service.InvoiceProductService;
 import com.cydeo.service.InvoiceService;
 import com.cydeo.service.SecurityService;
@@ -45,7 +47,8 @@ public class PurchasesInvoiceController {
 
         model.addAttribute("invoice",foundInvoice);
         model.addAttribute("newInvoiceProduct", new InvoiceProductDTO());
-        model.addAttribute("products", List.of(new ProductDTO())); //TODO implement productService
+        model.addAttribute("products", List.of(
+                new ProductDTO(1L,"Phone",100,15, ProductUnit.PCS, new CategoryDTO(),true))); //TODO implement productService
         model.addAttribute("invoiceProducts", invoiceProductDTOList);
 
         return "invoice/purchase-invoice-update";
@@ -98,7 +101,8 @@ public class PurchasesInvoiceController {
         InvoiceDTO invoice = invoiceService.invoiceCreator(InvoiceType.PURCHASE, companyTitle);
 
         model.addAttribute("newPurchaseInvoice", invoice);
-        model.addAttribute("vendors", List.of(new ClientVendorDTO()));//TODO Vendor should be a dropdown and be populated with only ClientVendors of Type Vendor.
+        model.addAttribute("vendors", List.of(
+                new ClientVendorDTO(1L,"ABC Vendor","1234567890","www.abc.com", ClientVendorType.VENDOR,new AddressDTO(),true)));//TODO Vendor should be a dropdown and be populated with only ClientVendors of Type Vendor.
 
         return "invoice/purchase-invoice-create";
     }
