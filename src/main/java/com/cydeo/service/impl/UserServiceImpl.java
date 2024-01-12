@@ -29,7 +29,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDTO> getAllUsers() {
 
-        List<User> userList = userRepository.findAll();
+        List<User> userList = userRepository.findAllByIsDeleted(false);
 
         return userList.stream()
                 .map(user -> mapperUtil.convert(user, new UserDTO()))
@@ -51,7 +51,6 @@ public class UserServiceImpl implements UserService {
     public void delete(Long id) {
         User user = userRepository.findByIdAndIsDeleted(id, false);
         user.setIsDeleted(true);
-        user.setUsername(user.getUsername() + " "+user.getId());
         userRepository.save(user);
     }
 

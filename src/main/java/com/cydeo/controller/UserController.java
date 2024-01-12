@@ -59,7 +59,7 @@ public class UserController {
     //    When End-User clicks on "Create-User" button, user_create page should be displayed with an Empty user form,
     @GetMapping("/create")
     public String createUser(Model model) {
-        model.addAttribute("user", new UserDTO());
+        model.addAttribute("newUser", new UserDTO());
         model.addAttribute("userRoles", roleService.getAllRolesForCurrentUser());
         model.addAttribute("companies", companyService.getCompanyDtoByLoggedInUser());
         return "user/user-create";
