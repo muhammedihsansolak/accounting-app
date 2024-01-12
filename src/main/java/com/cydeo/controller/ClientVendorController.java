@@ -3,8 +3,6 @@ package com.cydeo.controller;
 import com.cydeo.dto.ClientVendorDTO;
 import com.cydeo.enums.ClientVendorType;
 import com.cydeo.service.ClientVendorService;
-import com.cydeo.service.CompanyService;
-import com.cydeo.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +17,7 @@ public class ClientVendorController {
 
     private final ClientVendorService clientVendorService;
 
-    public ClientVendorController(ClientVendorService clientVendorService, UserService userService,CompanyService companyService) {
+    public ClientVendorController(ClientVendorService clientVendorService) {
         this.clientVendorService = clientVendorService;
 
     }
@@ -28,10 +26,11 @@ public class ClientVendorController {
     @GetMapping("/create")
     public String showCreateForm(Model model) {
         List<String> countries = new ArrayList<>();
+        model.addAttribute("countries", countries);
         countries.addAll(Arrays.asList("UK", "USA"));
+        //model.addAttribute("countries", List.of("USA","UK"));
         model.addAttribute("newClientVendor", new ClientVendorDTO());
         model.addAttribute("clientVendorTypes", Arrays.asList(ClientVendorType.values()));
-        model.addAttribute("countries", countries);
         return "clientVendor/clientVendor-create";
 
     }
@@ -65,11 +64,9 @@ public class ClientVendorController {
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteClientVendor(@PathVariable("id") Long id) {
+    public String deleteClientVendor(@PathVariable("id") Long id, Model model) {
         clientVendorService.delete(id);
-        return "redirect: clientVendor-list";
-
-
-    }
+        return "redirect:clientVendor-list";
+}
 
 }
