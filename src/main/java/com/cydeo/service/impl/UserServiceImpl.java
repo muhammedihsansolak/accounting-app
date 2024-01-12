@@ -28,23 +28,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDTO> getAllUsers() {
-
         List<User> userList = userRepository.findAllByIsDeleted(false);
-
         return userList.stream()
                 .map(user -> mapperUtil.convert(user, new UserDTO()))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public void save(UserDTO user) {
-        userRepository.save(mapperUtil.convert(user, new User()));
-    }
-
-    @Override
-    public void update(UserDTO userDTO, UserDTO userDtoToUpdate) {
-        User converted = mapperUtil.convert(userDtoToUpdate, new User());
-        userRepository.save(converted);
+    public void save(UserDTO userDTO) {
+        userRepository.save(mapperUtil.convert(userDTO, new User()));
     }
 
     @Override
@@ -59,5 +51,18 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id).orElseThrow();
         return mapperUtil.convert(user, new UserDTO());
     }
+
+    @Override
+    public UserDTO updateUser(UserDTO userDtoToBeUpdate) {
+        User user1 = userRepository.findById(userDtoToBeUpdate.getId()).orElseThrow();
+        user1.setUsername(user1.getUsername());
+        userRepository.save(user1);
+        User convertedUser = mapperUtil.convert(userDtoToBeUpdate, new User());
+        convertedUser.setId(user1.getId());
+        userRepository.save(convertedUser);
+        return mapperUtil.convert(convertedUser, new UserDTO());
+    }
+
+
 
 }

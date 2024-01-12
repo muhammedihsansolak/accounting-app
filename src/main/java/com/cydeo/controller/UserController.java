@@ -42,10 +42,11 @@ public class UserController {
     }
 
     @PostMapping("/update/{id}")
-    public String updateUser(@PathVariable("id") Long id, @ModelAttribute("user") UserDTO dto, Model model) {
+    public String updateUser(@PathVariable("id") Long id, @ModelAttribute("user") UserDTO userDTO, Model model) {
         model.addAttribute("userRoles", roleService.getAllRolesForCurrentUser());
         model.addAttribute("companies", companyService.getCompanyDtoByLoggedInUser());
         model.addAttribute("users", userService.getAllUsers());
+        userService.updateUser(userDTO);
         return "user/user-update";
     }
 
@@ -66,7 +67,7 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public String createUser(@ModelAttribute UserDTO userDTO) {
+    public String createUser(@ModelAttribute("user") UserDTO userDTO) {
         userService.save(userDTO);
         return "redirect:/user/user-list";
     }
