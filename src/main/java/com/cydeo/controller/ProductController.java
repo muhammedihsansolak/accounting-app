@@ -2,6 +2,7 @@ package com.cydeo.controller;
 
 import com.cydeo.dto.ProductDTO;
 import com.cydeo.enums.ProductUnit;
+import com.cydeo.repository.ProductRepository;
 import com.cydeo.service.CategoryService;
 import com.cydeo.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class ProductController {
 
     private final ProductService productService;
     private final CategoryService categoryService;
+    private final ProductRepository productRepository;
 
 
     //End-user should be able to List (display) all products in the product_list page...
@@ -33,14 +35,16 @@ public class ProductController {
     @GetMapping("/update/{id}")
     public String editProduct(@PathVariable("id") Long id, Model model){
         ProductDTO productToBeUpdated = productService.findById(id);
-        model.addAttribute("products",productToBeUpdated);
+        model.addAttribute("product",productToBeUpdated);
         model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("lowLimitAlert",productService.findById(id).getLowLimitAlert());
         model.addAttribute("productUnits", ProductUnit.values());
         return "/product/product-update";
     }
 
     @PostMapping("/update/{id}")
     public String updateProduct(@PathVariable("id") Long id, @ModelAttribute("product") ProductDTO productDtoToBeUpdated) {
+        productDtoToBeUpdated.setId(productDtoToBeUpdated.getId());
         productService.update(id, productDtoToBeUpdated);
 
         return "redirect:/product/product-list";

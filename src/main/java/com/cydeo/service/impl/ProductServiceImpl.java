@@ -48,7 +48,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void update(Long productId, ProductDTO productDtoToBeUpdated) {
 
-        Product productToBeUpdated = productRepository.findById(productId).get();
+        Product productToBeUpdated = productRepository.findById(productId).orElseThrow();
         productToBeUpdated.setId(productId);
         productRepository.save(mapperUtil.convert(productToBeUpdated, new Product()));
 
