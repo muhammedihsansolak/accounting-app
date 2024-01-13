@@ -19,4 +19,5 @@ public class ClientVendorDTO {
     private AddressDTO address;
     private boolean hasInvoice;
 
+
 }
