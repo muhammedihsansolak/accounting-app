@@ -67,7 +67,7 @@ public class UserController {
 //        companies.addAll(Arrays.asList("Green Tech", "Blue Tech"));
         model.addAttribute("newUser", new UserDTO());
         model.addAttribute("userRoles", roleService.getAllRolesForCurrentUser());
-        model.addAttribute("company", companyService.getCompanyDtoByLoggedInUser());
+        model.addAttribute("companies", companyService.getCompanyDtoByLoggedInUser());
         return "user/user-create";
     }
 

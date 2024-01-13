@@ -1,8 +1,13 @@
 package com.cydeo.service;
 
 import com.cydeo.dto.CompanyDTO;
+import org.springframework.validation.BindingResult;
+
+import java.util.List;
 
 public interface CompanyService {
-    CompanyDTO getCompanyDtoByLoggedInUser();
+    List<CompanyDTO> getCompanyDtoByLoggedInUser();
+
+    CompanyDTO findById(Long id);
 
 }
