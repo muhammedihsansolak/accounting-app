@@ -1,15 +1,13 @@
 package com.cydeo.dto;
 
 import com.cydeo.enums.CompanyStatus;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class CompanyDTO {
     private Long id;
     private String title;
