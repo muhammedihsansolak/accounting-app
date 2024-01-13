@@ -2,6 +2,7 @@ package com.cydeo.controller;
 
 import com.cydeo.dto.ProductDTO;
 import com.cydeo.enums.ProductUnit;
+import com.cydeo.service.CategoryService;
 import com.cydeo.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -33,7 +34,7 @@ public class ProductController {
     public String editProduct(@PathVariable("id") Long id, Model model){
         ProductDTO productToBeUpdated = productService.findById(id);
         model.addAttribute("products",productToBeUpdated);
-        model.addAttribute("categories", productService.getAllCategories());
+        model.addAttribute("categories", categoryService.findAll());
         model.addAttribute("productUnits", ProductUnit.values());
         return "/product/product-update";
     }
@@ -48,19 +49,28 @@ public class ProductController {
 
     //When End-User clicks on "Create-Product" button, product_create page should be displayed with an Empty product form,
     @GetMapping("/create")
-    public String createProduct(){
-
+    public String createProduct(Model model){
+        model.addAttribute("newProduct", new ProductDTO());
+        model.addAttribute("category",categoryService.findAll());
+        model.addAttribute("name", productService.listAllProducts());
+        //model.addAttribute("lowLimitAlert", );
+        model.addAttribute("productUnit", ProductUnit.values());
 
         return "/product/product-create";
     }
 
+    @PostMapping("/create")
+    public String createProduct(@ModelAttribute("product") ProductDTO productDTO){
+        productService.save(productDTO);
+        return "redirect:/products/list";
+    }
+
     //End-user should be able to Delete each product(soft delete), then end up to the product_list page with updated product list.
-    @DeleteMapping("/delete/{productId}")
-    public String deleteProduct(@PathVariable("productId") Long id, Model model){
-        ProductDTO productDTOToBeDeleted = productService.findById(id);
+    @GetMapping("/delete/{id}")
+    public String deleteProduct(@PathVariable("id") Long id){
         productService.delete(id);
 
-        return "redirect:/product-create";
+        return "redirect:/products/list";
     }
 
 
