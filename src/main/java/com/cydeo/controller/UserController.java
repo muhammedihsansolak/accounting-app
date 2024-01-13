@@ -72,10 +72,8 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public String createUser(@ModelAttribute("user") UserDTO userDTO,Model model) {
-
+    public String createUser(@ModelAttribute("user") UserDTO userDTO) {
         userService.save(userDTO);
-        model.addAttribute("companies",companies);
         return "redirect:/users/list";
     }
 
