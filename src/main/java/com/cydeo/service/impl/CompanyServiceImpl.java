@@ -3,26 +3,31 @@ package com.cydeo.service.impl;
 import com.cydeo.dto.CompanyDTO;
 import com.cydeo.dto.UserDTO;
 import com.cydeo.entity.Company;
-import com.cydeo.enums.CompanyStatus;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.CompanyRepository;
+import com.cydeo.enums.CompanyStatus;
+
 import com.cydeo.service.CompanyService;
+import com.cydeo.service.SecurityService;
 import com.cydeo.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CompanyServiceImpl implements CompanyService {
     private final UserService userService;
-    private final CompanyRepository repository;
+    private final SecurityService securityService;
+    private final CompanyRepository companyRepository;
     private final MapperUtil mapperUtil;
+    private final CompanyRepository repository;
 
 
     @Override
@@ -44,41 +49,53 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public CompanyDTO updateCompany(CompanyDTO newCompanyDto) {
-        Optional<Company> oldCompany = repository.findById(newCompanyDto.getId());
-        if (oldCompany.isPresent()) {
-            CompanyStatus oldCompanyStatus = oldCompany.get().getCompanyStatus();
-            newCompanyDto.setCompanyStatus(oldCompanyStatus);
-            Company savedCompany = repository.save(mapperUtil.convert(newCompanyDto,new Company()));
-
-            return mapperUtil.convert(savedCompany,newCompanyDto);
+    public List<CompanyDTO> getCompanyDtoByLoggedInUser() {
+        UserDTO loggedInUser = securityService.getLoggedInUser();
+        if (loggedInUser.getRole().getId() == 1) {
+            List<Company> companies = companyRepository.getAllCompanyForRoot(loggedInUser.getCompany().getId());
+            return companies.stream().map(company -> mapperUtil.convert(company, new CompanyDTO()))
+                    .collect(Collectors.toList());
+        } else {
+            Company company = companyRepository.getCompanyForCurrent(loggedInUser.getCompany().getId());
+            return Collections.singletonList(mapperUtil.convert(company, new CompanyDTO()));
         }
-           return null;
-
     }
 
-    @Override
-    public CompanyDTO createCompany(CompanyDTO newCompany) {
-        newCompany.setCompanyStatus(CompanyStatus.PASSIVE);
-        Company savedCompany = repository.save(mapperUtil.convert(newCompany,new Company()));
+        public CompanyDTO updateCompany (CompanyDTO newCompanyDto){
+            Optional<Company> oldCompany = repository.findById(newCompanyDto.getId());
+            if (oldCompany.isPresent()) {
+                CompanyStatus oldCompanyStatus = oldCompany.get().getCompanyStatus();
+                newCompanyDto.setCompanyStatus(oldCompanyStatus);
+                Company savedCompany = repository.save(mapperUtil.convert(newCompanyDto, new Company()));
 
-        return mapperUtil.convert(savedCompany, new CompanyDTO());
-    }
+                return mapperUtil.convert(savedCompany, newCompanyDto);
+            }
+            return null;
 
-    @Override
-    public void activateCompany(long companyId) {
-        Company companyToBeActivate = repository.findById(companyId)
-                .orElseThrow(() -> new NoSuchElementException("Company with id: " + companyId + " Not Found "));
-        companyToBeActivate.setCompanyStatus(CompanyStatus.ACTIVE);
-        repository.save(companyToBeActivate);
+        }
 
-    }
+        @Override
+        public CompanyDTO createCompany (CompanyDTO newCompany){
+            newCompany.setCompanyStatus(CompanyStatus.PASSIVE);
+            Company savedCompany = repository.save(mapperUtil.convert(newCompany, new Company()));
 
-    @Override
-    public void deactivateCompany(long companyId) {
-        Company companyToBeDeactivate = repository.findById(companyId)
-                .orElseThrow(() -> new NoSuchElementException("Company with id: " + companyId + " Not Found "));
-        companyToBeDeactivate.setCompanyStatus(CompanyStatus.PASSIVE);
-        repository.save(companyToBeDeactivate);
-    }
+            return mapperUtil.convert(savedCompany, new CompanyDTO());
+        }
+
+        @Override
+        public void activateCompany ( long companyId){
+            Company companyToBeActivate = repository.findById(companyId)
+                    .orElseThrow(() -> new NoSuchElementException("Company with id: " + companyId + " Not Found "));
+            companyToBeActivate.setCompanyStatus(CompanyStatus.ACTIVE);
+            repository.save(companyToBeActivate);
+
+        }
+
+        @Override
+        public void deactivateCompany ( long companyId){
+            Company companyToBeDeactivate = repository.findById(companyId)
+                    .orElseThrow(() -> new NoSuchElementException("Company with id: " + companyId + " Not Found "));
+            companyToBeDeactivate.setCompanyStatus(CompanyStatus.PASSIVE);
+            repository.save(companyToBeDeactivate);
+        }
 }
