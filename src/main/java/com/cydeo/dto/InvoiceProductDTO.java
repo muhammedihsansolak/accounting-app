@@ -20,9 +20,7 @@ public class InvoiceProductDTO {
 
     private Integer tax;
 
-    private BigDecimal total = price.add(
-            price.multiply(BigDecimal.valueOf(tax))
-                    .divide( BigDecimal.valueOf(100), RoundingMode.CEILING) );
+    private BigDecimal total;
 
     private BigDecimal profitLoss;
 

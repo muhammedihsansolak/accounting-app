@@ -1,11 +1,9 @@
 package com.cydeo.controller;
 
 import com.cydeo.dto.*;
+import com.cydeo.enums.ClientVendorType;
 import com.cydeo.enums.InvoiceType;
-import com.cydeo.service.InvoiceProductService;
-import com.cydeo.service.InvoiceService;
-import com.cydeo.service.SecurityService;
-import com.cydeo.service.UserService;
+import com.cydeo.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,13 +20,14 @@ public class SalesInvoiceController {
     private final InvoiceProductService invoiceProductService;
     private final UserService userService;
     private final SecurityService securityService;
+    private final ClientVendorService clientVendorService;
 
     /**
      * Lists all sales invoices in the sales-invoice-list page
      */
     @GetMapping("/list")
     public String listAllSalesInvoices(Model model){
-        List<InvoiceDTO> invoiceDTOList = invoiceService.findAllSalesInvoices();
+        List<InvoiceDTO> invoiceDTOList = invoiceService.findAllInvoices(InvoiceType.SALES);
 
         model.addAttribute("invoices", invoiceDTOList);
 
@@ -96,9 +95,10 @@ public class SalesInvoiceController {
         String companyTitle =  loggedInUser.getCompany().getTitle();
 
         InvoiceDTO invoice = invoiceService.invoiceCreator(InvoiceType.SALES, companyTitle);
+        List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.CLIENT);
 
         model.addAttribute("newSalesInvoice", invoice);
-        model.addAttribute("clients", List.of(new ClientVendorDTO()));//TODO Vendor should be a dropdown and be populated with only ClientVendors of Type Client.
+        model.addAttribute("clients", clientVendorDTOList );
 
         return "invoice/sales-invoice-create";
     }

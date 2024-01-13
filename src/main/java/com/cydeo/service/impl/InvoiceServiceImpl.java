@@ -1,6 +1,7 @@
 package com.cydeo.service.impl;
 
 import com.cydeo.dto.InvoiceDTO;
+import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.dto.UserDTO;
 import com.cydeo.entity.Invoice;
 import com.cydeo.enums.InvoiceStatus;
@@ -9,10 +10,13 @@ import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.InvoiceRepository;
 import com.cydeo.service.InvoiceProductService;
 import com.cydeo.service.InvoiceService;
+import com.cydeo.service.SecurityService;
 import com.cydeo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -26,6 +30,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final MapperUtil mapper;
     private final UserService userService;
+    private final SecurityService securityService;
     private final InvoiceProductService invoiceProductService;
 
     @Override
@@ -37,27 +42,70 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public List<InvoiceDTO> findAllPurchaseInvoices() {
-        String currentlyLoggedInPersonUsername = "admin@greentech.com";//hardcoded. TODO replace it with SecurityContextHolder when security implemented
+    public List<InvoiceDTO> findAllInvoices(InvoiceType invoiceType) {
+        String currentlyLoggedInPersonUsername = securityService.getLoggedInUser().getUsername();
         UserDTO loggedInUser = userService.findByUsername(currentlyLoggedInPersonUsername);
 
-        List<Invoice> all = invoiceRepository.findInvoiceByInvoiceTypeAndCompany_Title(InvoiceType.PURCHASE, loggedInUser.getCompany().getTitle());
+        List<Invoice> all = invoiceRepository.findInvoiceByInvoiceTypeAndCompany_Title(invoiceType, loggedInUser.getCompany().getTitle());
 
-        return all.stream()
+        List<InvoiceDTO> invoiceDTOList = all.stream()
                 .map(invoice -> mapper.convert(invoice, new InvoiceDTO()))
                 .collect(Collectors.toList());
+
+        invoiceDTOList = invoiceDTOList.stream()
+                .map(invoice -> {
+                    List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceId(invoice.getId());
+                    BigDecimal totalPriceWithoutTax =  calculateTotalPriceWithoutTax(invoiceProductDTOList);
+                    BigDecimal taxAmount =  calculateTax(invoiceProductDTOList);
+
+                    invoice.setPrice( totalPriceWithoutTax );
+                    invoice.setTax( taxAmount );
+                    invoice.setTotal( totalPriceWithoutTax.add( taxAmount ) );
+
+                    return invoice;
+                })
+                .collect(Collectors.toList());
+
+        return invoiceDTOList;
     }
 
-    @Override
-    public List<InvoiceDTO> findAllSalesInvoices() {
-        String currentlyLoggedInPersonUsername = "admin@greentech.com";//hardcoded. TODO replace it with SecurityContextHolder when security implemented
-        UserDTO loggedInUser = userService.findByUsername(currentlyLoggedInPersonUsername);
+    private static final BigDecimal PERCENTAGE_DIVISOR = BigDecimal.valueOf(100);
 
-        List<Invoice> all = invoiceRepository.findInvoiceByInvoiceTypeAndCompany_Title(InvoiceType.SALES, loggedInUser.getCompany().getTitle());
+    private BigDecimal calculateTax(List<InvoiceProductDTO> invoiceProductDTOList) {
+        BigDecimal sum = invoiceProductDTOList.stream()
+                .map(this::calculateTaxForProduct)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return all.stream()
-                .map(invoice -> mapper.convert(invoice, new InvoiceDTO()))
-                .collect(Collectors.toList());
+        if (sum.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Tax cannot be negative!");
+        }
+
+        return sum;
+    }
+
+    private BigDecimal calculateTaxForProduct(InvoiceProductDTO invoiceProductDTO) {
+        BigDecimal price = invoiceProductDTO.getPrice();
+        BigDecimal taxPercentage = BigDecimal.valueOf(invoiceProductDTO.getTax());
+        Integer quantity = invoiceProductDTO.getQuantity();
+
+        BigDecimal taxAmount = price.multiply(taxPercentage).divide(PERCENTAGE_DIVISOR, RoundingMode.CEILING).multiply(BigDecimal.valueOf(quantity));
+
+        if (taxAmount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Tax amount cannot be negative!");
+        }
+
+        return taxAmount;
+    }
+
+
+    private BigDecimal calculateTotalPriceWithoutTax(List<InvoiceProductDTO> invoiceProductDTOList) {
+        BigDecimal sum = invoiceProductDTOList.stream()
+                .map(invoiceProductDTO ->
+                        (invoiceProductDTO.getPrice()).multiply(BigDecimal.valueOf(invoiceProductDTO.getQuantity()) ))//total price amount without tax
+                .reduce(BigDecimal.ZERO, BigDecimal::add );
+
+        return sum;
+
     }
 
     // invoiceNo, invoiceStatus, invoiceType, date, company cannot be updatable. Update -> ClientVendor

@@ -9,7 +9,7 @@ import java.util.List;
 public interface InvoiceService {
     InvoiceDTO findById(Long id);
 
-    List<InvoiceDTO> findAllPurchaseInvoices();
+    List<InvoiceDTO> findAllInvoices(InvoiceType invoiceType);
 
     void update(InvoiceDTO foundInvoice, InvoiceDTO invoiceToUpdate);
 
@@ -21,5 +21,4 @@ public interface InvoiceService {
 
     InvoiceDTO create(InvoiceDTO invoice);
 
-    List<InvoiceDTO> findAllSalesInvoices();
 }

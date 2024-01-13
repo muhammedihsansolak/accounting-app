@@ -4,10 +4,7 @@ import com.cydeo.dto.*;
 import com.cydeo.enums.ClientVendorType;
 import com.cydeo.enums.InvoiceType;
 import com.cydeo.enums.ProductUnit;
-import com.cydeo.service.InvoiceProductService;
-import com.cydeo.service.InvoiceService;
-import com.cydeo.service.SecurityService;
-import com.cydeo.service.UserService;
+import com.cydeo.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,13 +21,14 @@ public class PurchasesInvoiceController {
     private final InvoiceProductService invoiceProductService;
     private final UserService userService;
     private final SecurityService securityService;
+    private final ClientVendorService clientVendorService;
 
     /**
      * Lists all purchase invoices in the purchase-invoice-list page
      */
     @GetMapping("/list")
     public String listAllPurchaseInvoices(Model model){
-        List<InvoiceDTO> invoiceDTOList = invoiceService.findAllPurchaseInvoices();
+        List<InvoiceDTO> invoiceDTOList = invoiceService.findAllInvoices(InvoiceType.PURCHASE);
 
         model.addAttribute("invoices", invoiceDTOList);
 
@@ -99,10 +97,10 @@ public class PurchasesInvoiceController {
         String companyTitle =  loggedInUser.getCompany().getTitle();
 
         InvoiceDTO invoice = invoiceService.invoiceCreator(InvoiceType.PURCHASE, companyTitle);
+        List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.VENDOR);
 
         model.addAttribute("newPurchaseInvoice", invoice);
-        model.addAttribute("vendors", List.of(
-                new ClientVendorDTO(1L,"ABC Vendor","1234567890","www.abc.com", ClientVendorType.VENDOR,new AddressDTO(),true)));//TODO Vendor should be a dropdown and be populated with only ClientVendors of Type Vendor.
+        model.addAttribute("vendors", clientVendorDTOList );
 
         return "invoice/purchase-invoice-create";
     }
