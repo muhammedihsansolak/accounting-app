@@ -32,14 +32,17 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public CompanyDTO findById(Long companyId) {
-        Company company = repository.findById(companyId)
-                .orElseThrow(() -> new NoSuchElementException("Company with id: " + companyId + " Not Found "));
+        if (companyId !=1) {
+            Company company = repository.findById(companyId)
+                    .orElseThrow(() -> new NoSuchElementException("Company with id: " + companyId + " Not Found "));
             return mapperUtil.convert(company, new CompanyDTO());
+        }
+        return null;
     }
 
     @Override
     public List<CompanyDTO> getCompanyList() {
-        List<Company> companies = repository.findAll();
+        List<Company> companies = repository.findAllCompanyIdNot1();
         if (companies.size() !=0){
             return companies.stream()
                     .map(company -> mapperUtil.convert(company,new CompanyDTO()))
