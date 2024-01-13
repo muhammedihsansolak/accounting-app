@@ -93,7 +93,8 @@ public class InvoiceServiceImpl implements InvoiceService {
         return sum;
     }
 
-    private BigDecimal calculateTaxForProduct(InvoiceProductDTO invoiceProductDTO) {
+    @Override
+    public BigDecimal calculateTaxForProduct(InvoiceProductDTO invoiceProductDTO) {
         BigDecimal price = invoiceProductDTO.getPrice();
         BigDecimal taxPercentage = BigDecimal.valueOf(invoiceProductDTO.getTax());
         Integer quantity = invoiceProductDTO.getQuantity();
@@ -170,27 +171,15 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     private String generateNextInvoiceNumber(Optional<Invoice> lastInvoice, InvoiceType invoiceType) {
-        if (invoiceType.equals(InvoiceType.PURCHASE)) {
-            if (lastInvoice.isEmpty()) {
-                return "P-000";
-            }
-            String lastInvoiceNumber = lastInvoice.get().getInvoiceNo();
-            int lastNumber = Integer.parseInt(lastInvoiceNumber.substring(2));
-            int nextNumber = lastNumber + 1;
-
-            return "P-" + nextNumber;
-        }else if (invoiceType.equals(InvoiceType.SALES)){
-            if (lastInvoice.isEmpty()) {
-                return "S-000";
-            }
-            String lastInvoiceNumber = lastInvoice.get().getInvoiceNo();
-            int lastNumber = Integer.parseInt(lastInvoiceNumber.substring(2));
-            int nextNumber = lastNumber + 1;
-
-            return "S-" + nextNumber;
-        }else {
-            return "";
+        if (!lastInvoice.isPresent()) {
+            return invoiceType.getValue().charAt(0) + "-000";
         }
+
+        String lastInvoiceNumber = lastInvoice.get().getInvoiceNo();
+        int lastNumber = Integer.parseInt(lastInvoiceNumber.substring(2));
+        int nextNumber = lastNumber + 1;
+
+        return invoiceType.getValue().charAt(0) + "-" + String.format("%03d", nextNumber);
     }
 
     @Override

@@ -6,19 +6,28 @@ import com.cydeo.entity.InvoiceProduct;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.InvoiceProductRepository;
 import com.cydeo.service.InvoiceProductService;
+import com.cydeo.service.InvoiceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class InvoiceProductServiceImpl implements InvoiceProductService {
 
     private final InvoiceProductRepository repository;
     private final MapperUtil mapper;
+    private final InvoiceService invoiceService;
+
+    public InvoiceProductServiceImpl(InvoiceProductRepository repository, MapperUtil mapper, @Lazy InvoiceService invoiceService) {
+        this.repository = repository;
+        this.mapper = mapper;
+        this.invoiceService = invoiceService;
+    }
 
     @Override
     public InvoiceProductDTO findById(Long id) {
@@ -32,9 +41,21 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
     public List<InvoiceProductDTO> findByInvoiceId(Long invoiceId) {
         List<InvoiceProduct> invoiceProductList = repository.findByInvoiceId(invoiceId);
 
-        return invoiceProductList.stream()
-                .map(product -> mapper.convert(product, new InvoiceProductDTO()))
+
+        List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductList.stream()
+                .map(invoiceProduct -> mapper.convert(invoiceProduct, new InvoiceProductDTO()))
+                .map(invoiceProduct -> {
+                    BigDecimal taxAmount = invoiceService.calculateTaxForProduct(invoiceProduct);
+                    invoiceProduct.setTotal(
+                            invoiceProduct.getPrice()
+                                    .multiply(BigDecimal.valueOf(invoiceProduct.getQuantity()))
+                                    .add(taxAmount));
+
+                    return invoiceProduct;
+                })
                 .collect(Collectors.toList());
+
+        return invoiceProductDTOList;
     }
 
     @Override
@@ -55,5 +76,15 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
         invoiceProductDTOList.stream()
                 .filter(invoiceProductDTO -> invoiceProductDTO.getId() == invoiceProductId)
                 .forEach(invoiceProductDTO -> deleteById(invoiceProductDTO.getId())); //soft delete
+    }
+
+    @Override
+    public void create(InvoiceProductDTO invoiceProductDTO, Long invoiceId) {
+        InvoiceDTO invoiceDTO = invoiceService.findById(invoiceId);
+
+        invoiceProductDTO.setInvoice(invoiceDTO);
+
+        InvoiceProduct invoiceProduct = mapper.convert(invoiceProductDTO, new InvoiceProduct());
+        repository.save(invoiceProduct);
     }
 }

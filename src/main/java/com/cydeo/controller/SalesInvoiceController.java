@@ -3,6 +3,7 @@ package com.cydeo.controller;
 import com.cydeo.dto.*;
 import com.cydeo.enums.ClientVendorType;
 import com.cydeo.enums.InvoiceType;
+import com.cydeo.enums.ProductUnit;
 import com.cydeo.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -41,11 +42,16 @@ public class SalesInvoiceController {
     public String editInvoiceProduct(@PathVariable("id")Long id, Model model){
         InvoiceDTO foundInvoice = invoiceService.findById(id);
         List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceId(id);
+        List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.CLIENT);
+
+        InvoiceProductDTO newInvoiceProduct = new InvoiceProductDTO();
 
         model.addAttribute("invoice",foundInvoice);
-        model.addAttribute("newInvoiceProduct", new InvoiceProductDTO());
-        model.addAttribute("products", List.of(new ProductDTO())); //TODO implement productService
+        model.addAttribute("newInvoiceProduct", newInvoiceProduct);
+        model.addAttribute("products", List.of(
+                new ProductDTO(1L,"Phone",100,15, ProductUnit.PCS, new CategoryDTO(),true))); //TODO implement productService
         model.addAttribute("invoiceProducts", invoiceProductDTOList);
+        model.addAttribute("vendors", clientVendorDTOList );
 
         return "invoice/sales-invoice-update";
     }
@@ -60,6 +66,13 @@ public class SalesInvoiceController {
         invoiceService.update(foundInvoice, invoiceToUpdate);
 
         return "redirect:/salesInvoices/update/"+id;
+    }
+
+    @PostMapping("/addInvoiceProduct/{id}")
+    public String addInvoiceProduct(@PathVariable("id")Long id, @ModelAttribute("newInvoiceProduct")InvoiceProductDTO invoiceProductDTO ){
+        invoiceProductService.create(invoiceProductDTO, id);
+
+        return "redirect:/purchaseInvoices/update/"+id;
     }
 
     /**

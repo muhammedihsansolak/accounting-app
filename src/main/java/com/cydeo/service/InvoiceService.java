@@ -1,9 +1,11 @@
 package com.cydeo.service;
 
 import com.cydeo.dto.InvoiceDTO;
+import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.entity.InvoiceProduct;
 import com.cydeo.enums.InvoiceType;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface InvoiceService {
@@ -21,4 +23,5 @@ public interface InvoiceService {
 
     InvoiceDTO create(InvoiceDTO invoice);
 
+    BigDecimal calculateTaxForProduct(InvoiceProductDTO invoiceProductDTO);
 }
