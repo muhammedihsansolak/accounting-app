@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @Controller
-@RequestMapping("/category")
+@RequestMapping("/categories")
 public class CategoryController {
 
     private final CategoryService categoryService;
@@ -34,14 +34,14 @@ public class CategoryController {
     public String saveCategory(@ModelAttribute("newCategory") CategoryDTO categoryDTO){
 
         categoryService.save(categoryDTO);
-        return "redirect:/category/category-list";
+        return "redirect:/categories/list";
     }
 
     @PostMapping ("/update/{id}")
     public String updateCategory(@PathVariable("id") Long id,@ModelAttribute ("category") CategoryDTO category ){
 
         categoryService.update(category, id);
-        return "redirect:/category/category-list";
+        return "redirect:/categories/list";
     }
     @GetMapping("/update/{id}")
     public String editCategory(@PathVariable("id") Long id, Model model){
