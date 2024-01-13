@@ -24,15 +24,6 @@ public class CompanyServiceImpl implements CompanyService {
     private final CompanyRepository repository;
     private final MapperUtil mapperUtil;
 
-    @Override
-    public CompanyDTO getCompanyDtoByLoggedInUser() {
-        String loggedInUser_userName = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (loggedInUser_userName != null){
-           UserDTO loggedInUserDto = userService.findByUsername(loggedInUser_userName);
-           return loggedInUserDto.getCompany();
-        }
-        return null;
-    }
 
     @Override
     public CompanyDTO findById(Long companyId) {
