@@ -6,7 +6,12 @@ import com.cydeo.service.RoleService;
 import com.cydeo.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Controller
 @RequestMapping("/users")
@@ -42,12 +47,10 @@ public class UserController {
     }
 
     @PostMapping("/update/{id}")
-    public String updateUser(@PathVariable("id") Long id, @ModelAttribute("user") UserDTO userDTO, Model model) {
-        model.addAttribute("userRoles", roleService.getAllRolesForCurrentUser());
-        model.addAttribute("companies", companyService.getCompanyDtoByLoggedInUser());
-        model.addAttribute("users", userService.getAllUsers());
+    public String updateUser( @ModelAttribute("user") UserDTO userDTO, @PathVariable("id") Long id, Model model) {
+        userDTO.setUsername(userDTO.getUsername());
         userService.updateUser(userDTO);
-        return "user/user-update";
+        return "redirect:/users/list";
     }
 
     //    End-user should be able to Delete each User (soft delete), then end up to the user_list page with updated User list.
@@ -60,15 +63,19 @@ public class UserController {
     //    When End-User clicks on "Create-User" button, user_create page should be displayed with an Empty user form,
     @GetMapping("/create")
     public String createUser(Model model) {
+//        List<String> companies = new ArrayList<>();
+//        companies.addAll(Arrays.asList("Green Tech", "Blue Tech"));
         model.addAttribute("newUser", new UserDTO());
         model.addAttribute("userRoles", roleService.getAllRolesForCurrentUser());
-        model.addAttribute("companies", companyService.getCompanyDtoByLoggedInUser());
+        model.addAttribute("company", companyService.getCompanyDtoByLoggedInUser());
         return "user/user-create";
     }
 
     @PostMapping("/create")
-    public String createUser(@ModelAttribute("user") UserDTO userDTO) {
+    public String createUser(@ModelAttribute("user") UserDTO userDTO,Model model) {
+
         userService.save(userDTO);
+        model.addAttribute("companies",companies);
         return "redirect:/users/list";
     }
 
