@@ -132,6 +132,7 @@ public class PurchasesInvoiceController {
     @GetMapping("/print/{invoiceId}")
     public String printPurchaseInvoice(@PathVariable("invoiceId")Long invoiceId , Model model){
         InvoiceDTO invoice = invoiceService.findById(invoiceId);
+
         List<InvoiceProductDTO> invoiceProductDTOList =  invoiceProductService.findByInvoiceId(invoiceId);
 
         model.addAttribute("invoice", invoice);

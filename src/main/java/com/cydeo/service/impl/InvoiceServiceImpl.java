@@ -37,8 +37,18 @@ public class InvoiceServiceImpl implements InvoiceService {
     public InvoiceDTO findById(Long id) {
         Invoice invoice = invoiceRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Invoice can not found with id: " + id));
+        InvoiceDTO invoiceDTO = mapper.convert(invoice, new InvoiceDTO());
 
-        return mapper.convert(invoice, new InvoiceDTO());
+        List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceId(invoiceDTO.getId());
+
+        BigDecimal withoutTax = calculateTotalPriceWithoutTax(invoiceProductDTOList);
+        BigDecimal tax = calculateTax(invoiceProductDTOList);
+
+        invoiceDTO.setPrice(withoutTax);
+        invoiceDTO.setTax(tax);
+        invoiceDTO.setTotal(withoutTax.add(tax));
+
+        return invoiceDTO;
     }
 
     @Override
