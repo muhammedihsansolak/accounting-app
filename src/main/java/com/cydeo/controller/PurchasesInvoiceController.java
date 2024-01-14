@@ -44,10 +44,8 @@ public class PurchasesInvoiceController {
         List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceId(id);
         List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.VENDOR);
 
-        InvoiceProductDTO newInvoiceProduct = new InvoiceProductDTO();
-
         model.addAttribute("invoice",foundInvoice);
-        model.addAttribute("newInvoiceProduct", newInvoiceProduct);
+        model.addAttribute("newInvoiceProduct", new InvoiceProductDTO());
         model.addAttribute("products", List.of(
                 new ProductDTO(1L,"Phone",100,15, ProductUnit.PCS, new CategoryDTO(),true))); //TODO implement productService
         model.addAttribute("invoiceProducts", invoiceProductDTOList);
