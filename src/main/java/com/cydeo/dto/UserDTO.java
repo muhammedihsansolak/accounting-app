@@ -24,6 +24,7 @@ public class UserDTO {
     private String phone;
     private RoleDTO role;
     private CompanyDTO company;
+    private boolean enabled;
 
     private boolean isOnlyAdmin; //(should be true if this user is only admin of any company.) I will write in business logic part
 
