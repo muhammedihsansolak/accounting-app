@@ -56,7 +56,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         String currentlyLoggedInPersonUsername = securityService.getLoggedInUser().getUsername();
         UserDTO loggedInUser = userService.findByUsername(currentlyLoggedInPersonUsername);
 
-        List<Invoice> all = invoiceRepository.findInvoiceByInvoiceTypeAndCompany_Title(invoiceType, loggedInUser.getCompany().getTitle());
+        List<Invoice> all = invoiceRepository.findInvoiceByInvoiceTypeAndCompany_TitleOrderByInvoiceNoDesc(invoiceType, loggedInUser.getCompany().getTitle());
 
         List<InvoiceDTO> invoiceDTOList = all.stream()
                 .map(invoice -> mapper.convert(invoice, new InvoiceDTO()))
@@ -155,6 +155,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     //Invoice_No should be auto generated
     //Invoice_Date should be the date which this invoice is created
+    //InvoiceStatus should be AWAITING_APPROVAL
     @Override
     public InvoiceDTO invoiceCreator(InvoiceType invoiceType, String companyTitle) {
         // Get the latest invoice from the database which belongs to that company
@@ -166,6 +167,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceDTO.setInvoiceNo( generatedInvoiceNo );
         invoiceDTO.setDate( LocalDate.now() );
         invoiceDTO.setInvoiceType( invoiceType );
+        invoiceDTO.setInvoiceStatus( InvoiceStatus.AWAITING_APPROVAL );
 
         return invoiceDTO;
     }
