@@ -61,8 +61,16 @@ public class CompanyController {
     }
 
     @PostMapping("/update/{id}")
-    public String updateCompanies(@ModelAttribute("company")CompanyDTO company){
-        System.out.println(company);
+    public String updateCompanies(@Valid @ModelAttribute("company")CompanyDTO company,
+                                  BindingResult bindingResult, Model model){
+        // Title cannot be null and should be unique
+        bindingResult = companyService.addUpdateTitleValidation(company,bindingResult);
+
+        if (bindingResult.hasFieldErrors()){
+            model.addAttribute("countries", List.of("USA","UK")); // we will consume from third party app
+            return "/company/company-update";
+        }
+
         companyService.updateCompany(company);
         return "redirect:/companies/list";
     }

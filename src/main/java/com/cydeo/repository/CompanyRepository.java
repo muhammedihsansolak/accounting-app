@@ -20,4 +20,6 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     List<Company> findAllCompanyIdNot1();
 
     boolean existsByTitle(String title);
+
+    boolean existsByTitleAndIdNot(String title, Long id);
 }
