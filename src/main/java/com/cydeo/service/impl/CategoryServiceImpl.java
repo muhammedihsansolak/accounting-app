@@ -6,6 +6,7 @@ import com.cydeo.entity.Company;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.CategoryRepository;
 import com.cydeo.service.CategoryService;
+import com.cydeo.service.CompanyService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,10 +18,13 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final MapperUtil mapperUtil;
+    private final CompanyService companyService;
 
-    public CategoryServiceImpl(CategoryRepository categoryRepository, MapperUtil mapperUtil) {
+
+    public CategoryServiceImpl(CategoryRepository categoryRepository, MapperUtil mapperUtil, CompanyService companyService) {
         this.categoryRepository = categoryRepository;
         this.mapperUtil = mapperUtil;
+        this.companyService = companyService;
     }
 
 
@@ -32,14 +36,18 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDTO> findAll() {
-        List<Category> categoryList = categoryRepository.findAll();
+        List<Category> categoryList = categoryRepository.findAllByIsDeleted(false);
         return categoryList.stream().map(category -> mapperUtil.convert(category, new CategoryDTO())).collect(Collectors.toList());
     }
+
+
 
     @Override
     public List<CategoryDTO> listAllCategories() {
 
-        List<Category> categoryList = categoryRepository.findAll();
+        Company company = mapperUtil.convert(companyService.getCompanyDtoByLoggedInUser(), new Company());
+        List<Category> categoryList = categoryRepository.findAllByCompanyAndIsDeleted(company, false);
+
         return categoryList.stream().map(category -> mapperUtil.convert(category, new CategoryDTO())).
                 collect(Collectors.toList());
     }
@@ -63,6 +71,15 @@ public class CategoryServiceImpl implements CategoryService {
         return mapperUtil.convert(convertedCategory, new CategoryDTO());
 
     }
+
+    @Override
+    public void delete(Long id) {
+        Category byId = categoryRepository.findById(id).orElseThrow();
+        byId.setIsDeleted(Boolean.TRUE);
+        categoryRepository.save(byId);
+
+    }
+
 
 
 }
