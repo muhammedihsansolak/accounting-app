@@ -12,6 +12,8 @@ import com.cydeo.service.SecurityService;
 import com.cydeo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,9 +25,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class CompanyServiceImpl implements CompanyService {
-    private final UserService userService;
     private final SecurityService securityService;
-    private final CompanyRepository companyRepository;
     private final MapperUtil mapperUtil;
     private final CompanyRepository repository;
 
@@ -55,11 +55,11 @@ public class CompanyServiceImpl implements CompanyService {
     public List<CompanyDTO> getCompanyDtoByLoggedInUser() {
         UserDTO loggedInUser = securityService.getLoggedInUser();
         if (loggedInUser.getRole().getId() == 1) {
-            List<Company> companies = companyRepository.getAllCompanyForRoot(loggedInUser.getCompany().getId());
+            List<Company> companies = repository.getAllCompanyForRoot(loggedInUser.getCompany().getId());
             return companies.stream().map(company -> mapperUtil.convert(company, new CompanyDTO()))
                     .collect(Collectors.toList());
         } else {
-            Company company = companyRepository.getCompanyForCurrent(loggedInUser.getCompany().getId());
+            Company company = repository.getCompanyForCurrent(loggedInUser.getCompany().getId());
             return Collections.singletonList(mapperUtil.convert(company, new CompanyDTO()));
         }
     }
@@ -101,4 +101,12 @@ public class CompanyServiceImpl implements CompanyService {
             companyToBeDeactivate.setCompanyStatus(CompanyStatus.PASSIVE);
             repository.save(companyToBeDeactivate);
         }
+
+    @Override
+    public BindingResult addTitleValidation(String title, BindingResult bindingResult) {
+        if (repository.existsByTitle(title)){
+            bindingResult.addError(new FieldError("newCompany", "title", "This title already exists."));
+        }
+        return bindingResult;
+    }
 }
