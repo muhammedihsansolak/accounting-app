@@ -2,6 +2,7 @@ package com.cydeo.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
+
 import javax.validation.constraints.*;
 
 @Getter
@@ -20,7 +21,7 @@ public class UserDTO {
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotBlank
-    @Pattern(regexp = "(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{4,}")
+    @Pattern(regexp = "(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{4,}", message = "Password should be at least 4 characters long and needs to contain 1 capital letter, 1 small letter and 1 special character or number.")
     private String password;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -35,14 +36,13 @@ public class UserDTO {
     @Size(min = 2, max = 50, message = "First Name must be between 2 and 50 characters long.")
     private String lastname;
 
-    @Pattern(regexp = "^(\\+\\d{1,3}( )?)?((\\(\\d{3}\\))|\\d{3})[- .]?\\d{3}[- .]?\\d{4}$"
-            + "|^(\\+\\d{1,3}( )?)?(\\d{3}[ ]?){2}\\d{3}$"
-            + "|^(\\+\\d{1,3}( )?)?(\\d{3}[ ]?)(\\d{2}[ ]?){2}\\d{2}$")
+    @Pattern(regexp = "^\\+\\d{1,4}\\s\\(\\d{1,}\\)\\s\\d{1,}-\\d{1,}$", message = "Phone Number is required field and may be in any valid phone number format. Ex: +1 (222) 333-4444")
     private String phone;
 
-    @NotNull
+    @NotNull(message = "Please select a Role.")
     private RoleDTO role;
-    @NotNull
+
+    @NotNull(message = "Please select a Customer.")
     private CompanyDTO company;
     private boolean enabled;
 

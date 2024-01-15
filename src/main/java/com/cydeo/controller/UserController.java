@@ -83,7 +83,7 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public String createUser(@Valid @ModelAttribute("user") UserDTO userDTO, BindingResult bindingResult, Model model) {
+    public String createUser(@Valid @ModelAttribute("newUser") UserDTO userDTO, BindingResult bindingResult, Model model) {
         boolean emailExist = userService.findByUsernameCheck(userDTO.getUsername());
         if (bindingResult.hasErrors()) {
             if (emailExist) {
