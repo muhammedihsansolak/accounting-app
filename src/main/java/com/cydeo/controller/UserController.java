@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -47,7 +48,19 @@ public class UserController {
     }
 
     @PostMapping("/update/{id}")
-    public String updateUser( @ModelAttribute("user") UserDTO userDTO, @PathVariable("id") Long id, Model model) {
+    public String updateUser(@Valid @ModelAttribute("user") UserDTO userDTO, BindingResult bindingResult, @PathVariable("id") Long id, Model model) {
+        boolean emailExist = userService.findByUsernameCheck(userDTO.getUsername());
+
+        if (bindingResult.hasErrors()) {
+            if (emailExist) {
+                bindingResult.rejectValue("username", " ", "A user with this email already exists. Please try with different email.");
+            }
+            model.addAttribute("userRoles", roleService.getAllRolesForCurrentUser());
+            model.addAttribute("companies", companyService.getCompanyDtoByLoggedInUser());
+            model.addAttribute("users", userService.getAllUsers());
+            return "user/user-update";
+
+        }
         userDTO.setUsername(userDTO.getUsername());
         userService.updateUser(userDTO);
         return "redirect:/users/list";
@@ -70,7 +83,18 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public String createUser(@ModelAttribute("user") UserDTO userDTO) {
+    public String createUser(@Valid @ModelAttribute("user") UserDTO userDTO, BindingResult bindingResult, Model model) {
+        boolean emailExist = userService.findByUsernameCheck(userDTO.getUsername());
+        if (bindingResult.hasErrors()) {
+            if (emailExist) {
+                bindingResult.rejectValue("username", " ", "A user with this email already exists. Please try with different email.");
+            }
+
+            model.addAttribute("userRoles", roleService.getAllRolesForCurrentUser());
+            model.addAttribute("companies", companyService.getCompanyDtoByLoggedInUser());
+            return "/user/user-create";
+        }
+
         userService.save(userDTO);
         return "redirect:/users/list";
     }
