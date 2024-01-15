@@ -8,6 +8,7 @@ import com.cydeo.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,11 +44,11 @@ public class ProductController {
     }
 
     @PostMapping("/update/{id}")
-    public String updateProduct(@PathVariable("id") Long id, @ModelAttribute("product") ProductDTO productDtoToBeUpdated) {
-        productDtoToBeUpdated.setId(productDtoToBeUpdated.getId());
+    public String updateProduct(@ModelAttribute("product") ProductDTO productDtoToBeUpdated, @PathVariable("id") Long id, Model model) {
+        //productDtoToBeUpdated.setId(productDtoToBeUpdated.getId());
         productService.update(id, productDtoToBeUpdated);
 
-        return "redirect:/product/product-list";
+        return "/product/product-list";
     }
 
 
@@ -55,17 +56,26 @@ public class ProductController {
     @GetMapping("/create")
     public String createProduct(Model model){
         model.addAttribute("newProduct", new ProductDTO());
-        model.addAttribute("category",categoryService.findAll());
-        model.addAttribute("name", productService.listAllProducts());
-        //model.addAttribute("lowLimitAlert", );
+        model.addAttribute("category",categoryService.listAllCategories());
+        model.addAttribute("name", "deneme");
+        model.addAttribute("lowLimitAlert", 10 );
         model.addAttribute("productUnit", ProductUnit.values());
 
         return "/product/product-create";
     }
 
     @PostMapping("/create")
-    public String createProduct(@ModelAttribute("product") ProductDTO productDTO){
+    public String createProduct(@ModelAttribute("product") ProductDTO productDTO, Model model){
+
+
+            model.addAttribute("category",categoryService.findAll());
+            model.addAttribute("name", productService.listAllProducts());
+            //model.addAttribute("lowLimitAlert", ???);
+            model.addAttribute("productUnit", ProductUnit.values());
+
+
         productService.save(productDTO);
+
         return "redirect:/products/list";
     }
 
