@@ -45,6 +45,7 @@ public class ProductController {
 
     @PostMapping("/update/{id}")
     public String updateProduct(@PathVariable("id") Long id, @ModelAttribute("product") ProductDTO productDtoToBeUpdated) {
+
         productService.update(id, productDtoToBeUpdated);
 
         return "redirect:/products/list";
