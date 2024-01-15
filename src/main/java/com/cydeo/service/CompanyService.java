@@ -21,4 +21,5 @@ public interface CompanyService {
     void activateCompany(long companyId);
 
     void deactivateCompany(long companyId);
+    BindingResult addTitleValidation(String title, BindingResult bindingResult);
 }
