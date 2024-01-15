@@ -1,6 +1,7 @@
 package com.cydeo.repository;
 
 import com.cydeo.entity.ClientVendor;
+import com.cydeo.entity.Company;
 import com.cydeo.enums.ClientVendorType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -19,7 +20,7 @@ public interface ClientVendorRepository extends JpaRepository<ClientVendor, Long
     */
 
     Optional<ClientVendor> findById(Long id);
-    List<ClientVendor> findByClientVendorType(ClientVendorType clientVendorType);
+    List<ClientVendor> findByClientVendorTypeAndCompany(ClientVendorType clientVendorType, Company company);
     List<ClientVendor> findAllByCompanyId(Long companyId);
 
 

@@ -5,8 +5,10 @@ import com.cydeo.service.CompanyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,7 +35,17 @@ public class CompanyController {
     }
 
     @PostMapping("/create")
-    public String createCompany(@ModelAttribute("newCompany") CompanyDTO newCompany){
+    public String createCompany(@Valid @ModelAttribute("newCompany") CompanyDTO newCompany,
+                                BindingResult bindingResult, Model model){
+
+        // Title cannot be null and should be unique
+        bindingResult = companyService.addTitleValidation(newCompany.getTitle(),bindingResult);
+
+        if (bindingResult.hasFieldErrors()){
+            model.addAttribute("countries", List.of("USA","UK")); // we will consume from third party app
+            return "/company/company-create";
+        }
+
         companyService.createCompany(newCompany);
 
         return "redirect:/company/list";
@@ -49,8 +61,16 @@ public class CompanyController {
     }
 
     @PostMapping("/update/{id}")
-    public String updateCompanies(@ModelAttribute("company")CompanyDTO company){
-        System.out.println(company);
+    public String updateCompanies(@Valid @ModelAttribute("company")CompanyDTO company,
+                                  BindingResult bindingResult, Model model){
+        // Title cannot be null and should be unique
+        bindingResult = companyService.addUpdateTitleValidation(company,bindingResult);
+
+        if (bindingResult.hasFieldErrors()){
+            model.addAttribute("countries", List.of("USA","UK")); // we will consume from third party app
+            return "/company/company-update";
+        }
+
         companyService.updateCompany(company);
         return "redirect:/companies/list";
     }

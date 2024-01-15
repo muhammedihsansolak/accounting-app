@@ -88,8 +88,12 @@ public class ClientVendorServiceImpl implements ClientVendorService {
 
     @Override
     public List<ClientVendorDTO> findByClientVendorType(ClientVendorType clientVendorType) {
+        UserDTO loggedInUser = securityService.getLoggedInUser();
+        CompanyDTO companyDTO = loggedInUser.getCompany();
+        Company company = mapperUtil.convert(companyDTO, new Company());
+
         List<ClientVendor> byClientVendorType
-                = clientVendorRepository.findByClientVendorType(clientVendorType);
+                = clientVendorRepository.findByClientVendorTypeAndCompany(clientVendorType, company);
         return  byClientVendorType.stream()
                 .map(clientVendor -> mapperUtil.convert(clientVendor,new ClientVendorDTO()))
                 .collect(Collectors.toList());
