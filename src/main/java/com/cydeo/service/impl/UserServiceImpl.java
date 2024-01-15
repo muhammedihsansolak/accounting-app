@@ -1,10 +1,14 @@
 package com.cydeo.service.impl;
 
 import com.cydeo.dto.UserDTO;
+import com.cydeo.entity.Company;
 import com.cydeo.entity.User;
 import com.cydeo.mapper.MapperUtil;
+import com.cydeo.repository.CompanyRepository;
 import com.cydeo.repository.UserRepository;
 import com.cydeo.service.UserService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,10 +19,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final MapperUtil mapperUtil;
+    private final CompanyRepository companyRepository;
 
-    public UserServiceImpl(UserRepository userRepository, MapperUtil mapperUtil) {
+    public UserServiceImpl(UserRepository userRepository, MapperUtil mapperUtil, CompanyRepository companyRepository) {
         this.userRepository = userRepository;
         this.mapperUtil = mapperUtil;
+        this.companyRepository = companyRepository;
     }
 
     public UserDTO findByUsername(String username) {
@@ -28,10 +34,29 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDTO> getAllUsers() {
-        List<User> userList = userRepository.findAllByIsDeleted(false);
-        return userList.stream()
-                .map(user -> mapperUtil.convert(user, new UserDTO()))
-                .collect(Collectors.toList());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User LoggedInUser = userRepository.findByUsername(auth.getName());
+
+        if (LoggedInUser.getId() != 1) {
+            Company company = companyRepository.findById(LoggedInUser.getCompany().getId()).orElseThrow();
+
+            List<User> userList = userRepository.findAllUserWithCompanyAndIsDeleted(company, false);
+            return userList.stream().map(user -> mapperUtil.convert(user, new UserDTO())).
+                    collect(Collectors.toList());
+        } else {
+            List<User> userList = userRepository.findAllAdminRole("Admin");
+            return userList.stream()
+                    .map(user -> mapperUtil.convert(user, new UserDTO()))
+                    .peek(dto -> dto.setOnlyAdmin(isOnlyAdmin(dto)))
+                    .collect(Collectors.toList());
+        }
+    }
+
+    private boolean isOnlyAdmin(UserDTO userDTO) {
+        User user = mapperUtil.convert(userDTO, new User());
+        Integer userOnlyAdmin = userRepository.isUserOnlyAdmin(user.getCompany(), user.getRole());
+        return userOnlyAdmin == 1;
+
     }
 
     @Override
@@ -64,7 +89,6 @@ public class UserServiceImpl implements UserService {
         userRepository.save(convertedUser);
         return mapperUtil.convert(convertedUser, new UserDTO());
     }
-
 
 
 }
