@@ -31,6 +31,11 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final InvoiceProductService invoiceProductService;
     private final CompanyService companyService;
 
+    /**
+     * Finds invoices by invoiceId based on logged-in user's company. Calculates price, tax amount and total price of the invoice.
+     * @param id
+     * @return invoiceDTO
+     */
     @Override
     public InvoiceDTO findById(Long id) {
         Invoice invoice = invoiceRepository.findById(id)
@@ -49,6 +54,11 @@ public class InvoiceServiceImpl implements InvoiceService {
         return invoiceDTO;
     }
 
+    /**
+     * Finds all invoices belongs to logged-in user's company. Calculates price, tax amount and total price of all invoices.
+     * @param invoiceType
+     * @return
+     */
     @Override
     public List<InvoiceDTO> findAllInvoices(InvoiceType invoiceType) {
         String currentlyLoggedInPersonUsername = securityService.getLoggedInUser().getUsername();
@@ -77,8 +87,16 @@ public class InvoiceServiceImpl implements InvoiceService {
         return invoiceDTOList;
     }
 
+    /**
+     * Percentage divisor for calculation methods.
+     */
     private static final BigDecimal PERCENTAGE_DIVISOR = BigDecimal.valueOf(100);
 
+    /**
+     * Calculates total tax amount of the given invoiceProductDTO objects.
+     * @param invoiceProductDTOList
+     * @return tax amount (BigDecimal)
+     */
     private BigDecimal calculateTax(List<InvoiceProductDTO> invoiceProductDTOList) {
         BigDecimal sum = invoiceProductDTOList.stream()
                 .map(this::calculateTaxForProduct)
@@ -91,6 +109,11 @@ public class InvoiceServiceImpl implements InvoiceService {
         return sum;
     }
 
+    /**
+     * Calculates tax amount of the given invoiceProductDTO.
+     * @param invoiceProductDTO
+     * @return tax amount (BigDecimal)
+     */
     @Override
     public BigDecimal calculateTaxForProduct(InvoiceProductDTO invoiceProductDTO) {
         BigDecimal price = invoiceProductDTO.getPrice();
@@ -106,7 +129,11 @@ public class InvoiceServiceImpl implements InvoiceService {
         return taxAmount;
     }
 
-
+    /**
+     * Calculates total amount (without tax) of the given invoiceProductDTO objects.
+     * @param invoiceProductDTOList
+     * @return tax amount (BigDecimal)
+     */
     private BigDecimal calculateTotalPriceWithoutTax(List<InvoiceProductDTO> invoiceProductDTOList) {
         BigDecimal sum = invoiceProductDTOList.stream()
                 .map(invoiceProductDTO ->
@@ -117,6 +144,11 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     }
 
+    /**
+     * Updates the invoice. Id, InvoiceStatus, InvoiceType and Company fields are not updated.
+     * @param foundInvoice
+     * @param invoiceToUpdate
+     */
     // invoiceNo, invoiceStatus, invoiceType, date, company cannot be updatable. Update -> ClientVendor
     // id, invoiceStatus, invoiceType, company details should come from DB
     @Override
@@ -130,6 +162,10 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceRepository.save( converted );
     }
 
+    /**
+     * Softly deletes the invoice.
+     * @param invoiceId
+     */
     @Override
     public void deleteInvoice(Long invoiceId) {
         Invoice invoiceToDelete = invoiceRepository.findById(invoiceId)
@@ -141,6 +177,10 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceRepository.save(invoiceToDelete);
     }
 
+    /**
+     * Approves the invoice
+     * @param invoiceId
+     */
     @Override
     public void approve(Long invoiceId) {
         Invoice invoiceToApprove = invoiceRepository.findById(invoiceId)
@@ -151,6 +191,11 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceRepository.save(invoiceToApprove);
     }
 
+    /**
+     * Creates a invoice without saving it to database. InvoiceNo and Invoice date will be auto generated.
+     * @param invoiceType
+     * @return
+     */
     //Invoice_No should be auto generated
     //Invoice_Date should be the date which this invoice is created
     @Override
@@ -169,6 +214,12 @@ public class InvoiceServiceImpl implements InvoiceService {
         return invoiceDTO;
     }
 
+    /**
+     * Auto generate method for invoiceNo. Generates next invoiceNo based on last created invoice of a company even if it is deleted.
+     * @param lastInvoice
+     * @param invoiceType
+     * @return
+     */
     private String generateNextInvoiceNumber(Optional<Invoice> lastInvoice, InvoiceType invoiceType) {
         if (!lastInvoice.isPresent()) {
             return invoiceType.getValue().charAt(0) + "-000";
@@ -181,6 +232,12 @@ public class InvoiceServiceImpl implements InvoiceService {
         return invoiceType.getValue().charAt(0) + "-" + String.format("%03d", nextNumber);
     }
 
+    /**
+     * Creates invoice. InvoiceNo, invoice date and invoice type should be auto-generated before this method.
+     * @param invoice
+     * @param invoiceType
+     * @return
+     */
     //InvoiceStatus should be AWAITING_APPROVAL
     //Company should be assigned here
     @Override
