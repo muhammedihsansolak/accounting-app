@@ -19,9 +19,9 @@ public interface InvoiceService {
 
     void approve(Long invoiceId);
 
-    InvoiceDTO invoiceCreator(InvoiceType invoiceType, String companyTitle);
+    InvoiceDTO invoiceCreator(InvoiceType invoiceType);
 
-    InvoiceDTO create(InvoiceDTO invoice);
+    InvoiceDTO create(InvoiceDTO invoice, InvoiceType invoiceType);
 
     BigDecimal calculateTaxForProduct(InvoiceProductDTO invoiceProductDTO);
 }

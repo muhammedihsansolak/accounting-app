@@ -11,8 +11,9 @@ import java.util.Optional;
 @Repository
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
-    List<Invoice> findInvoiceByInvoiceTypeAndCompany_TitleOrderByInvoiceNoDesc(InvoiceType invoiceType, String companyTitle);
+    List<Invoice> findInvoiceByInvoiceTypeAndCompany_TitleAndIsDeletedOrderByInvoiceNoDesc(InvoiceType invoiceType, String companyTitle, boolean isDeleted);
 
     //find latest Invoice
-    Optional<Invoice> findTopByCompany_TitleOrderByDateDesc(String companyTitle);
+    Optional<Invoice> findTopByCompany_TitleAndInvoiceTypeOrderByInvoiceNoDesc(String companyTitle, InvoiceType invoiceType);
+
 }

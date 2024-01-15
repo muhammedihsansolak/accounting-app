@@ -8,10 +8,7 @@ import com.cydeo.enums.InvoiceStatus;
 import com.cydeo.enums.InvoiceType;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.InvoiceRepository;
-import com.cydeo.service.InvoiceProductService;
-import com.cydeo.service.InvoiceService;
-import com.cydeo.service.SecurityService;
-import com.cydeo.service.UserService;
+import com.cydeo.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +29,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final UserService userService;
     private final SecurityService securityService;
     private final InvoiceProductService invoiceProductService;
+    private final CompanyService companyService;
 
     @Override
     public InvoiceDTO findById(Long id) {
@@ -56,7 +54,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         String currentlyLoggedInPersonUsername = securityService.getLoggedInUser().getUsername();
         UserDTO loggedInUser = userService.findByUsername(currentlyLoggedInPersonUsername);
 
-        List<Invoice> all = invoiceRepository.findInvoiceByInvoiceTypeAndCompany_TitleOrderByInvoiceNoDesc(invoiceType, loggedInUser.getCompany().getTitle());
+        List<Invoice> all = invoiceRepository.findInvoiceByInvoiceTypeAndCompany_TitleAndIsDeletedOrderByInvoiceNoDesc(invoiceType, loggedInUser.getCompany().getTitle(), false);
 
         List<InvoiceDTO> invoiceDTOList = all.stream()
                 .map(invoice -> mapper.convert(invoice, new InvoiceDTO()))
@@ -155,11 +153,11 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     //Invoice_No should be auto generated
     //Invoice_Date should be the date which this invoice is created
-    //InvoiceStatus should be AWAITING_APPROVAL
     @Override
-    public InvoiceDTO invoiceCreator(InvoiceType invoiceType, String companyTitle) {
+    public InvoiceDTO invoiceCreator(InvoiceType invoiceType) {
+        String companyTitle = securityService.getLoggedInUser().getCompany().getTitle();
         // Get the latest invoice from the database which belongs to that company
-        Optional<Invoice> latestInvoice = invoiceRepository.findTopByCompany_TitleOrderByDateDesc(companyTitle);
+        Optional<Invoice> latestInvoice = invoiceRepository.findTopByCompany_TitleAndInvoiceTypeOrderByInvoiceNoDesc(companyTitle,invoiceType);
         // Generate the new invoice number
         String generatedInvoiceNo = generateNextInvoiceNumber(latestInvoice, invoiceType);
 
@@ -167,7 +165,6 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceDTO.setInvoiceNo( generatedInvoiceNo );
         invoiceDTO.setDate( LocalDate.now() );
         invoiceDTO.setInvoiceType( invoiceType );
-        invoiceDTO.setInvoiceStatus( InvoiceStatus.AWAITING_APPROVAL );
 
         return invoiceDTO;
     }
@@ -184,12 +181,18 @@ public class InvoiceServiceImpl implements InvoiceService {
         return invoiceType.getValue().charAt(0) + "-" + String.format("%03d", nextNumber);
     }
 
+    //InvoiceStatus should be AWAITING_APPROVAL
+    //Company should be assigned here
     @Override
-    public InvoiceDTO create(InvoiceDTO invoice) {
+    public InvoiceDTO create(InvoiceDTO invoice, InvoiceType invoiceType) {
+        String companyTitle = securityService.getLoggedInUser().getCompany().getTitle();
+        invoice.setInvoiceStatus( InvoiceStatus.AWAITING_APPROVAL );
+        invoice.setCompany( companyService.findByCompanyTitle(companyTitle) );
+        invoice.setInvoiceType(invoiceType);
+
         Invoice invoiceToCreate = mapper.convert(invoice, new Invoice());
 
-        //since I need to send invoice id immediately to UI, I used saveAndFlush() to persist data instantly
-        Invoice savedInvoice = invoiceRepository.saveAndFlush(invoiceToCreate);
+        Invoice savedInvoice = invoiceRepository.save(invoiceToCreate);
 
         return mapper.convert(savedInvoice, new InvoiceDTO());
     }
