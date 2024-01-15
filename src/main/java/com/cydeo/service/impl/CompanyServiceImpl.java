@@ -1,6 +1,8 @@
 package com.cydeo.service.impl;
 
+import com.cydeo.FeinClient.CountryClient;
 import com.cydeo.dto.CompanyDTO;
+import com.cydeo.dto.CountriesDTO;
 import com.cydeo.dto.UserDTO;
 import com.cydeo.entity.Company;
 import com.cydeo.mapper.MapperUtil;
@@ -9,8 +11,8 @@ import com.cydeo.enums.CompanyStatus;
 
 import com.cydeo.service.CompanyService;
 import com.cydeo.service.SecurityService;
-import com.cydeo.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -28,7 +30,9 @@ public class CompanyServiceImpl implements CompanyService {
     private final SecurityService securityService;
     private final MapperUtil mapperUtil;
     private final CompanyRepository repository;
-
+    private final CountryClient countryClient;
+    @Value("${COUNTRIES_API_KEY}")
+    private String countriesApiKey;
 
     @Override
     public CompanyDTO findById(Long companyId) {
@@ -66,6 +70,7 @@ public class CompanyServiceImpl implements CompanyService {
 
         public CompanyDTO updateCompany (CompanyDTO newCompanyDto){
             Optional<Company> oldCompany = repository.findById(newCompanyDto.getId());
+            System.out.println(oldCompany);
             if (oldCompany.isPresent()) {
                 CompanyStatus oldCompanyStatus = oldCompany.get().getCompanyStatus();
                 newCompanyDto.setCompanyStatus(oldCompanyStatus);
@@ -117,5 +122,14 @@ public class CompanyServiceImpl implements CompanyService {
             bindingResult.addError(new FieldError("company", "title", "This title already exists."));
         }
         return bindingResult;
+    }
+
+    @Override
+    public List<String> getCounties() {
+        CountriesDTO countries = countryClient.getCountries(countriesApiKey).getBody();
+       return countries.getData().values().stream()
+                .map(info->info.getName())
+                .collect(Collectors.toList());
+
     }
 }
