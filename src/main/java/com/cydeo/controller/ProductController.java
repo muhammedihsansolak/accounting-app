@@ -39,16 +39,15 @@ public class ProductController {
         model.addAttribute("product",productToBeUpdated);
         model.addAttribute("categories", categoryService.findAll());
         model.addAttribute("lowLimitAlert",productService.findById(id).getLowLimitAlert());
-        model.addAttribute("productUnits", ProductUnit.values());
+        model.addAttribute("productUnits", List.of(ProductUnit.values()));
         return "/product/product-update";
     }
 
     @PostMapping("/update/{id}")
-    public String updateProduct(@ModelAttribute("product") ProductDTO productDtoToBeUpdated, @PathVariable("id") Long id, Model model) {
-        //productDtoToBeUpdated.setId(productDtoToBeUpdated.getId());
+    public String updateProduct(@PathVariable("id") Long id, @ModelAttribute("product") ProductDTO productDtoToBeUpdated) {
         productService.update(id, productDtoToBeUpdated);
 
-        return "/product/product-list";
+        return "redirect:/products/list";
     }
 
 
@@ -56,10 +55,9 @@ public class ProductController {
     @GetMapping("/create")
     public String createProduct(Model model){
         model.addAttribute("newProduct", new ProductDTO());
-        model.addAttribute("category",categoryService.listAllCategories());
-        model.addAttribute("name", "deneme");
-        model.addAttribute("lowLimitAlert", 10 );
-        model.addAttribute("productUnit", ProductUnit.values());
+        model.addAttribute("categories",categoryService.findAll());
+        model.addAttribute("name", productService.listAllProducts());
+        model.addAttribute("productUnits", List.of(ProductUnit.values()));
 
         return "/product/product-create";
     }
@@ -68,10 +66,10 @@ public class ProductController {
     public String createProduct(@ModelAttribute("product") ProductDTO productDTO, Model model){
 
 
-            model.addAttribute("category",categoryService.findAll());
+            model.addAttribute("categories",categoryService.findAll());
             model.addAttribute("name", productService.listAllProducts());
             //model.addAttribute("lowLimitAlert", ???);
-            model.addAttribute("productUnit", ProductUnit.values());
+            model.addAttribute("productUnits", List.of(ProductUnit.values()));
 
 
         productService.save(productDTO);
