@@ -70,7 +70,6 @@ public class CompanyServiceImpl implements CompanyService {
 
         public CompanyDTO updateCompany (CompanyDTO newCompanyDto){
             Optional<Company> oldCompany = repository.findById(newCompanyDto.getId());
-            System.out.println(oldCompany);
             if (oldCompany.isPresent()) {
                 CompanyStatus oldCompanyStatus = oldCompany.get().getCompanyStatus();
                 newCompanyDto.setCompanyStatus(oldCompanyStatus);
