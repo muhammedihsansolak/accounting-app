@@ -159,7 +159,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public InvoiceDTO invoiceCreator(InvoiceType invoiceType, String companyTitle) {
         // Get the latest invoice from the database which belongs to that company
-        Optional<Invoice> latestInvoice = invoiceRepository.findTopByCompany_TitleOrderByDateDesc(companyTitle);
+        Optional<Invoice> latestInvoice = invoiceRepository.findTopByCompany_TitleAndInvoiceTypeOrderByDateDesc(companyTitle, invoiceType);
         // Generate the new invoice number
         String generatedInvoiceNo = generateNextInvoiceNumber(latestInvoice, invoiceType);
 
