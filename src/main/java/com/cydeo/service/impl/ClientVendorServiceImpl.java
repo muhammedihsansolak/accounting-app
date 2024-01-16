@@ -9,7 +9,6 @@ import com.cydeo.mapper.MapperUtil;
 import com.cydeo.entity.ClientVendor;
 import com.cydeo.service.ClientVendorService;
 import com.cydeo.service.SecurityService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.cydeo.repository.ClientVendorRepository;
 import org.springframework.validation.BindingResult;
@@ -105,7 +104,7 @@ public class ClientVendorServiceImpl implements ClientVendorService {
 
     @Override
     public BindingResult addTypeValidation(String type, BindingResult bindingResult) {
-        if (clientVendorRepository.existsByClientVendorType(type)) {
+        if (clientVendorRepository.existsByClientVendorName(type)) {
             bindingResult.addError(new FieldError("newType", "title", "This title already exists."));
         }
 
