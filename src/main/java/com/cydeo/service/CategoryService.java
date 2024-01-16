@@ -19,4 +19,6 @@ public interface CategoryService {
     CategoryDTO update(CategoryDTO dto, Long id);
 
     void delete(Long id);
+
+    boolean isCategoryDescriptionUnique(String description);
 }
