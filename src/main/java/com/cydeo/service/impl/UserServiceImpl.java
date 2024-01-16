@@ -9,7 +9,6 @@ import com.cydeo.repository.UserRepository;
 import com.cydeo.service.UserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,13 +19,11 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final MapperUtil mapperUtil;
-    private final PasswordEncoder passwordEncoder;
     private final CompanyRepository companyRepository;
 
-    public UserServiceImpl(UserRepository userRepository, MapperUtil mapperUtil, PasswordEncoder passwordEncoder, CompanyRepository companyRepository) {
+    public UserServiceImpl(UserRepository userRepository, MapperUtil mapperUtil, CompanyRepository companyRepository) {
         this.userRepository = userRepository;
         this.mapperUtil = mapperUtil;
-        this.passwordEncoder = passwordEncoder;
         this.companyRepository = companyRepository;
     }
 
@@ -72,7 +69,6 @@ public class UserServiceImpl implements UserService {
     public void save(UserDTO userDTO) {
         userDTO.setEnabled(true);
         User user = mapperUtil.convert(userDTO, new User());
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(mapperUtil.convert(userDTO, new User()));
     }
 
@@ -80,7 +76,6 @@ public class UserServiceImpl implements UserService {
     public void delete(Long id) {
         User user = userRepository.findByIdAndIsDeleted(id, false);
         user.setIsDeleted(true);
-        user.setUsername(user.getUsername() + " deleted"+user.getId());
         userRepository.save(user);
     }
 

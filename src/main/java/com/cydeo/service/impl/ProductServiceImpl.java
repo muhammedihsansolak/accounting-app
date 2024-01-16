@@ -1,12 +1,11 @@
 package com.cydeo.service.impl;
 
 import com.cydeo.dto.ProductDTO;
-import com.cydeo.entity.Category;
 import com.cydeo.entity.Product;
 import com.cydeo.mapper.MapperUtil;
-import com.cydeo.repository.CategoryRepository;
 import com.cydeo.repository.ProductRepository;
 import com.cydeo.service.ProductService;
+import com.cydeo.service.SecurityService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,12 +17,12 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final MapperUtil mapperUtil;
-    private final CategoryRepository categoryRepository;
+    private final SecurityService securityService;
 
-    public ProductServiceImpl(ProductRepository productRepository, MapperUtil mapperUtil, CategoryRepository categoryRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, MapperUtil mapperUtil, SecurityService securityService) {
         this.productRepository = productRepository;
         this.mapperUtil = mapperUtil;
-        this.categoryRepository = categoryRepository;
+        this.securityService = securityService;
     }
 
     @Override
@@ -64,16 +63,5 @@ public class ProductServiceImpl implements ProductService {
         productToBeDeleted.setIsDeleted(true);
         productRepository.save(productToBeDeleted);
 
-    }
-
-
-    @Override
-    public List<ProductDTO> getProductsByCategory(Long id) {
-
-        Category category = categoryRepository.findById(id).orElseThrow();
-
-        List<Product> products = productRepository.findByCategory(category);
-
-        return products.stream().map(product -> mapperUtil.convert(product, new ProductDTO())).collect(Collectors.toList());
     }
 }

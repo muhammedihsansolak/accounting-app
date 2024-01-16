@@ -6,10 +6,8 @@ import com.cydeo.service.ClientVendorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,7 +18,6 @@ import java.util.List;
 public class ClientVendorController {
 
     private final ClientVendorService clientVendorService;
-
 
     @GetMapping("/list")
     public String listClientVendors(Model model) {
@@ -41,29 +38,18 @@ public class ClientVendorController {
 
     }
 
-  @PostMapping("/create")
-    public String createClientVendor(@Valid @ModelAttribute("newClientVendor") ClientVendorDTO newClientVendor,
-                                     BindingResult bindingResult, Model model) {
-        bindingResult = clientVendorService.addTypeValidation(newClientVendor.getClientVendorName(),bindingResult);
+    @PostMapping("/create")
+    public String createClientVendor(@ModelAttribute("newClientVendor") ClientVendorDTO clientVendor) {
+        clientVendorService.saveClientVendor(clientVendor);
 
-        if (bindingResult.hasFieldErrors()){
-            model.addAttribute("countries",List.of("USA","UK"));
-            model.addAttribute("clientVendorTypes", Arrays.asList(ClientVendorType.values()));
-            return "clientVendor/clientVendor-create";
-        }
-        clientVendorService.saveClientVendor(newClientVendor);
         return "redirect:/clientVendors/list";
     }
-
-
-
 
     @GetMapping("/update/{id}")
     public String showUpdateForm(@PathVariable("id") Long id, Model model) {
         ClientVendorDTO clientVendor = clientVendorService.findById(id);
         List<String> countries = new ArrayList<>();
         countries.addAll(Arrays.asList("UK", "USA"));
-
         model.addAttribute("clientVendorTypes", Arrays.asList(ClientVendorType.values()));
         model.addAttribute("countries", countries);
         model.addAttribute("clientVendor", clientVendor);

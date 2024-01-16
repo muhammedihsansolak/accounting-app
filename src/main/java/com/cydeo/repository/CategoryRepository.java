@@ -1,6 +1,5 @@
 package com.cydeo.repository;
 
-import com.cydeo.dto.CategoryDTO;
 import com.cydeo.entity.Category;
 import com.cydeo.entity.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,7 +13,7 @@ public interface CategoryRepository extends JpaRepository<Category,Long> {
 
     List<Category> findAllByIsDeleted(Boolean isDeleted);
 
-    Category findByDescription(String description);
+
 
 
 }

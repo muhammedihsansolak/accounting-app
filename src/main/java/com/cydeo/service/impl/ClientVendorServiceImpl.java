@@ -7,12 +7,10 @@ import com.cydeo.entity.Company;
 import com.cydeo.enums.ClientVendorType;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.entity.ClientVendor;
+import com.cydeo.repository.ClientVendorRepository;
 import com.cydeo.service.ClientVendorService;
 import com.cydeo.service.SecurityService;
 import org.springframework.stereotype.Service;
-import com.cydeo.repository.ClientVendorRepository;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -33,7 +31,6 @@ public class ClientVendorServiceImpl implements ClientVendorService {
         this.mapperUtil = mapperUtil;
         this.securityService = securityService;
     }
-
 
 
     @Override
@@ -89,32 +86,18 @@ public class ClientVendorServiceImpl implements ClientVendorService {
 
     }
 
-
     @Override
     public List<ClientVendorDTO> findByClientVendorType(ClientVendorType clientVendorType) {
+        UserDTO loggedInUser = securityService.getLoggedInUser();
+        CompanyDTO companyDTO = loggedInUser.getCompany();
+        Company company = mapperUtil.convert(companyDTO, new Company());
+
         List<ClientVendor> byClientVendorType
-                = clientVendorRepository.findByClientVendorType(clientVendorType);
+                = clientVendorRepository.findByClientVendorTypeAndCompany(clientVendorType, company);
         return  byClientVendorType.stream()
                 .map(clientVendor -> mapperUtil.convert(clientVendor,new ClientVendorDTO()))
                 .collect(Collectors.toList());
 
     }
-
-
-
-    @Override
-    public BindingResult addTypeValidation(String type, BindingResult bindingResult) {
-        if (clientVendorRepository.existsByClientVendorName(type)) {
-            bindingResult.addError(new FieldError("newType", "title", "This title already exists."));
-        }
-
-        return bindingResult;
-
-
-
-
-    }
 }
-
-
 

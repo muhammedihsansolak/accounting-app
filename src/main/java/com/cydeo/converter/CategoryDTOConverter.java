@@ -1,7 +1,6 @@
 package com.cydeo.converter;
 
 import com.cydeo.dto.CategoryDTO;
-import com.cydeo.entity.Category;
 import com.cydeo.service.CategoryService;
 import org.springframework.stereotype.Component;
 import org.springframework.core.convert.converter.Converter;
