@@ -1,9 +1,12 @@
 package com.cydeo.dto;
 
 import lombok.Getter;
-import java.util.Map;
+import lombok.ToString;
+
+import java.util.List;
 
 @Getter
+@ToString
 public class CountriesDTO {
-    private Map<String, CountryInfoDTO> data;
+    private List<CountryInfoDTO> alpha2Code;
 }

@@ -135,10 +135,11 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public List<String> getCounties() {
-        CountriesDTO countries = countryClient.getCountries(countriesApiKey).getBody();
-       return countries.getData().values().stream()
-                .map(info->info.getName())
-                .collect(Collectors.toList());
+        CountriesDTO countries = countryClient.getCountries("Bearer " + countriesApiKey).getBody();
+        System.out.println(countries);
+       return countries.getAlpha2Code().stream()
+               .map(info->info.getName())
+               .collect(Collectors.toList());
 
     }
 }
