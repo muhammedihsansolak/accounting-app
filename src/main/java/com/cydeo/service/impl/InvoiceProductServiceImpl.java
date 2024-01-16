@@ -91,4 +91,13 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
 
         return mapper.convert(savedInvoice, new InvoiceProductDTO());
     }
+
+    @Override
+    public boolean doesProductHaveEnoughStock(InvoiceProductDTO invoiceProductDTO) {
+        if (invoiceProductDTO.getProduct() == null) return false;
+        Integer invoiceProductQuantity = invoiceProductDTO.getQuantity();
+        Integer quantityInStock = invoiceProductDTO.getProduct().getQuantityInStock();
+
+        return quantityInStock >= invoiceProductQuantity;//if enough stock available, return true
+    }
 }

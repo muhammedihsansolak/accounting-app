@@ -13,4 +13,6 @@ public interface InvoiceProductService {
     void removeInvoiceProductFromInvoice(Long invoiceId, Long invoiceProductId);
 
     InvoiceProductDTO create(InvoiceProductDTO invoiceProductDTO, Long invoiceId);
+
+    boolean doesProductHaveEnoughStock(InvoiceProductDTO invoiceProductDTO);
 }
