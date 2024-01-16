@@ -33,6 +33,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean findByUsernameCheck(String username) {
+        User user = userRepository.findByUsername(username);
+        return user != null;
+    }
+
+    @Override
     public List<UserDTO> getAllUsers() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User LoggedInUser = userRepository.findByUsername(auth.getName());
