@@ -4,7 +4,11 @@ import com.cydeo.dto.CategoryDTO;
 import com.cydeo.service.CategoryService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import javax.validation.Valid;
 
 
 @Controller
@@ -31,16 +35,28 @@ public class CategoryController {
     }
 
     @PostMapping("/create")
-    public String saveCategory(@ModelAttribute("newCategory") CategoryDTO categoryDTO){
+    public String saveCategory(@Valid @ModelAttribute("newCategory") CategoryDTO categoryDTO, BindingResult bindingResult){
+        boolean categoryDescriptionNotUnique = categoryService.isCategoryDescriptionUnique(categoryDTO.getDescription());
+        if (categoryDescriptionNotUnique) {
+            bindingResult.rejectValue("description", " ", "This category description already exists");
+        }
 
+        if (bindingResult.hasErrors()) {
+            return "category/category-create";
+        }
         categoryService.save(categoryDTO);
         return "redirect:/categories/list";
     }
 
     @PostMapping ("/update/{id}")
-    public String updateCategory(@PathVariable("id") Long id,@ModelAttribute ("category") CategoryDTO category ){
-
-        categoryService.update(category, id);
+    public String updateCategory(@Valid @ModelAttribute ("category") CategoryDTO categoryDTO,BindingResult bindingResult,@PathVariable("id") Long id){
+        if (categoryService.hasProducts(categoryDTO)){
+            bindingResult.rejectValue("description", " ", "This category already has product/products! Make sure the new description that will be provided is proper.");
+        }
+        if (bindingResult.hasErrors()) {
+            return "category/category-update";
+        }
+        categoryService.update(categoryDTO, id);
         return "redirect:/categories/list";
     }
     @GetMapping("/update/{id}")
@@ -52,7 +68,12 @@ public class CategoryController {
         return "category/category-update";
     }
     @GetMapping("/delete/{id}")
-    public String delete(@PathVariable("id") Long id) {
+    public String delete(@PathVariable("id") Long id, RedirectAttributes redirectAttributes, @ModelAttribute("category") CategoryDTO categoryDTO) {
+        if(categoryService.hasProducts(categoryDTO)){
+            redirectAttributes.addFlashAttribute("error", "Can not be deleted! This category has product/products");
+            return "redirect:/categories/list";
+        }
+
         categoryService.delete(id);
         return "redirect:/categories/list";
     }

@@ -118,13 +118,4 @@ public class CompanyServiceImpl implements CompanyService {
         }
         return bindingResult;
     }
-
-    @Override
-    public CompanyDTO findByCompanyTitle(String companyTitle) {
-
-        Company foundCompany = repository.findByTitle(companyTitle);
-
-        return mapperUtil.convert(foundCompany,new CompanyDTO());
-
-    }
 }
