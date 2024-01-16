@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationPropertiesBinding
-public class ProductDTOConverter implements Converter <Long, ProductDTO> {
+public class ProductDTOConverter implements Converter <String, ProductDTO> {
 
     private final ProductService productService;
 
@@ -19,7 +19,9 @@ public class ProductDTOConverter implements Converter <Long, ProductDTO> {
     }
 
     @Override
-    public ProductDTO convert(Long source) {
-        return productService.findById(source);
+    public ProductDTO convert(String source) {
+        if (source.equals("")) return null;
+        Long id = Long.valueOf(source);
+        return productService.findById(id);
     }
 }
