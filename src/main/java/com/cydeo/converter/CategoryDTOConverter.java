@@ -8,7 +8,7 @@ import org.springframework.core.convert.converter.Converter;
 
 
 @Component
-public class CategoryDTOConverter implements Converter <Long, CategoryDTO> {
+public class CategoryDTOConverter implements Converter <String, CategoryDTO> {
 
     CategoryService categoryService;
 
@@ -18,12 +18,12 @@ public class CategoryDTOConverter implements Converter <Long, CategoryDTO> {
     }
 
     @Override
-    public CategoryDTO convert(Long id) {
+    public CategoryDTO convert(String id) {
         if (id==null || id.equals("")){
             return null;
         }
 
-        return categoryService.findById(id);
+        return categoryService.findById(Long.parseLong(id));
 
     }
 

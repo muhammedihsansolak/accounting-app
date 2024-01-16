@@ -1,5 +1,6 @@
 package com.cydeo.repository;
 
+import com.cydeo.entity.Company;
 import com.cydeo.entity.Product;
 import com.cydeo.enums.ProductUnit;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,5 +15,10 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
     Optional<Product> findById(Long id);
 
     List<Product> findAll();
+
+    List<Product> findAllByCategory_Company(Company company);
+
+    List<Product> findAllByCategory_CompanyAndQuantityInStockGreaterThan(Company company, int quantity);
+
 
 }

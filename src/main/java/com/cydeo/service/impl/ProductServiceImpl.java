@@ -1,11 +1,16 @@
 package com.cydeo.service.impl;
 
+import com.cydeo.dto.CompanyDTO;
 import com.cydeo.dto.ProductDTO;
+import com.cydeo.entity.Company;
 import com.cydeo.entity.Product;
+import com.cydeo.entity.User;
 import com.cydeo.enums.ProductUnit;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.ProductRepository;
 import com.cydeo.service.ProductService;
+import com.cydeo.service.SecurityService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,10 +22,14 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final MapperUtil mapperUtil;
+    private final SecurityService securityService;
+    private final InvoiceProductServiceImpl invoiceProductService;
 
-    public ProductServiceImpl(ProductRepository productRepository, MapperUtil mapperUtil) {
+    public ProductServiceImpl(ProductRepository productRepository, MapperUtil mapperUtil, SecurityService securityService, InvoiceProductServiceImpl invoiceProductService) {
         this.productRepository = productRepository;
         this.mapperUtil = mapperUtil;
+        this.securityService = securityService;
+        this.invoiceProductService = invoiceProductService;
     }
 
     @Override
@@ -32,7 +41,11 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDTO> listAllProducts() {
-        List<Product> productList = productRepository.findAll();
+
+        CompanyDTO companyDTO = securityService.getLoggedInUser().getCompany();
+        Company company = mapperUtil.convert(companyDTO, new Company());
+
+        List<Product> productList = productRepository.findAllByCategory_Company(company);
         return productList.stream()
                 .map(product -> mapperUtil.convert(product,new ProductDTO()))
                 .collect(Collectors.toList());
@@ -60,6 +73,30 @@ public class ProductServiceImpl implements ProductService {
         Product productToBeDeleted = productRepository.findById(id).get();
         productToBeDeleted.setIsDeleted(true);
         productRepository.save(productToBeDeleted);
+    }
 
+    @Override
+    public void decreaseProductQuantityInStock(Long id, Integer quantity) {
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(()-> new NoSuchElementException("Product not found with id: " + id));
+
+        int newQuantity = product.getQuantityInStock() - quantity;
+
+        if (newQuantity < 0){
+            throw new IllegalArgumentException("Quantity cannot be negative");
+        }
+        product.setQuantityInStock(newQuantity);
+
+        productRepository.save(product);
+    }
+
+    @Override
+    public List<ProductDTO> findProductsByCompanyAndHaveStock(Company company) {
+        List<Product> products = productRepository.findAllByCategory_CompanyAndQuantityInStockGreaterThan(company, 0);
+
+        return products.stream()
+                .map(product -> mapperUtil.convert(product, new ProductDTO()))
+                .collect(Collectors.toList());
     }
 }
