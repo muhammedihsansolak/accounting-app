@@ -18,7 +18,9 @@ public interface ProductService {
 
     void delete(Long id);
 
+
     void decreaseProductQuantityInStock(Long id, Integer quantity);
 
     List<ProductDTO> findProductsByCompanyAndHaveStock(Company company);
+
 }

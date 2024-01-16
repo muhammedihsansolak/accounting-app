@@ -2,11 +2,17 @@ package com.cydeo.service.impl;
 
 import com.cydeo.dto.CompanyDTO;
 import com.cydeo.dto.ProductDTO;
+
 import com.cydeo.entity.Company;
 import com.cydeo.entity.Product;
 import com.cydeo.entity.User;
 import com.cydeo.enums.ProductUnit;
+
+import com.cydeo.entity.Category;
+import com.cydeo.entity.Product;
+
 import com.cydeo.mapper.MapperUtil;
+import com.cydeo.repository.CategoryRepository;
 import com.cydeo.repository.ProductRepository;
 import com.cydeo.service.ProductService;
 import com.cydeo.service.SecurityService;
@@ -22,6 +28,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final MapperUtil mapperUtil;
+
     private final SecurityService securityService;
     private final InvoiceProductServiceImpl invoiceProductService;
 
@@ -30,6 +37,7 @@ public class ProductServiceImpl implements ProductService {
         this.mapperUtil = mapperUtil;
         this.securityService = securityService;
         this.invoiceProductService = invoiceProductService;
+
     }
 
     @Override
@@ -98,5 +106,16 @@ public class ProductServiceImpl implements ProductService {
         return products.stream()
                 .map(product -> mapperUtil.convert(product, new ProductDTO()))
                 .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public List<ProductDTO> getProductsByCategory(Long id) {
+
+        Category category = categoryRepository.findById(id).orElseThrow();
+
+        List<Product> products = productRepository.findByCategory(category);
+
+        return products.stream().map(product -> mapperUtil.convert(product, new ProductDTO())).collect(Collectors.toList());
     }
 }
