@@ -48,24 +48,13 @@ public class ClientVendorController {
 
         if (bindingResult.hasFieldErrors()){
             model.addAttribute("countries",List.of("USA","UK"));
+            model.addAttribute("clientVendorTypes", Arrays.asList(ClientVendorType.values()));
+            return "clientVendor/clientVendor-create";
         }
         clientVendorService.saveClientVendor(newClientVendor);
         return "redirect:/clientVendors/list";
     }
 
-
-
-
-
-/*
-    @PostMapping("/create")
-    public String createClientVendor(@ModelAttribute("newClientVendor") ClientVendorDTO clientVendor) {
-        clientVendorService.saveClientVendor(clientVendor);
-
-        return "redirect:/clientVendors/list";
-    }
-
- */
 
 
 
