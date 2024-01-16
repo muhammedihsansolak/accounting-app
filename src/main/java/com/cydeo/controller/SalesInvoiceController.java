@@ -3,12 +3,13 @@ package com.cydeo.controller;
 import com.cydeo.dto.*;
 import com.cydeo.enums.ClientVendorType;
 import com.cydeo.enums.InvoiceType;
-import com.cydeo.enums.ProductUnit;
 import com.cydeo.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -21,8 +22,6 @@ public class SalesInvoiceController {
 
     private final InvoiceService invoiceService;
     private final InvoiceProductService invoiceProductService;
-    private final UserService userService;
-    private final SecurityService securityService;
     private final ClientVendorService clientVendorService;
     private final ProductService productService;
 
@@ -74,9 +73,26 @@ public class SalesInvoiceController {
     }
 
     @PostMapping("/addInvoiceProduct/{id}")
-    public String addInvoiceProduct(@PathVariable("id")Long id, @Valid @ModelAttribute("newInvoiceProduct")InvoiceProductDTO invoiceProductDTO, BindingResult bindingResult ){
+    public String addInvoiceProduct(@Valid @ModelAttribute("newInvoiceProduct")InvoiceProductDTO invoiceProductDTO, BindingResult bindingResult, @PathVariable("id")Long id, Model model){
 
-        if (bindingResult.hasErrors()) return "redirect:/salesInvoices/update/"+id;
+        if (!invoiceProductService.doesProductHaveEnoughStock(invoiceProductDTO) && invoiceProductDTO.getProduct() != null){
+            ObjectError error = new FieldError("newInvoiceProduct","product","Product "+ invoiceProductDTO.getProduct().getName()+" has no enough stock!");
+
+            bindingResult.addError(error);
+        }
+
+        if (bindingResult.hasFieldErrors()) {
+            InvoiceDTO foundInvoice = invoiceService.findById(id);
+            List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceId(id);
+            List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.CLIENT);
+
+            model.addAttribute("invoice",foundInvoice);
+            model.addAttribute("products", productService.listAllProducts());
+            model.addAttribute("invoiceProducts", invoiceProductDTOList);
+            model.addAttribute("clients", clientVendorDTOList );
+
+            return "invoice/sales-invoice-update";
+        }
 
         invoiceProductService.create(invoiceProductDTO, id);
 
@@ -110,8 +126,6 @@ public class SalesInvoiceController {
      */
     @GetMapping("/create")
     public String createInvoice(Model model){
-        //invoiceNo differ company to company. In order to auto generate invoiceNo, invoiceCreator() method should know companyTitle
-
         InvoiceDTO invoice = invoiceService.invoiceCreator(InvoiceType.SALES);
         List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.CLIENT);
 
