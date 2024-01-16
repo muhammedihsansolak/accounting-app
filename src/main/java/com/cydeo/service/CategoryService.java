@@ -21,4 +21,6 @@ public interface CategoryService {
     void delete(Long id);
 
     boolean isCategoryDescriptionUnique(String description);
+
+    boolean hasProducts(CategoryDTO categoryDTO);
 }
