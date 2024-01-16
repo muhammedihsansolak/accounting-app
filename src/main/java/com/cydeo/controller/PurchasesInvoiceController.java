@@ -70,9 +70,20 @@ public class PurchasesInvoiceController {
     }
 
     @PostMapping("/addInvoiceProduct/{id}")
-    public String addInvoiceProduct(@PathVariable("id")Long id, @Valid @ModelAttribute("newInvoiceProduct")InvoiceProductDTO invoiceProductDTO, BindingResult bindingResult){
+    public String addInvoiceProduct(@Valid @ModelAttribute("newInvoiceProduct")InvoiceProductDTO invoiceProductDTO, BindingResult bindingResult, @PathVariable("id")Long id, Model model){
 
-        if (bindingResult.hasErrors()) return "redirect:/purchaseInvoices/update/" +id;
+        if (bindingResult.hasFieldErrors()) {
+            InvoiceDTO foundInvoice = invoiceService.findById(id);
+            List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceId(id);
+            List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.VENDOR);
+
+            model.addAttribute("invoice",foundInvoice);
+            model.addAttribute("products", productService.listAllProducts());
+            model.addAttribute("invoiceProducts", invoiceProductDTOList);
+            model.addAttribute("vendors", clientVendorDTOList );
+
+            return "invoice/purchase-invoice-update";
+        }
 
         invoiceProductService.create(invoiceProductDTO, id);
 
@@ -106,8 +117,6 @@ public class PurchasesInvoiceController {
      */
     @GetMapping("/create")
     public String createInvoice(Model model){
-        //invoiceNo differ company to company. In order to auto generate invoiceNo, invoiceCreator() method should know companyTitle
-
         InvoiceDTO invoice = invoiceService.invoiceCreator(InvoiceType.PURCHASE);
         List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.VENDOR);
 
