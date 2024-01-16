@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 
@@ -67,7 +68,12 @@ public class CategoryController {
         return "category/category-update";
     }
     @GetMapping("/delete/{id}")
-    public String delete(@PathVariable("id") Long id) {
+    public String delete(@PathVariable("id") Long id, RedirectAttributes redirectAttributes, @ModelAttribute("category") CategoryDTO categoryDTO) {
+        if(categoryService.hasProducts(categoryDTO)){
+            redirectAttributes.addFlashAttribute("error", "Can not be deleted! This category has product/products");
+            return "redirect:/categories/list";
+        }
+
         categoryService.delete(id);
         return "redirect:/categories/list";
     }
