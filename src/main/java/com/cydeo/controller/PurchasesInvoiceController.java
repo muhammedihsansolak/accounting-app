@@ -8,8 +8,10 @@ import com.cydeo.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Controller
@@ -22,6 +24,7 @@ public class PurchasesInvoiceController {
     private final UserService userService;
     private final SecurityService securityService;
     private final ClientVendorService clientVendorService;
+    private final ProductService productService;
 
     /**
      * Lists all purchase invoices in the purchase-invoice-list page
@@ -39,15 +42,14 @@ public class PurchasesInvoiceController {
      * When end-user click "Edit" button they should land on purchase-invoice-update page. This section is the place end-user will add products in that Invoice,
      */
     @GetMapping("/update/{id}")
-    public String editInvoiceProduct(@PathVariable("id")Long id, Model model){
+    public String editInvoice(@PathVariable("id")Long id, Model model){
         InvoiceDTO foundInvoice = invoiceService.findById(id);
         List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceId(id);
         List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.VENDOR);
 
         model.addAttribute("invoice",foundInvoice);
         model.addAttribute("newInvoiceProduct", new InvoiceProductDTO());
-        model.addAttribute("products", List.of(
-                new ProductDTO(1L,"Phone",100,15, ProductUnit.PCS, new CategoryDTO(),true))); //TODO implement productService
+        model.addAttribute("products", productService.listAllProducts()); //TODO List All By Company
         model.addAttribute("invoiceProducts", invoiceProductDTOList);
         model.addAttribute("vendors", clientVendorDTOList );
 
@@ -58,7 +60,8 @@ public class PurchasesInvoiceController {
      * When end-user click "Save" button, invoice should be updated and they should land on purchase-invoice-list page. When click on Add Product button, this product (InvoiceProduct actually) should be saved to database as an InvoiceProduct, and end-user should be redirected to the very same page with updated Product List section below (Invoice Products actually)
      */
     @PostMapping("/update/{id}")
-    public String updateInvoiceProduct(@PathVariable("id")Long id, @ModelAttribute("invoice")InvoiceDTO invoiceToUpdate ){
+    public String updateInvoice(@PathVariable("id")Long id,  @ModelAttribute("invoice")InvoiceDTO invoiceToUpdate){
+
         InvoiceDTO foundInvoice = invoiceService.findById(id);
 
         invoiceService.update(foundInvoice, invoiceToUpdate);
@@ -67,7 +70,10 @@ public class PurchasesInvoiceController {
     }
 
     @PostMapping("/addInvoiceProduct/{id}")
-    public String addInvoiceProduct(@PathVariable("id")Long id, @ModelAttribute("newInvoiceProduct")InvoiceProductDTO invoiceProductDTO ){
+    public String addInvoiceProduct(@PathVariable("id")Long id, @Valid @ModelAttribute("newInvoiceProduct")InvoiceProductDTO invoiceProductDTO, BindingResult bindingResult){
+
+        if (bindingResult.hasErrors()) return "redirect:/purchaseInvoices/update/" +id;
+
         invoiceProductService.create(invoiceProductDTO, id);
 
         return "redirect:/purchaseInvoices/update/"+id;
@@ -101,11 +107,8 @@ public class PurchasesInvoiceController {
     @GetMapping("/create")
     public String createInvoice(Model model){
         //invoiceNo differ company to company. In order to auto generate invoiceNo, invoiceCreator() method should know companyTitle
-        String loggedInUsername = securityService.getLoggedInUser().getUsername();
-        UserDTO loggedInUser = userService.findByUsername(loggedInUsername);
-        String companyTitle =  loggedInUser.getCompany().getTitle();
 
-        InvoiceDTO invoice = invoiceService.invoiceCreator(InvoiceType.PURCHASE, companyTitle);
+        InvoiceDTO invoice = invoiceService.invoiceCreator(InvoiceType.PURCHASE);
         List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.VENDOR);
 
         model.addAttribute("newPurchaseInvoice", invoice);
@@ -120,7 +123,7 @@ public class PurchasesInvoiceController {
     @PostMapping("/create")
     public String createInvoice(@ModelAttribute("newPurchaseInvoice") InvoiceDTO invoice){
 
-        InvoiceDTO createdInvoice = invoiceService.create(invoice);
+        InvoiceDTO createdInvoice = invoiceService.create(invoice, InvoiceType.PURCHASE);
 
         return "redirect:/purchaseInvoices/update/"+createdInvoice.getId();
     }
