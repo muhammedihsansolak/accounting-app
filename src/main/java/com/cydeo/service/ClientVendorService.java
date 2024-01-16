@@ -11,12 +11,17 @@ public interface ClientVendorService {
 
     ClientVendorDTO findById(Long Id);
     ClientVendorDTO saveClientVendor(ClientVendorDTO clientVendorDTO);
-    ClientVendorDTO update(Long id , ClientVendorDTO clientVendorDTO);
+    ClientVendorDTO update(Long id, ClientVendorDTO clientVendor);
+
+    //ClientVendorDTO update( ClientVendorDTO clientVendor);
     List<ClientVendorDTO> findByClientVendorType(ClientVendorType clientVendorType);
     List<ClientVendorDTO> getAllClientVendors();
+
     void delete (Long Id);
 
 
     BindingResult addTypeValidation(String type, BindingResult bindingResult);
+
+    BindingResult addUpdateTypeValidation(ClientVendorDTO clientVendor, BindingResult bindingResult);
 
 }

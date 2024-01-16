@@ -35,6 +35,8 @@ public class ClientVendorDTO {
             message = "Website should have a valid format.")
     private String website;
 
+    @NotNull
+    @NotBlank(message =  "Please select type.")
     private ClientVendorType clientVendorType;
 
     @Valid

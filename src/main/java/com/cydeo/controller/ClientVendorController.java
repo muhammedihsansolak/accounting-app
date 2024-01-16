@@ -70,12 +70,28 @@ public class ClientVendorController {
         return "clientVendor/clientVendor-update";
     }
 
-    @PostMapping("/update/{id}")
+ /*   @PostMapping("/update/{id}")
     public String updateClientVendor(@PathVariable("id") Long id, @ModelAttribute("ClientVendor")
     ClientVendorDTO clientVendor) {
         clientVendorService.update(id,clientVendor);
         return "redirect:/clientVendors/list";
     }
+
+  */
+
+    @PostMapping("/update/{id}")
+    public String updateClientVendor(@Valid @ModelAttribute("id") Long id , ClientVendorDTO clientVendor,
+                                  BindingResult bindingResult, Model model){
+        bindingResult = clientVendorService.addUpdateTypeValidation(clientVendor,bindingResult);
+
+        if (bindingResult.hasFieldErrors()){
+            model.addAttribute("countries", List.of("USA","UK"));
+            return "clientVendor/clientVendor-update";
+        }
+        clientVendorService.update(id,clientVendor);
+        return "redirect:/clientVendors/list";
+    }
+
 
     @GetMapping("/delete/{id}")
     public String deleteClientVendor(@PathVariable("id") Long id) {
