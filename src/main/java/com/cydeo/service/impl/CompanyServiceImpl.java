@@ -2,7 +2,8 @@ package com.cydeo.service.impl;
 
 import com.cydeo.FeinClient.CountryClient;
 import com.cydeo.dto.CompanyDTO;
-import com.cydeo.dto.CountriesDTO;
+import com.cydeo.dto.CountryDetailInfoDTO;
+import com.cydeo.dto.CountryInfoDTO;
 import com.cydeo.dto.UserDTO;
 import com.cydeo.entity.Company;
 import com.cydeo.mapper.MapperUtil;
@@ -11,19 +12,15 @@ import com.cydeo.enums.CompanyStatus;
 
 import com.cydeo.service.CompanyService;
 import com.cydeo.service.SecurityService;
-import com.cydeo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -135,11 +132,27 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public List<String> getCounties() {
-        CountriesDTO countries = countryClient.getCountries("Bearer " + countriesApiKey).getBody();
-        System.out.println(countries);
-       return countries.getAlpha2Code().stream()
-               .map(info->info.getName())
-               .collect(Collectors.toList());
+        ResponseEntity<List<CountryInfoDTO>> countries = countryClient.getCountries(countriesApiKey);
+        if (countries.getStatusCode().is2xxSuccessful()){
+            return countries.getBody().stream()
+                    .map(CountryInfoDTO::getName)
+//                    .map(info-> getCountryWithDetail(info.getIso2()))
+                    .collect(Collectors.toList());
+        }
+//        throw new CountryServiceException("Countries didn't fetched"); // add exception when we do exception handling
+       return List.of();
+
+    }
+
+    @Override
+    public String getCountryWithDetail(String ciso) {
+        ResponseEntity<CountryDetailInfoDTO> country = countryClient.getCountryWithDetail(countriesApiKey,ciso);
+        if (country.getStatusCode().is2xxSuccessful()){
+            CountryDetailInfoDTO countryInfo = country.getBody();
+            return countryInfo.getEmoji() + " " + countryInfo.getName();
+        }
+//        throw new CountryServiceException("Countries didn't fetched"); // add exception when we do exception handling
+        return "";
 
     }
 }

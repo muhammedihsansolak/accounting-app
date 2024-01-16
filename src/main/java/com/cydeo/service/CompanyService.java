@@ -28,4 +28,6 @@ public interface CompanyService {
     CompanyDTO findByCompanyTitle(String companyTitle);
 
     List<String> getCounties();
+
+    String getCountryWithDetail(String ciso);
 }
