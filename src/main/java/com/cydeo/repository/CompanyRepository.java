@@ -22,4 +22,6 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     boolean existsByTitle(String title);
 
     boolean existsByTitleAndIdNot(String title, Long id);
+
+    Company findByTitle(String companyTitle);
 }

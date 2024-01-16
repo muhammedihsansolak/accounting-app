@@ -24,4 +24,6 @@ public interface CompanyService {
     BindingResult addTitleValidation(String title, BindingResult bindingResult);
 
     BindingResult addUpdateTitleValidation(CompanyDTO company, BindingResult bindingResult);
+
+    CompanyDTO findByCompanyTitle(String companyTitle);
 }
