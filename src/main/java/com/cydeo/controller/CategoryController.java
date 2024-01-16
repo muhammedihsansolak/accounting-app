@@ -43,17 +43,19 @@ public class CategoryController {
         if (bindingResult.hasErrors()) {
             return "category/category-create";
         }
-
-
-
         categoryService.save(categoryDTO);
         return "redirect:/categories/list";
     }
 
     @PostMapping ("/update/{id}")
-    public String updateCategory(@PathVariable("id") Long id,@ModelAttribute ("category") CategoryDTO category ){
-
-        categoryService.update(category, id);
+    public String updateCategory(@Valid @ModelAttribute ("category") CategoryDTO categoryDTO,BindingResult bindingResult,@PathVariable("id") Long id){
+        if (categoryService.hasProducts(categoryDTO)){
+            bindingResult.rejectValue("description", " ", "This category already has product/products! Make sure the new description that will be provided is proper.");
+        }
+        if (bindingResult.hasErrors()) {
+            return "category/category-update";
+        }
+        categoryService.update(categoryDTO, id);
         return "redirect:/categories/list";
     }
     @GetMapping("/update/{id}")
