@@ -11,6 +11,7 @@ import com.cydeo.enums.CompanyStatus;
 
 import com.cydeo.service.CompanyService;
 import com.cydeo.service.SecurityService;
+import com.cydeo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -121,6 +122,15 @@ public class CompanyServiceImpl implements CompanyService {
             bindingResult.addError(new FieldError("company", "title", "This title already exists."));
         }
         return bindingResult;
+    }
+
+    @Override
+    public CompanyDTO findByCompanyTitle(String companyTitle) {
+
+        Company foundCompany = repository.findByTitle(companyTitle);
+
+        return mapperUtil.convert(foundCompany,new CompanyDTO());
+
     }
 
     @Override
