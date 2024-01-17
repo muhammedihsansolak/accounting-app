@@ -8,10 +8,7 @@ import com.cydeo.enums.InvoiceStatus;
 import com.cydeo.enums.InvoiceType;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.InvoiceRepository;
-import com.cydeo.service.InvoiceProductService;
-import com.cydeo.service.InvoiceService;
-import com.cydeo.service.SecurityService;
-import com.cydeo.service.UserService;
+import com.cydeo.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +29,13 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final UserService userService;
     private final SecurityService securityService;
     private final InvoiceProductService invoiceProductService;
+    private final CompanyService companyService;
 
+    /**
+     * Finds invoices by invoiceId based on logged-in user's company. Calculates price, tax amount and total price of the invoice.
+     * @param id
+     * @return invoiceDTO
+     */
     @Override
     public InvoiceDTO findById(Long id) {
         Invoice invoice = invoiceRepository.findById(id)
@@ -51,12 +54,17 @@ public class InvoiceServiceImpl implements InvoiceService {
         return invoiceDTO;
     }
 
+    /**
+     * Finds all invoices belongs to logged-in user's company. Calculates price, tax amount and total price of all invoices.
+     * @param invoiceType
+     * @return
+     */
     @Override
     public List<InvoiceDTO> findAllInvoices(InvoiceType invoiceType) {
         String currentlyLoggedInPersonUsername = securityService.getLoggedInUser().getUsername();
         UserDTO loggedInUser = userService.findByUsername(currentlyLoggedInPersonUsername);
 
-        List<Invoice> all = invoiceRepository.findInvoiceByInvoiceTypeAndCompany_TitleOrderByInvoiceNoDesc(invoiceType, loggedInUser.getCompany().getTitle());
+        List<Invoice> all = invoiceRepository.findInvoiceByInvoiceTypeAndCompany_TitleAndIsDeletedOrderByInvoiceNoDesc(invoiceType, loggedInUser.getCompany().getTitle(), false);
 
         List<InvoiceDTO> invoiceDTOList = all.stream()
                 .map(invoice -> mapper.convert(invoice, new InvoiceDTO()))
@@ -79,8 +87,16 @@ public class InvoiceServiceImpl implements InvoiceService {
         return invoiceDTOList;
     }
 
+    /**
+     * Percentage divisor for calculation methods.
+     */
     private static final BigDecimal PERCENTAGE_DIVISOR = BigDecimal.valueOf(100);
 
+    /**
+     * Calculates total tax amount of the given invoiceProductDTO objects.
+     * @param invoiceProductDTOList
+     * @return tax amount (BigDecimal)
+     */
     private BigDecimal calculateTax(List<InvoiceProductDTO> invoiceProductDTOList) {
         BigDecimal sum = invoiceProductDTOList.stream()
                 .map(this::calculateTaxForProduct)
@@ -93,6 +109,11 @@ public class InvoiceServiceImpl implements InvoiceService {
         return sum;
     }
 
+    /**
+     * Calculates tax amount of the given invoiceProductDTO.
+     * @param invoiceProductDTO
+     * @return tax amount (BigDecimal)
+     */
     @Override
     public BigDecimal calculateTaxForProduct(InvoiceProductDTO invoiceProductDTO) {
         BigDecimal price = invoiceProductDTO.getPrice();
@@ -108,7 +129,11 @@ public class InvoiceServiceImpl implements InvoiceService {
         return taxAmount;
     }
 
-
+    /**
+     * Calculates total amount (without tax) of the given invoiceProductDTO objects.
+     * @param invoiceProductDTOList
+     * @return tax amount (BigDecimal)
+     */
     private BigDecimal calculateTotalPriceWithoutTax(List<InvoiceProductDTO> invoiceProductDTOList) {
         BigDecimal sum = invoiceProductDTOList.stream()
                 .map(invoiceProductDTO ->
@@ -119,6 +144,11 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     }
 
+    /**
+     * Updates the invoice. Id, InvoiceStatus, InvoiceType and Company fields are not updated.
+     * @param foundInvoice
+     * @param invoiceToUpdate
+     */
     // invoiceNo, invoiceStatus, invoiceType, date, company cannot be updatable. Update -> ClientVendor
     // id, invoiceStatus, invoiceType, company details should come from DB
     @Override
@@ -132,6 +162,10 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceRepository.save( converted );
     }
 
+    /**
+     * Softly deletes the invoice.
+     * @param invoiceId
+     */
     @Override
     public void deleteInvoice(Long invoiceId) {
         Invoice invoiceToDelete = invoiceRepository.findById(invoiceId)
@@ -143,6 +177,10 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceRepository.save(invoiceToDelete);
     }
 
+    /**
+     * Approves the invoice
+     * @param invoiceId
+     */
     @Override
     public void approve(Long invoiceId) {
         Invoice invoiceToApprove = invoiceRepository.findById(invoiceId)
@@ -153,13 +191,18 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceRepository.save(invoiceToApprove);
     }
 
+    /**
+     * Creates a invoice without saving it to database. InvoiceNo and Invoice date will be auto generated.
+     * @param invoiceType
+     * @return
+     */
     //Invoice_No should be auto generated
     //Invoice_Date should be the date which this invoice is created
-    //InvoiceStatus should be AWAITING_APPROVAL
     @Override
-    public InvoiceDTO invoiceCreator(InvoiceType invoiceType, String companyTitle) {
+    public InvoiceDTO invoiceCreator(InvoiceType invoiceType) {
+        String companyTitle = securityService.getLoggedInUser().getCompany().getTitle();
         // Get the latest invoice from the database which belongs to that company
-        Optional<Invoice> latestInvoice = invoiceRepository.findTopByCompany_TitleAndInvoiceTypeOrderByDateDesc(companyTitle, invoiceType);
+        Optional<Invoice> latestInvoice = invoiceRepository.findTopByCompany_TitleAndInvoiceTypeOrderByInvoiceNoDesc(companyTitle,invoiceType);
         // Generate the new invoice number
         String generatedInvoiceNo = generateNextInvoiceNumber(latestInvoice, invoiceType);
 
@@ -167,11 +210,16 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceDTO.setInvoiceNo( generatedInvoiceNo );
         invoiceDTO.setDate( LocalDate.now() );
         invoiceDTO.setInvoiceType( invoiceType );
-        invoiceDTO.setInvoiceStatus( InvoiceStatus.AWAITING_APPROVAL );
 
         return invoiceDTO;
     }
 
+    /**
+     * Auto generate method for invoiceNo. Generates next invoiceNo based on last created invoice of a company even if it is deleted.
+     * @param lastInvoice
+     * @param invoiceType
+     * @return
+     */
     private String generateNextInvoiceNumber(Optional<Invoice> lastInvoice, InvoiceType invoiceType) {
         if (!lastInvoice.isPresent()) {
             return invoiceType.getValue().charAt(0) + "-000";
@@ -184,12 +232,24 @@ public class InvoiceServiceImpl implements InvoiceService {
         return invoiceType.getValue().charAt(0) + "-" + String.format("%03d", nextNumber);
     }
 
+    /**
+     * Creates invoice. InvoiceNo, invoice date and invoice type should be auto-generated before this method.
+     * @param invoice
+     * @param invoiceType
+     * @return
+     */
+    //InvoiceStatus should be AWAITING_APPROVAL
+    //Company should be assigned here
     @Override
-    public InvoiceDTO create(InvoiceDTO invoice) {
+    public InvoiceDTO create(InvoiceDTO invoice, InvoiceType invoiceType) {
+        String companyTitle = securityService.getLoggedInUser().getCompany().getTitle();
+        invoice.setInvoiceStatus( InvoiceStatus.AWAITING_APPROVAL );
+        invoice.setCompany( companyService.findByCompanyTitle(companyTitle) );
+        invoice.setInvoiceType(invoiceType);
+
         Invoice invoiceToCreate = mapper.convert(invoice, new Invoice());
 
-        //since I need to send invoice id immediately to UI, I used saveAndFlush() to persist data instantly
-        Invoice savedInvoice = invoiceRepository.saveAndFlush(invoiceToCreate);
+        Invoice savedInvoice = invoiceRepository.save(invoiceToCreate);
 
         return mapper.convert(savedInvoice, new InvoiceDTO());
     }
