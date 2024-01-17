@@ -5,8 +5,6 @@ import org.springframework.validation.BindingResult;
 
 import java.util.List;
 
-import java.util.List;
-
 public interface CompanyService {
     List<CompanyDTO> getCompanyDtoByLoggedInUser();
 
@@ -24,4 +22,6 @@ public interface CompanyService {
     BindingResult addTitleValidation(String title, BindingResult bindingResult);
 
     BindingResult addUpdateTitleValidation(CompanyDTO company, BindingResult bindingResult);
+
+    CompanyDTO findByCompanyTitle(String companyTitle);
 }
