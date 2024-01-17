@@ -68,8 +68,9 @@ public class ClientVendorServiceImpl implements ClientVendorService {
         return mapperUtil.convert(savedClientVendor, new ClientVendorDTO());
     }
 
+
     @Override
-    public ClientVendorDTO update(Long id ,ClientVendorDTO clientVendorDTO) {
+    public ClientVendorDTO update(Long id, ClientVendorDTO clientVendorDTO) {
         ClientVendor byId = clientVendorRepository.findById(id).orElseThrow();
         ClientVendor clientVendor = mapperUtil.convert(clientVendorDTO, new ClientVendor());
 
@@ -89,7 +90,6 @@ public class ClientVendorServiceImpl implements ClientVendorService {
 
     }
 
-
     @Override
     public List<ClientVendorDTO> findByClientVendorType(ClientVendorType clientVendorType) {
         List<ClientVendor> byClientVendorType
@@ -100,20 +100,20 @@ public class ClientVendorServiceImpl implements ClientVendorService {
 
     }
 
-
-
     @Override
     public BindingResult addTypeValidation(String type, BindingResult bindingResult) {
         if (clientVendorRepository.existsByClientVendorName(type)) {
-            bindingResult.addError(new FieldError("newType", "title", "This title already exists."));
+            bindingResult.addError(new FieldError("newType", "type", "This type already exists."));
         }
 
         return bindingResult;
 
-
-
-
     }
+
+
+
+
+
 }
 
 
