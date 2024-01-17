@@ -2,12 +2,10 @@ package com.cydeo.dto;
 
 import com.cydeo.enums.InvoiceStatus;
 import com.cydeo.enums.InvoiceType;
-import com.sun.istack.NotNull;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -32,6 +30,7 @@ public class InvoiceDTO {
 
     private CompanyDTO company;
 
+    @NotNull(message = "Client vendor is a required field.")
     private ClientVendorDTO clientVendor;
 
     private BigDecimal price;
