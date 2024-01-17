@@ -8,6 +8,7 @@ import com.cydeo.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -66,10 +67,10 @@ public class ProductController {
     public String createProduct(@ModelAttribute("product") ProductDTO productDTO, Model model){
 
 
-            model.addAttribute("categories",categoryService.findAll());
-            model.addAttribute("name", productService.listAllProducts());
-            //model.addAttribute("lowLimitAlert", ???);
-            model.addAttribute("productUnits", List.of(ProductUnit.values()));
+        model.addAttribute("categories",categoryService.findAll());
+        model.addAttribute("name", productService.listAllProducts());
+        //model.addAttribute("lowLimitAlert", ???);
+        model.addAttribute("productUnits", List.of(ProductUnit.values()));
 
 
         productService.save(productDTO);
