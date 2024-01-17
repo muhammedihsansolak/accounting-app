@@ -41,7 +41,7 @@ public class ClientVendorController {
 
     }
 
-  @PostMapping("/create")
+    @PostMapping("/create")
     public String createClientVendor(@Valid @ModelAttribute("newClientVendor") ClientVendorDTO newClientVendor,
                                      BindingResult bindingResult, Model model) {
         bindingResult = clientVendorService.addTypeValidation(newClientVendor.getClientVendorName(),bindingResult);

@@ -2,7 +2,6 @@ package com.cydeo.converter;
 
 import com.cydeo.dto.ProductDTO;
 import com.cydeo.service.ProductService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBinding;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.convert.converter.Converter;
