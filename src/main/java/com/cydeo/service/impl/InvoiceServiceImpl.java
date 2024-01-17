@@ -3,6 +3,7 @@ package com.cydeo.service.impl;
 import com.cydeo.dto.InvoiceDTO;
 import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.dto.UserDTO;
+import com.cydeo.entity.Company;
 import com.cydeo.entity.Invoice;
 import com.cydeo.enums.InvoiceStatus;
 import com.cydeo.enums.InvoiceType;
@@ -254,4 +255,15 @@ public class InvoiceServiceImpl implements InvoiceService {
         return mapper.convert(savedInvoice, new InvoiceDTO());
     }
 
+
+
+    @Override  //  ---> Elif add this
+    public List<InvoiceDTO> findTop3ByCompanyOrderByDateDesc() {
+
+        Company company = mapper.convert(securityService.getLoggedInUser().getCompany(),new Company());
+
+        return invoiceRepository.findTop3ByCompanyOrderByDateDesc(company).stream()
+                .map(invoice -> mapper.convert(invoice, new InvoiceDTO()))
+                .collect(Collectors.toList());
+    }
 }

@@ -23,4 +23,6 @@ public interface InvoiceService {
     InvoiceDTO create(InvoiceDTO invoice, InvoiceType invoiceType);
 
     BigDecimal calculateTaxForProduct(InvoiceProductDTO invoiceProductDTO);
+
+    List<InvoiceDTO> findTop3ByCompanyOrderByDateDesc(); //-->Elif added
 }
