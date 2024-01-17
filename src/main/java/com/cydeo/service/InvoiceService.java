@@ -4,6 +4,7 @@ import com.cydeo.dto.InvoiceDTO;
 import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.enums.InvoiceType;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -25,4 +26,6 @@ public interface InvoiceService {
     BigDecimal calculateTaxForProduct(InvoiceProductDTO invoiceProductDTO);
 
     List<InvoiceDTO> findTop3ByCompanyOrderByDateDesc(); //-->Elif added
+
+
 }
