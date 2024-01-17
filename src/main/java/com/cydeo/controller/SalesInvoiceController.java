@@ -75,11 +75,7 @@ public class SalesInvoiceController {
     @PostMapping("/addInvoiceProduct/{id}")
     public String addInvoiceProduct(@Valid @ModelAttribute("newInvoiceProduct")InvoiceProductDTO invoiceProductDTO, BindingResult bindingResult, @PathVariable("id")Long id, Model model){
 
-        if (!invoiceProductService.doesProductHaveEnoughStock(invoiceProductDTO) && invoiceProductDTO.getProduct() != null){
-            ObjectError error = new FieldError("newInvoiceProduct","product","Product "+ invoiceProductDTO.getProduct().getName()+" has no enough stock!");
-
-            bindingResult.addError(error);
-        }
+        bindingResult = invoiceProductService.doesProductHaveEnoughStock(invoiceProductDTO, bindingResult);
 
         if (bindingResult.hasFieldErrors()) {
             InvoiceDTO foundInvoice = invoiceService.findById(id);
