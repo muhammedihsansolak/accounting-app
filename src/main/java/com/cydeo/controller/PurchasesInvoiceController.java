@@ -135,7 +135,14 @@ public class PurchasesInvoiceController {
      * When End-user clicks on SAVE button, a new purchase_invoice should be created in the database and end-user should land the purchase_invoice_update page. (because we only created invoice, but there are no products in it... We need to add them in update page)
      */
     @PostMapping("/create")
-    public String createInvoice(@ModelAttribute("newPurchaseInvoice") InvoiceDTO invoice){
+    public String createInvoice(@Valid @ModelAttribute("newPurchaseInvoice") InvoiceDTO invoice, BindingResult bindingResult, Model model){
+
+        if (bindingResult.hasErrors()){
+            List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.VENDOR);
+            model.addAttribute("vendors", clientVendorDTOList );
+
+            return "invoice/purchase-invoice-create";
+        }
 
         InvoiceDTO createdInvoice = invoiceService.create(invoice, InvoiceType.PURCHASE);
 

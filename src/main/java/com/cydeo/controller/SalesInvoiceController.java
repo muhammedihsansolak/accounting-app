@@ -139,10 +139,13 @@ public class SalesInvoiceController {
      * When End-user clicks on SAVE button, a new sales_invoice should be created in the database and end-user should land the sales_invoice_update page. (because we only created invoice, but there are no products in it... We need to add them in update page)
      */
     @PostMapping("/create")
-    public String createInvoice(@Valid @ModelAttribute("newSalesInvoice") InvoiceDTO invoice, BindingResult bindingResult){
+    public String createInvoice(@Valid @ModelAttribute("newSalesInvoice") InvoiceDTO invoice, BindingResult bindingResult, Model model){
 
         if (bindingResult.hasErrors()){
-            return "redirect:/salesInvoices/create";
+            List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.CLIENT);
+            model.addAttribute("clients", clientVendorDTOList );
+
+            return "invoice/sales-invoice-create";
         }
 
         InvoiceDTO createdInvoice = invoiceService.create(invoice, InvoiceType.SALES);
