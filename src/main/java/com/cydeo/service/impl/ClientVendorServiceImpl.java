@@ -110,17 +110,8 @@ public class ClientVendorServiceImpl implements ClientVendorService {
 
     }
 
-    @Override
-    public BindingResult addUpdateTypeValidation(ClientVendorDTO clientVendor, BindingResult bindingResult) {
 
 
-        if (clientVendorRepository.existsByClientVendorTypeAndIdNot(String.valueOf(clientVendor.
-                getClientVendorType()),clientVendor.getId())){
-            bindingResult.addError(new FieldError("newType", "type", "This type already exists."));
-        }
-        return bindingResult;
-
-    }
 
 
 }

@@ -31,8 +31,7 @@ public class ClientVendorController {
 
     @GetMapping("/create")
     public String showCreateForm(Model model) {
-        List<String> countries = new ArrayList<>();
-        countries.addAll(Arrays.asList("UK", "USA"));
+        List<String> countries = new ArrayList<>(Arrays.asList("UK", "USA"));
 
         model.addAttribute("newClientVendor", new ClientVendorDTO());
         model.addAttribute("clientVendorTypes", Arrays.asList(ClientVendorType.values()));
@@ -61,8 +60,7 @@ public class ClientVendorController {
     @GetMapping("/update/{id}")
     public String showUpdateForm(@PathVariable("id") Long id, Model model) {
         ClientVendorDTO clientVendor = clientVendorService.findById(id);
-        List<String> countries = new ArrayList<>();
-        countries.addAll(Arrays.asList("UK", "USA"));
+        List<String> countries = new ArrayList<>(Arrays.asList("UK", "USA"));
 
         model.addAttribute("clientVendorTypes", Arrays.asList(ClientVendorType.values()));
         model.addAttribute("countries", countries);
@@ -70,28 +68,21 @@ public class ClientVendorController {
         return "clientVendor/clientVendor-update";
     }
 
- /*   @PostMapping("/update/{id}")
-    public String updateClientVendor(@PathVariable("id") Long id, @ModelAttribute("ClientVendor")
-    ClientVendorDTO clientVendor) {
-        clientVendorService.update(id,clientVendor);
-        return "redirect:/clientVendors/list";
-    }
-
-  */
 
     @PostMapping("/update/{id}")
-    public String updateClientVendor(@Valid @ModelAttribute("id") Long id , ClientVendorDTO clientVendor,
-                                  BindingResult bindingResult, Model model){
-        bindingResult = clientVendorService.addUpdateTypeValidation(clientVendor,bindingResult);
+  public String updateClientVendor(@PathVariable("id") Long id,
+                                   @Valid @ModelAttribute("clientVendor") ClientVendorDTO clientVendor,
+                                   BindingResult bindingResult, Model model) {
+      //  bindingResult = clientVendorService.addTypeValidation(clientVendor.getClientVendorName(),bindingResult);
+      if (bindingResult.hasErrors()) {
+          model.addAttribute("clientVendorTypes", Arrays.asList(ClientVendorType.values()));
+          model.addAttribute("countries", Arrays.asList("USA", "UK"));
+          return "clientVendor/clientVendor-update";
+      }
 
-        if (bindingResult.hasFieldErrors()){
-            model.addAttribute("countries", List.of("USA","UK"));
-            return "clientVendor/clientVendor-update";
-        }
-        clientVendorService.update(id,clientVendor);
-        return "redirect:/clientVendors/list";
-    }
-
+      clientVendorService.update(id, clientVendor);
+      return "redirect:/clientVendors/list";
+  }
 
     @GetMapping("/delete/{id}")
     public String deleteClientVendor(@PathVariable("id") Long id) {
