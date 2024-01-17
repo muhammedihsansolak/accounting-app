@@ -40,7 +40,6 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
     public List<InvoiceProductDTO> findByInvoiceId(Long invoiceId) {
         List<InvoiceProduct> invoiceProductList = repository.findByInvoiceId(invoiceId);
 
-
         List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductList.stream()
                 .map(invoiceProduct -> mapper.convert(invoiceProduct, new InvoiceProductDTO()))
                 .map(invoiceProduct -> {
