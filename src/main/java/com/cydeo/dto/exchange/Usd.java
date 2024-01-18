@@ -10,12 +10,16 @@ import java.math.BigDecimal;
 public class Usd {
 
 
+    //In the exchange table, we only want to see these currencies.
+
     private BigDecimal eur;
     private BigDecimal gbp;
     private BigDecimal cad;
     private BigDecimal jpy;
     private BigDecimal inr;
 
+
+    //The names of the getter methods were adjusted according to the lines in dashboard.html
 
     public BigDecimal getEuro() {
         return eur;

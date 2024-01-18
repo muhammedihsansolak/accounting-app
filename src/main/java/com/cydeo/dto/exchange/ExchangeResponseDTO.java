@@ -10,6 +10,8 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ExchangeResponseDTO {
 
+    //The JSON file was saying that we needed to add these objects
+
     private String date;
 
     private Usd usd;
