@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Error Page</title>
+    <style>
+        body {
+            background-color: #fff; /* Set a white background */
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        .error-container {
+            max-width: 600px;
+            margin: 0 auto; /* Center the container horizontally */
+            padding: 20px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #ff0000; /* Red color for the error message */
+        }
+
+        img {
+            max-width: 100%;
+            display: block;
+            margin: 0 auto; /* Center the image horizontally */
+        }
+
+        p {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+        /* ... Existing CSS styles ... */
+
+        .home-button {
+            margin-top: 20px;
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: #fff;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .home-button:hover {
+            background-color: #0056b3;
+            color: #fff;
+        }
+
+        .home-button span {
+            display: inline-block;
+            padding: 5px 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .home-button:hover span {
+            transform: scale(1.1);
+        }
+
+    </style>
+</head>
+<body>
+<div class="error-container">
+    <h1>Oops! Something went wrong.</h1>
+
+    <!-- Error Image -->
+    <img src="/images/error_image.png" alt="Error Image">
+
+    <p th:if="${url}">
+        <b>Page:</b> <span th:text="${url}"></span>
+    </p>
+
+    <p th:if="${timestamp}">
+        <b>Occurred:</b> <span th:text="${timestamp}"></span>
+    </p>
+
+    <p th:if="${status}">
+        <b>Response Status:</b> <span th:text="${status}"></span> <span
+            th:if="${error}" th:text="' (' + ${error} + ')'"></span>
+    </p>
+
+    <p th:if="${exception}">
+        <b>Exception:</b> <span th:text="${exception.message}"></span>
+    </p>
+
+    <p>Application has encountered an error.</p>
+
+    <a class="home-button" th:href="@{/redirectToHome}">
+        <span>Go to Home</span>
+    </a>
+</div>
+</body>
+</html>
