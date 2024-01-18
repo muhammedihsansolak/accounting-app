@@ -7,6 +7,7 @@ import com.cydeo.dto.UserDTO;
 import com.cydeo.entity.Invoice;
 import com.cydeo.enums.InvoiceStatus;
 import com.cydeo.enums.InvoiceType;
+import com.cydeo.exception.InvoiceNotFoundException;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.InvoiceRepository;
 import com.cydeo.service.*;
@@ -40,7 +41,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public InvoiceDTO findById(Long id) {
         Invoice invoice = invoiceRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Invoice can not found with id: " + id));
+                .orElseThrow(() -> new InvoiceNotFoundException("Invoice can not found with id: " + id));
         InvoiceDTO invoiceDTO = mapper.convert(invoice, new InvoiceDTO());
 
         List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceId(invoiceDTO.getId());
@@ -169,7 +170,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public void deleteInvoice(Long invoiceId) {
         Invoice invoiceToDelete = invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new NoSuchElementException("Invoice can not found with id: " + invoiceId));
+                .orElseThrow(() -> new InvoiceNotFoundException("Invoice can not found with id: " + invoiceId));
 
         //delete operation
         invoiceToDelete.setIsDeleted( Boolean.TRUE );
@@ -184,7 +185,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public void approve(Long invoiceId) {
         Invoice invoiceToApprove = invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new NoSuchElementException("Invoice can not found with id: " + invoiceId));
+                .orElseThrow(() -> new InvoiceNotFoundException("Invoice can not found with id: " + invoiceId));
 
         invoiceToApprove.setInvoiceStatus(InvoiceStatus.APPROVED);
 
