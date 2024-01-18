@@ -3,6 +3,7 @@ package com.cydeo.service.impl;
 import com.cydeo.dto.InvoiceDTO;
 import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.entity.InvoiceProduct;
+import com.cydeo.exception.InvoiceProductNotFoundException;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.InvoiceProductRepository;
 import com.cydeo.service.InvoiceProductService;
@@ -34,7 +35,7 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
     @Override
     public InvoiceProductDTO findById(Long id) {
         InvoiceProduct foundInvoiceProduct = repository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("InvoiceProduct can not found with id: " + id));
+                .orElseThrow(() -> new InvoiceProductNotFoundException("InvoiceProduct can not found with id: " + id));
 
         return mapper.convert(foundInvoiceProduct, new InvoiceProductDTO());
     }
@@ -62,7 +63,7 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
     @Override
     public InvoiceDTO deleteById(Long id) {
         InvoiceProduct invoiceToDelete = repository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("InvoiceProduct can not found with id: " + id));
+                .orElseThrow(() -> new InvoiceProductNotFoundException("InvoiceProduct can not found with id: " + id));
 
         invoiceToDelete.setIsDeleted(Boolean.TRUE);
 
