@@ -81,6 +81,7 @@ public class ClientVendorServiceImpl implements ClientVendorService {
         return mapperUtil.convert(saved, new ClientVendorDTO());
     }
 
+
     @Override
     public void delete(Long id) {
         ClientVendor byId = clientVendorRepository.findById(id).orElseThrow();
@@ -90,15 +91,21 @@ public class ClientVendorServiceImpl implements ClientVendorService {
 
     }
 
-    @Override
-    public List<ClientVendorDTO> findByClientVendorType(ClientVendorType clientVendorType) {
-        List<ClientVendor> byClientVendorType
-                = clientVendorRepository.findByClientVendorType(clientVendorType);
-        return  byClientVendorType.stream()
-                .map(clientVendor -> mapperUtil.convert(clientVendor,new ClientVendorDTO()))
-                .collect(Collectors.toList());
 
+
+
+   @Override
+    public List<ClientVendorDTO> findClientVendorByClientVendorTypeAndCompany(ClientVendorType clientVendorType) {
+       Company company = mapperUtil.convert(securityService.getLoggedInUser().getCompany(),new Company());
+        List<ClientVendor> byClientVendorTypeAndCompany =
+                clientVendorRepository.findClientVendorByClientVendorTypeAndCompany(clientVendorType, company);
+
+        return byClientVendorTypeAndCompany.stream()
+                .map(clientVendor -> mapperUtil.convert(clientVendor, new ClientVendorDTO()))
+                .collect(Collectors.toList());
     }
+
+
 
     @Override
     public BindingResult addTypeValidation(String type, BindingResult bindingResult) {

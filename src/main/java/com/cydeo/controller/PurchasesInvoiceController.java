@@ -44,7 +44,7 @@ public class PurchasesInvoiceController {
     public String editInvoice(@PathVariable("id")Long id, Model model){
         InvoiceDTO foundInvoice = invoiceService.findById(id);
         List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceId(id);
-        List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.VENDOR);
+        List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findClientVendorByClientVendorTypeAndCompany(ClientVendorType.VENDOR);
 
         model.addAttribute("invoice",foundInvoice);
         model.addAttribute("newInvoiceProduct", new InvoiceProductDTO());
@@ -76,7 +76,7 @@ public class PurchasesInvoiceController {
         if (bindingResult.hasErrors()) {
             InvoiceDTO foundInvoice = invoiceService.findById(id);
             List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceId(id);
-            List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.VENDOR);
+            List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findClientVendorByClientVendorTypeAndCompany(ClientVendorType.VENDOR );
 
             model.addAttribute("invoice",foundInvoice);
             model.addAttribute("products", productService.listAllProducts());
@@ -119,7 +119,7 @@ public class PurchasesInvoiceController {
     @GetMapping("/create")
     public String createInvoice(Model model){
         InvoiceDTO invoice = invoiceService.invoiceGenerator(InvoiceType.PURCHASE);
-        List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.VENDOR);
+        List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findClientVendorByClientVendorTypeAndCompany(ClientVendorType.VENDOR);
 
         model.addAttribute("newPurchaseInvoice", invoice);
         model.addAttribute("vendors", clientVendorDTOList );
@@ -134,7 +134,7 @@ public class PurchasesInvoiceController {
     public String createInvoice(@Valid @ModelAttribute("newPurchaseInvoice") InvoiceDTO invoice, BindingResult bindingResult, Model model){
 
         if (bindingResult.hasErrors()){
-            List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.VENDOR);
+            List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findClientVendorByClientVendorTypeAndCompany(ClientVendorType.VENDOR);
             model.addAttribute("vendors", clientVendorDTOList );
 
             return "invoice/purchase-invoice-create";
