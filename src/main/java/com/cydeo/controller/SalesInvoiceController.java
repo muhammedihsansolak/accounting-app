@@ -75,11 +75,7 @@ public class SalesInvoiceController {
     @PostMapping("/addInvoiceProduct/{id}")
     public String addInvoiceProduct(@Valid @ModelAttribute("newInvoiceProduct")InvoiceProductDTO invoiceProductDTO, BindingResult bindingResult, @PathVariable("id")Long id, Model model){
 
-        if (!invoiceProductService.doesProductHaveEnoughStock(invoiceProductDTO) && invoiceProductDTO.getProduct() != null){
-            ObjectError error = new FieldError("newInvoiceProduct","product","Product "+ invoiceProductDTO.getProduct().getName()+" has no enough stock!");
-
-            bindingResult.addError(error);
-        }
+        bindingResult = invoiceProductService.doesProductHaveEnoughStock(invoiceProductDTO, bindingResult);
 
         if (bindingResult.hasFieldErrors()) {
             InvoiceDTO foundInvoice = invoiceService.findById(id);
@@ -126,7 +122,7 @@ public class SalesInvoiceController {
      */
     @GetMapping("/create")
     public String createInvoice(Model model){
-        InvoiceDTO invoice = invoiceService.invoiceCreator(InvoiceType.SALES);
+        InvoiceDTO invoice = invoiceService.invoiceGenerator(InvoiceType.SALES);
         List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.CLIENT);
 
         model.addAttribute("newSalesInvoice", invoice);
@@ -139,10 +135,13 @@ public class SalesInvoiceController {
      * When End-user clicks on SAVE button, a new sales_invoice should be created in the database and end-user should land the sales_invoice_update page. (because we only created invoice, but there are no products in it... We need to add them in update page)
      */
     @PostMapping("/create")
-    public String createInvoice(@Valid @ModelAttribute("newSalesInvoice") InvoiceDTO invoice, BindingResult bindingResult){
+    public String createInvoice(@Valid @ModelAttribute("newSalesInvoice") InvoiceDTO invoice, BindingResult bindingResult, Model model){
 
         if (bindingResult.hasErrors()){
-            return "redirect:/salesInvoices/create";
+            List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.CLIENT);
+            model.addAttribute("clients", clientVendorDTOList );
+
+            return "invoice/sales-invoice-create";
         }
 
         InvoiceDTO createdInvoice = invoiceService.create(invoice, InvoiceType.SALES);

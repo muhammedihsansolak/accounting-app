@@ -3,12 +3,16 @@ package com.cydeo.service.impl;
 import com.cydeo.dto.InvoiceDTO;
 import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.entity.InvoiceProduct;
+import com.cydeo.exception.InvoiceProductNotFoundException;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.InvoiceProductRepository;
 import com.cydeo.service.InvoiceProductService;
 import com.cydeo.service.InvoiceService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -31,7 +35,7 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
     @Override
     public InvoiceProductDTO findById(Long id) {
         InvoiceProduct foundInvoiceProduct = repository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("InvoiceProduct can not found with id: " + id));
+                .orElseThrow(() -> new InvoiceProductNotFoundException("InvoiceProduct can not found with id: " + id));
 
         return mapper.convert(foundInvoiceProduct, new InvoiceProductDTO());
     }
@@ -39,7 +43,6 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
     @Override
     public List<InvoiceProductDTO> findByInvoiceId(Long invoiceId) {
         List<InvoiceProduct> invoiceProductList = repository.findByInvoiceId(invoiceId);
-
 
         List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductList.stream()
                 .map(invoiceProduct -> mapper.convert(invoiceProduct, new InvoiceProductDTO()))
@@ -60,9 +63,9 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
     @Override
     public InvoiceDTO deleteById(Long id) {
         InvoiceProduct invoiceToDelete = repository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("InvoiceProduct can not found with id: " + id));
+                .orElseThrow(() -> new InvoiceProductNotFoundException("InvoiceProduct can not found with id: " + id));
 
-        invoiceToDelete.setIsDeleted( Boolean.TRUE );
+        invoiceToDelete.setIsDeleted(Boolean.TRUE);
 
         InvoiceProduct deleted = repository.save(invoiceToDelete);
         return mapper.convert(deleted, new InvoiceDTO());
@@ -91,11 +94,20 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
     }
 
     @Override
-    public boolean doesProductHaveEnoughStock(InvoiceProductDTO invoiceProductDTO) {
-        if (invoiceProductDTO.getProduct() == null) return false;
-        Integer invoiceProductQuantity = invoiceProductDTO.getQuantity();
-        Integer quantityInStock = invoiceProductDTO.getProduct().getQuantityInStock();
+    public BindingResult doesProductHaveEnoughStock(InvoiceProductDTO invoiceProductDTO, BindingResult bindingResult) {
+        if (invoiceProductDTO.getProduct() != null) {
+            if (invoiceProductDTO.getProduct().getQuantityInStock() != null) {
+                if (invoiceProductDTO.getQuantity() != null) {
+                    Integer invoiceProductQuantity = invoiceProductDTO.getQuantity();
+                    Integer quantityInStock = invoiceProductDTO.getProduct().getQuantityInStock();
+                    if (quantityInStock < invoiceProductQuantity){
+                        ObjectError error = new FieldError("newInvoiceProduct", "product", "Product " + invoiceProductDTO.getProduct().getName() + " has no enough stock!");
 
-        return quantityInStock >= invoiceProductQuantity;//if enough stock available, return true
+                        bindingResult.addError(error);
+                    }
+                }
+            }
+        }
+        return bindingResult;
     }
 }
