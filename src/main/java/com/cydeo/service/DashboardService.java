@@ -1,12 +1,14 @@
 package com.cydeo.service;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 public interface DashboardService {
 
-    BigDecimal totalCost();
-    BigDecimal totalSales();
-    BigDecimal profitLoss();
+    Map<String,BigDecimal> summaryNumbersCalculation();
+
+
+
 
 
 }
