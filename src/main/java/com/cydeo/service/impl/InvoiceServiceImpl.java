@@ -259,13 +259,42 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override  //  ---> Elif add this
     public List<InvoiceDTO> findTop3ByCompanyOrderByDateDesc() {
-
         Company company = mapper.convert(securityService.getLoggedInUser().getCompany(),new Company());
-
         return invoiceRepository.findTop3ByCompanyOrderByDateDesc(company).stream()
-                .map(invoice -> mapper.convert(invoice, new InvoiceDTO()))
+                .map(invoice -> {
+                    InvoiceDTO invoiceDTO = mapper.convert(invoice, new InvoiceDTO());
+                    setInvoicePriceTaxTotal(invoiceDTO);
+                    return invoiceDTO;
+                })
                 .collect(Collectors.toList());
     }
 
+
+
+    private void setInvoicePriceTaxTotal(InvoiceDTO invoiceDTO) {    //  ---> Elif add this
+        //  Retrieve the list of InvoiceProductDTO objects associated with the given invoiceDTO.
+        List<InvoiceProductDTO> invoiceProductS = invoiceProductService.findByInvoiceId(invoiceDTO.getId());
+
+       //  Calculate the total price of all products in the invoice.
+
+        BigDecimal price = invoiceProductS.stream()
+                //// For each InvoiceProductDTO, calculate the product of price and quantity.
+                .map(invoiceProduct-> invoiceProduct.getPrice().multiply(BigDecimal.valueOf(invoiceProduct.getQuantity()))
+                )
+                // Sum up all the calculated products to get the total price.
+                .reduce(BigDecimal::add)// Sum the products.
+                .get(); //Get the final total price.
+
+        //Calculate the total amount (sum) of all products in the invoice.
+        BigDecimal total = invoiceProductS.stream()
+                .map(InvoiceProductDTO::getTotal)// For each InvoiceProductDTO, retrieve the total price.
+                .reduce(BigDecimal::add)// Sum up all the total prices to get the overall total.
+                .get();// Get the final overall total.
+
+       // Update the InvoiceDTO with the calculated price, tax, and total.
+        invoiceDTO.setPrice(price);
+        invoiceDTO.setTax(total.subtract(price));
+        invoiceDTO.setTotal(total);
+    }
 
 }
