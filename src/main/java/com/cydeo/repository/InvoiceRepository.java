@@ -19,7 +19,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     Optional<Invoice> findTopByCompany_TitleAndInvoiceTypeOrderByInvoiceNoDesc(String companyTitle, InvoiceType invoiceType);
 
     //show the last 3 approved invoices of the company  -->Elif add this :)
-    List<Invoice> findTop3ByCompanyOrderByDateDesc(Company company);
+    List<Invoice> findTop3ByCompanyAndInvoiceStatusAndIsDeletedOrderByDateDesc(Company company, InvoiceStatus invoiceStatus,boolean isDeleted);
 
 
 }
