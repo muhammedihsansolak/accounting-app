@@ -1,18 +1,18 @@
 package com.cydeo.service.impl;
 
-import com.cydeo.dto.CompanyDTO;
 import com.cydeo.dto.ProductDTO;
 
 import com.cydeo.entity.Company;
 import com.cydeo.entity.Product;
 
-import com.cydeo.entity.Category;
 
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.ProductRepository;
 import com.cydeo.service.ProductService;
 import com.cydeo.service.SecurityService;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -24,16 +24,12 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final MapperUtil mapperUtil;
-
     private final SecurityService securityService;
-    private final InvoiceProductServiceImpl invoiceProductService;
 
-    public ProductServiceImpl(ProductRepository productRepository, MapperUtil mapperUtil, SecurityService securityService, InvoiceProductServiceImpl invoiceProductService) {
+    public ProductServiceImpl(ProductRepository productRepository, MapperUtil mapperUtil, SecurityService securityService) {
         this.productRepository = productRepository;
         this.mapperUtil = mapperUtil;
         this.securityService = securityService;
-        this.invoiceProductService = invoiceProductService;
-
     }
 
     @Override
@@ -101,11 +97,24 @@ public class ProductServiceImpl implements ProductService {
                 .collect(Collectors.toList());
     }
 
-
     @Override
     public List<ProductDTO> getProductsByCategory(Long id) {
 
-
         return List.of(new ProductDTO());
+    }
+
+    @Override
+    public BindingResult addProductNameValidation(ProductDTO productDTO, BindingResult bindingResult) {
+        Long companyId = securityService.getLoggedInUser().getCompany().getId();
+        if (productDTO.getCategory() != null) {
+            Long categoryId = productDTO.getCategory().getId();
+            // Check if product with the same name exists for the current company
+            if (productRepository.existsByNameAndCategory_IdAndCategory_Company_Id(productDTO.getName(),
+                    categoryId,companyId)) {
+                bindingResult.addError(new FieldError("newProduct", "name",
+                        "Product name \"" + productDTO.getName() + "\" is already in use for this company."));
+            }
+        }
+        return bindingResult;
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Controller
@@ -54,14 +55,21 @@ public class ProductController {
     @GetMapping("/create")
     public String createProduct(Model model){
         model.addAttribute("newProduct", new ProductDTO());
-        model.addAttribute("categories",categoryService.findAll());
-        model.addAttribute("name", productService.listAllProducts());
+        model.addAttribute("categories",categoryService.listAllCategories());
         model.addAttribute("productUnits", List.of(ProductUnit.values()));
         return "/product/product-create";
     }
 
     @PostMapping("/create")
-    public String createProduct(@ModelAttribute("newProduct") ProductDTO productDTO){
+    public String createProduct(@Valid @ModelAttribute("newProduct") ProductDTO productDTO,
+                                BindingResult bindingResult, Model model){
+        bindingResult = productService.addProductNameValidation(productDTO,bindingResult);
+        if (bindingResult.hasFieldErrors()){
+            model.addAttribute("categories",categoryService.listAllCategories());
+            model.addAttribute("productUnits", List.of(ProductUnit.values()));
+            return "/product/product-create";
+
+        }
 
         productService.save(productDTO);
 
