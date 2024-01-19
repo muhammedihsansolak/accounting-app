@@ -29,5 +29,4 @@ public interface CompanyService {
 
     List<String> getCounties();
 
-    String getCountryWithDetail(String ciso);
 }

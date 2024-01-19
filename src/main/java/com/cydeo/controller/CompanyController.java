@@ -9,7 +9,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -28,7 +27,6 @@ public class CompanyController {
     public String createCompany(Model model){
         model.addAttribute("newCompany", new CompanyDTO());
         model.addAttribute("countries",companyService.getCounties());
-//        model.addAttribute("countries", List.of("USA","UK")); // we will consume from third party app
 
         return "/company/company-create";
     }
@@ -42,13 +40,12 @@ public class CompanyController {
 
         if (bindingResult.hasFieldErrors()){
             model.addAttribute("countries",companyService.getCounties());
-//            model.addAttribute("countries", List.of("USA","UK")); // we will consume from third party app
             return "/company/company-create";
         }
 
         companyService.createCompany(newCompany);
 
-        return "redirect:/company/list";
+        return "redirect:/companies/list";
     }
 
     @GetMapping("/update/{companyId}")
@@ -56,7 +53,6 @@ public class CompanyController {
 
         model.addAttribute("company", companyService.findById(companyId));
         model.addAttribute("countries",companyService.getCounties());
-//        model.addAttribute("countries", List.of("USA","UK")); // we will consume from third party app
 
         return "/company/company-update";
     }
@@ -69,7 +65,6 @@ public class CompanyController {
 
         if (bindingResult.hasFieldErrors()){
             model.addAttribute("countries",companyService.getCounties());
-//            model.addAttribute("countries", List.of("USA","UK")); // we will consume from third party app
             return "/company/company-update";
         }
 

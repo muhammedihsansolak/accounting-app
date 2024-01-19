@@ -2,7 +2,6 @@ package com.cydeo.service.impl;
 
 import com.cydeo.FeinClient.CountryClient;
 import com.cydeo.dto.CompanyDTO;
-import com.cydeo.dto.CountryDetailInfoDTO;
 import com.cydeo.dto.CountryInfoDTO;
 import com.cydeo.dto.UserDTO;
 import com.cydeo.entity.Company;
@@ -10,10 +9,8 @@ import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.CompanyRepository;
 import com.cydeo.enums.CompanyStatus;
 
-import com.cydeo.repository.CompanyRepository;
 import com.cydeo.service.CompanyService;
 import com.cydeo.service.SecurityService;
-import com.cydeo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -135,30 +132,16 @@ public class CompanyServiceImpl implements CompanyService {
         return mapperUtil.convert(foundCompany,new CompanyDTO());
 
     }
-
     @Override
     public List<String> getCounties() {
         ResponseEntity<List<CountryInfoDTO>> countries = countryClient.getCountries(countriesApiKey);
         if (countries.getStatusCode().is2xxSuccessful()){
             return countries.getBody().stream()
                     .map(CountryInfoDTO::getName)
-//                    .map(info-> getCountryWithDetail(info.getIso2()))
                     .collect(Collectors.toList());
         }
 //        throw new CountryServiceException("Countries didn't fetched"); // add exception when we do exception handling
        return List.of();
-
-    }
-
-    @Override
-    public String getCountryWithDetail(String ciso) {
-        ResponseEntity<CountryDetailInfoDTO> country = countryClient.getCountryWithDetail(countriesApiKey,ciso);
-        if (country.getStatusCode().is2xxSuccessful()){
-            CountryDetailInfoDTO countryInfo = country.getBody();
-            return countryInfo.getEmoji() + " " + countryInfo.getName();
-        }
-//        throw new CountryServiceException("Countries didn't fetched"); // add exception when we do exception handling
-        return "";
 
     }
 }
