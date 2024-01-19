@@ -1,7 +1,6 @@
 package com.cydeo.converter;
 
 import com.cydeo.dto.CategoryDTO;
-import com.cydeo.entity.Category;
 import com.cydeo.service.CategoryService;
 import org.springframework.stereotype.Component;
 import org.springframework.core.convert.converter.Converter;
@@ -19,6 +18,7 @@ public class CategoryDTOConverter implements Converter <String, CategoryDTO> {
 
     @Override
     public CategoryDTO convert(String id) {
+        if (id.equals("")) return null;
         Long source = Long.valueOf(id);
         return categoryService.findById(source);
 

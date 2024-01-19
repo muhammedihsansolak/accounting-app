@@ -2,8 +2,8 @@ package com.cydeo.service;
 
 import com.cydeo.dto.InvoiceDTO;
 import com.cydeo.dto.InvoiceProductDTO;
+import org.springframework.validation.BindingResult;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public interface InvoiceProductService {
@@ -14,5 +14,5 @@ public interface InvoiceProductService {
 
     InvoiceProductDTO create(InvoiceProductDTO invoiceProductDTO, Long invoiceId);
 
-    boolean doesProductHaveEnoughStock(InvoiceProductDTO invoiceProductDTO);
+    BindingResult doesProductHaveEnoughStock(InvoiceProductDTO invoiceProductDTO, BindingResult bindingResult );
 }
