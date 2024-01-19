@@ -5,22 +5,18 @@ import com.cydeo.dto.ProductDTO;
 
 import com.cydeo.entity.Company;
 import com.cydeo.entity.Product;
-import com.cydeo.entity.User;
-import com.cydeo.enums.ProductUnit;
 
 import com.cydeo.entity.Category;
-import com.cydeo.entity.Product;
 
 import com.cydeo.mapper.MapperUtil;
-import com.cydeo.repository.CategoryRepository;
 import com.cydeo.repository.ProductRepository;
 import com.cydeo.service.ProductService;
 import com.cydeo.service.SecurityService;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,11 +45,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDTO> listAllProducts() {
-
         CompanyDTO companyDTO = securityService.getLoggedInUser().getCompany();
         Company company = mapperUtil.convert(companyDTO, new Company());
-
-        List<Product> productList = productRepository.findAllByCategory_Company(company);
+        List<Product> productList = productRepository.findAllByCompany(company);
         return productList.stream()
                 .map(product -> mapperUtil.convert(product,new ProductDTO()))
                 .collect(Collectors.toList());
@@ -67,12 +61,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void update(Long productId, ProductDTO productDtoToBeUpdated) {
-
-        Product productToBeUpdated = productRepository.findById(productId).orElseThrow();
-        productDtoToBeUpdated.setId(productToBeUpdated.getId());
-        productRepository.save(mapperUtil.convert(productDtoToBeUpdated, new Product()));
-
+    public void update(ProductDTO newProduct) {
+        Optional<Product> oldProduct = productRepository.findById(newProduct.getId());
+        if (oldProduct.isPresent()){
+            newProduct.setQuantityInStock(oldProduct.get().getQuantityInStock());
+            productRepository.save(mapperUtil.convert(newProduct, new Product()));
+        }
     }
 
     @Override
@@ -112,10 +106,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductDTO> getProductsByCategory(Long id) {
 
-        Category category = categoryRepository.findById(id).orElseThrow();
 
-        List<Product> products = productRepository.findByCategory(category);
-
-        return products.stream().map(product -> mapperUtil.convert(product, new ProductDTO())).collect(Collectors.toList());
+        return List.of(new ProductDTO());
     }
 }

@@ -21,8 +21,4 @@ public class ProductDTO {
     private ProductUnit productUnit;
 
     private CategoryDTO category;
-
-    private boolean hasProduct;
-
-
 }
