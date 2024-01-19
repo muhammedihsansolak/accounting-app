@@ -27,7 +27,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
 
 
-    public void generateMonthlyPayments(){
+    public void generateMonthlyPayments() {
         List<Company> companies = companyRepository.findAll();
         companies.removeIf(company -> company.getTitle().equals("CYDEO"));//not generate payment objects for CYDEO
 
@@ -36,16 +36,21 @@ public class PaymentServiceImpl implements PaymentService {
 
         for (Company company : companies) {
             for (Months month : Months.values()) {
-                Payment payment = new Payment();
-                payment.setYear(currentYear);
-                payment.setAmount(BigDecimal.valueOf(250));//monthly subscription fee
-                payment.setPaymentDate(currentDate.withMonth(month.ordinal() + 1)); // Adding 1 because Months enum starts from 0
-                payment.setPaid(false);
-//                payment.setCompanyStripeId(company.getStripeId()); // Set Stripe ID if necessary
-                payment.setMonth(month);
-                payment.setCompany(company);
 
-                paymentRepository.save(payment);
+                // Check if payments for this month have already been generated
+                boolean paymentsGenerated = paymentRepository.existsByCompanyAndMonthAndYear(company, month, currentYear);
+
+                if (!paymentsGenerated) {
+                    Payment payment = new Payment();
+                    payment.setYear(currentYear);
+                    payment.setAmount(BigDecimal.valueOf(250)); // Monthly subscription fee
+                    payment.setPaymentDate(LocalDate.of(currentYear, month.ordinal() + 1, 1)); // Adding 1 because Months enum starts from 0
+                    payment.setPaid(false);
+                    payment.setMonth(month);
+                    payment.setCompany(company);
+
+                    paymentRepository.save(payment);
+                }
             }
         }
     }
