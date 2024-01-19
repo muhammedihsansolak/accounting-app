@@ -38,16 +38,14 @@ public class ProductController {
         ProductDTO productToBeUpdated = productService.findById(id);
         model.addAttribute("product",productToBeUpdated);
         model.addAttribute("categories", categoryService.findAll());
-        model.addAttribute("lowLimitAlert",productService.findById(id).getLowLimitAlert());
+        model.addAttribute("lowLimitAlert",productToBeUpdated.getLowLimitAlert());
         model.addAttribute("productUnits", List.of(ProductUnit.values()));
         return "/product/product-update";
     }
 
     @PostMapping("/update/{id}")
-    public String updateProduct(@PathVariable("id") Long id, @ModelAttribute("product") ProductDTO productDtoToBeUpdated) {
-
-        productService.update(id, productDtoToBeUpdated);
-
+    public String updateProduct(@ModelAttribute("product") ProductDTO product) {
+        productService.update(product);
         return "redirect:/products/list";
     }
 
@@ -59,19 +57,11 @@ public class ProductController {
         model.addAttribute("categories",categoryService.findAll());
         model.addAttribute("name", productService.listAllProducts());
         model.addAttribute("productUnits", List.of(ProductUnit.values()));
-
         return "/product/product-create";
     }
 
     @PostMapping("/create")
-    public String createProduct(@ModelAttribute("product") ProductDTO productDTO, Model model){
-
-
-        model.addAttribute("categories",categoryService.findAll());
-        model.addAttribute("name", productService.listAllProducts());
-        //model.addAttribute("lowLimitAlert", ???);
-        model.addAttribute("productUnits", List.of(ProductUnit.values()));
-
+    public String createProduct(@ModelAttribute("newProduct") ProductDTO productDTO){
 
         productService.save(productDTO);
 
