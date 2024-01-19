@@ -45,9 +45,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDTO> listAllProducts() {
-        CompanyDTO companyDTO = securityService.getLoggedInUser().getCompany();
-        Company company = mapperUtil.convert(companyDTO, new Company());
-        List<Product> productList = productRepository.findAllByCompany(company);
+        Long companyId = securityService.getLoggedInUser().getCompany().getId();
+        List<Product> productList = productRepository.findAllByCompanyId(companyId);
         return productList.stream()
                 .map(product -> mapperUtil.convert(product,new ProductDTO()))
                 .collect(Collectors.toList());
