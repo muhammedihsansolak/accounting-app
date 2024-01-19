@@ -36,6 +36,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     /**
      * Finds invoices by invoiceId based on logged-in user's company. Calculates price, tax amount and total price of the invoice.
+     *
      * @param id
      * @return invoiceDTO
      */
@@ -59,6 +60,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     /**
      * Finds all invoices belongs to logged-in user's company. Calculates price, tax amount and total price of all invoices.
+     *
      * @param invoiceType
      * @return
      */
@@ -75,12 +77,12 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceDTOList = invoiceDTOList.stream()
                 .map(invoice -> {
                     List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceId(invoice.getId());
-                    BigDecimal totalPriceWithoutTax =  calculateTotalPriceWithoutTax(invoiceProductDTOList);
-                    BigDecimal taxAmount =  calculateTax(invoiceProductDTOList);
+                    BigDecimal totalPriceWithoutTax = calculateTotalPriceWithoutTax(invoiceProductDTOList);
+                    BigDecimal taxAmount = calculateTax(invoiceProductDTOList);
 
-                    invoice.setPrice( totalPriceWithoutTax );
-                    invoice.setTax( taxAmount );
-                    invoice.setTotal( totalPriceWithoutTax.add( taxAmount ) );
+                    invoice.setPrice(totalPriceWithoutTax);
+                    invoice.setTax(taxAmount);
+                    invoice.setTotal(totalPriceWithoutTax.add(taxAmount));
 
                     return invoice;
                 })
@@ -96,6 +98,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     /**
      * Calculates total tax amount of the given invoiceProductDTO objects.
+     *
      * @param invoiceProductDTOList
      * @return tax amount (BigDecimal)
      */
@@ -113,6 +116,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     /**
      * Calculates tax amount of the given invoiceProductDTO.
+     *
      * @param invoiceProductDTO
      * @return tax amount (BigDecimal)
      */
@@ -133,14 +137,15 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     /**
      * Calculates total amount (without tax) of the given invoiceProductDTO objects.
+     *
      * @param invoiceProductDTOList
      * @return Total Price Without Tax (BigDecimal)
      */
     private BigDecimal calculateTotalPriceWithoutTax(List<InvoiceProductDTO> invoiceProductDTOList) {
         BigDecimal sum = invoiceProductDTOList.stream()
                 .map(invoiceProductDTO ->
-                        (invoiceProductDTO.getPrice()).multiply(BigDecimal.valueOf(invoiceProductDTO.getQuantity()) ))//total price amount without tax
-                .reduce(BigDecimal.ZERO, BigDecimal::add );
+                        (invoiceProductDTO.getPrice()).multiply(BigDecimal.valueOf(invoiceProductDTO.getQuantity())))//total price amount without tax
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return sum;
 
@@ -148,6 +153,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     /**
      * Updates the invoice. Id, InvoiceStatus, InvoiceType and Company fields are not updated.
+     *
      * @param foundInvoice
      * @param invoiceToUpdate
      */
@@ -155,17 +161,18 @@ public class InvoiceServiceImpl implements InvoiceService {
     // id, invoiceStatus, invoiceType, company details should come from DB
     @Override
     public void update(InvoiceDTO foundInvoice, InvoiceDTO invoiceToUpdate) {
-        invoiceToUpdate.setId( foundInvoice.getId() );
-        invoiceToUpdate.setInvoiceStatus( foundInvoice.getInvoiceStatus() );
-        invoiceToUpdate.setInvoiceType( foundInvoice.getInvoiceType() );
-        invoiceToUpdate.setCompany( foundInvoice.getCompany() );
+        invoiceToUpdate.setId(foundInvoice.getId());
+        invoiceToUpdate.setInvoiceStatus(foundInvoice.getInvoiceStatus());
+        invoiceToUpdate.setInvoiceType(foundInvoice.getInvoiceType());
+        invoiceToUpdate.setCompany(foundInvoice.getCompany());
 
         Invoice converted = mapper.convert(invoiceToUpdate, new Invoice());
-        invoiceRepository.save( converted );
+        invoiceRepository.save(converted);
     }
 
     /**
      * Softly deletes the invoice.
+     *
      * @param invoiceId
      */
     @Override
@@ -174,13 +181,14 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .orElseThrow(() -> new InvoiceNotFoundException("Invoice can not found with id: " + invoiceId));
 
         //delete operation
-        invoiceToDelete.setIsDeleted( Boolean.TRUE );
+        invoiceToDelete.setIsDeleted(Boolean.TRUE);
 
         invoiceRepository.save(invoiceToDelete);
     }
 
     /**
      * Approves the invoice
+     *
      * @param invoiceId
      */
     @Override
@@ -195,6 +203,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     /**
      * Creates a invoice without saving it to database. InvoiceNo and Invoice date will be auto generated.
+     *
      * @param invoiceType
      * @return
      */
@@ -205,21 +214,22 @@ public class InvoiceServiceImpl implements InvoiceService {
         String companyTitle = securityService.getLoggedInUser().getCompany().getTitle();
 
         // Get the latest invoice from the database which belongs to that company
-        Optional<Invoice> latestInvoice = invoiceRepository.findTopByCompany_TitleAndInvoiceTypeOrderByInvoiceNoDesc(companyTitle,invoiceType);
+        Optional<Invoice> latestInvoice = invoiceRepository.findTopByCompany_TitleAndInvoiceTypeOrderByInvoiceNoDesc(companyTitle, invoiceType);
 
         // Generate the new invoice number
         String generatedInvoiceNo = generateNextInvoiceNumber(latestInvoice, invoiceType);
 
         InvoiceDTO invoiceDTO = new InvoiceDTO();
-        invoiceDTO.setInvoiceNo( generatedInvoiceNo );
-        invoiceDTO.setDate( LocalDate.now() );
-        invoiceDTO.setInvoiceType( invoiceType );
+        invoiceDTO.setInvoiceNo(generatedInvoiceNo);
+        invoiceDTO.setDate(LocalDate.now());
+        invoiceDTO.setInvoiceType(invoiceType);
 
         return invoiceDTO;
     }
 
     /**
      * Auto generate method for invoiceNo. Generates next invoiceNo based on last created invoice of a company even if it is deleted.
+     *
      * @param lastInvoice
      * @param invoiceType
      * @return generated invoice bo
@@ -238,6 +248,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     /**
      * Creates invoice. InvoiceNo, invoice date and invoice type should be auto-generated before this method.
+     *
      * @param invoice
      * @param invoiceType
      * @return created invoiceDTO
@@ -248,8 +259,8 @@ public class InvoiceServiceImpl implements InvoiceService {
     public InvoiceDTO create(InvoiceDTO invoice, InvoiceType invoiceType) {
         CompanyDTO company = securityService.getLoggedInUser().getCompany();
 
-        invoice.setInvoiceStatus( InvoiceStatus.AWAITING_APPROVAL );
-        invoice.setCompany( company );
+        invoice.setInvoiceStatus(InvoiceStatus.AWAITING_APPROVAL);
+        invoice.setCompany(company);
         invoice.setInvoiceType(invoiceType);
 
         Invoice invoiceToCreate = mapper.convert(invoice, new Invoice());
@@ -260,38 +271,41 @@ public class InvoiceServiceImpl implements InvoiceService {
 
 
     public List<InvoiceDTO> findTop3ByCompanyOrderByDateDesc() {
+
+        //Get the currently logged-in user
         CompanyDTO logInUser = securityService.getLoggedInUser().getCompany();
 
-        Company company = mapper.convert(logInUser,new Company());
+        //Get the company of the logged-in user
+        Company company = mapper.convert(logInUser, new Company());
 
-
-        List<InvoiceDTO>  invoiceDTOList =  invoiceRepository.findTop3ByCompanyAndInvoiceStatusAndIsDeletedOrderByDateDesc(company,InvoiceStatus.APPROVED,false).stream()
+         // Query the database to find the top 3 invoices based on certain criteria
+        List<InvoiceDTO> invoiceDTOList = invoiceRepository.findTop3ByCompanyAndInvoiceStatusAndIsDeletedOrderByDateDesc(company, InvoiceStatus.APPROVED, false).stream()
                 .map(invoice -> {
                     InvoiceDTO invoiceDTO = mapper.convert(invoice, new InvoiceDTO());
-
                     return invoiceDTO;
                 })
                 .map(invoiceDTO -> {
-
+                    // Retrieve the list of InvoiceProductDTO objects associated with the given invoiceDTO.
                     List<InvoiceProductDTO> invoiceProductsList = invoiceProductService.findByInvoiceId(invoiceDTO.getId());
 
+                    //Calculate the taxAmount, totalPriceWithoutTax , totalPrice
                     BigDecimal taxAmount = calculateTax(invoiceProductsList);
                     BigDecimal totalPriceWithoutTax = calculateTotalPriceWithoutTax(invoiceProductsList);
                     BigDecimal totalPrice = taxAmount.add(totalPriceWithoutTax);
 
+                    // Update the InvoiceDTO with the calculated price, tax, and total.
                     invoiceDTO.setTax(taxAmount);
                     invoiceDTO.setPrice(totalPriceWithoutTax);
                     invoiceDTO.setTotal(totalPrice);
                     return invoiceDTO;
 
-                } )
+                })
                 .collect(Collectors.toList());
 
         return invoiceDTOList;
 
 
     }
-
 
 
 }
