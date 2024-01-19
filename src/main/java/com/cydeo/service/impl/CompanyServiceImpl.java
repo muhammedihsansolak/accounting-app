@@ -1,15 +1,19 @@
 package com.cydeo.service.impl;
 
+import com.cydeo.FeinClient.CountryClient;
 import com.cydeo.dto.CompanyDTO;
+import com.cydeo.dto.CountryInfoDTO;
 import com.cydeo.dto.UserDTO;
 import com.cydeo.entity.Company;
 import com.cydeo.mapper.MapperUtil;
+import com.cydeo.repository.CompanyRepository;
 import com.cydeo.enums.CompanyStatus;
 
-import com.cydeo.repository.CompanyRepository;
 import com.cydeo.service.CompanyService;
 import com.cydeo.service.SecurityService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -27,7 +31,9 @@ public class CompanyServiceImpl implements CompanyService {
     private final SecurityService securityService;
     private final MapperUtil mapperUtil;
     private final CompanyRepository repository;
-
+    private final CountryClient countryClient;
+    @Value("${COUNTRIES_API_KEY}")
+    private String countriesApiKey;
 
     @Override
     public CompanyDTO findById(Long companyId) {
@@ -124,6 +130,18 @@ public class CompanyServiceImpl implements CompanyService {
         Company foundCompany = repository.findByTitle(companyTitle);
 
         return mapperUtil.convert(foundCompany,new CompanyDTO());
+
+    }
+    @Override
+    public List<String> getCounties() {
+        ResponseEntity<List<CountryInfoDTO>> countries = countryClient.getCountries(countriesApiKey);
+        if (countries.getStatusCode().is2xxSuccessful()){
+            return countries.getBody().stream()
+                    .map(CountryInfoDTO::getName)
+                    .collect(Collectors.toList());
+        }
+//        throw new CountryServiceException("Countries didn't fetched"); // add exception when we do exception handling
+       return List.of();
 
     }
 }

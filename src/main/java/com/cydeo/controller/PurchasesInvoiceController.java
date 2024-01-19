@@ -44,7 +44,7 @@ public class PurchasesInvoiceController {
     public String editInvoice(@PathVariable("id")Long id, Model model){
         InvoiceDTO foundInvoice = invoiceService.findById(id);
         List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceId(id);
-        List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.VENDOR);
+        List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findClientVendorByClientVendorTypeAndCompany(ClientVendorType.VENDOR);
 
         model.addAttribute("invoice",foundInvoice);
         model.addAttribute("newInvoiceProduct", new InvoiceProductDTO());
@@ -71,16 +71,12 @@ public class PurchasesInvoiceController {
     @PostMapping("/addInvoiceProduct/{id}")
     public String addInvoiceProduct(@Valid @ModelAttribute("newInvoiceProduct")InvoiceProductDTO invoiceProductDTO, BindingResult bindingResult, @PathVariable("id")Long id, Model model){
 
-        if (!invoiceProductService.doesProductHaveEnoughStock(invoiceProductDTO) && invoiceProductDTO.getProduct() != null){
-            ObjectError error = new FieldError("newInvoiceProduct","product","Product "+ invoiceProductDTO.getProduct().getName()+" has no enough stock!");
-
-            bindingResult.addError(error);
-        }
+        bindingResult = invoiceProductService.doesProductHaveEnoughStock(invoiceProductDTO, bindingResult);
 
         if (bindingResult.hasErrors()) {
             InvoiceDTO foundInvoice = invoiceService.findById(id);
             List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceId(id);
-            List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.VENDOR);
+            List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findClientVendorByClientVendorTypeAndCompany(ClientVendorType.VENDOR );
 
             model.addAttribute("invoice",foundInvoice);
             model.addAttribute("products", productService.listAllProducts());
@@ -122,8 +118,8 @@ public class PurchasesInvoiceController {
      */
     @GetMapping("/create")
     public String createInvoice(Model model){
-        InvoiceDTO invoice = invoiceService.invoiceCreator(InvoiceType.PURCHASE);
-        List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findByClientVendorType(ClientVendorType.VENDOR);
+        InvoiceDTO invoice = invoiceService.invoiceGenerator(InvoiceType.PURCHASE);
+        List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findClientVendorByClientVendorTypeAndCompany(ClientVendorType.VENDOR);
 
         model.addAttribute("newPurchaseInvoice", invoice);
         model.addAttribute("vendors", clientVendorDTOList );
@@ -135,7 +131,14 @@ public class PurchasesInvoiceController {
      * When End-user clicks on SAVE button, a new purchase_invoice should be created in the database and end-user should land the purchase_invoice_update page. (because we only created invoice, but there are no products in it... We need to add them in update page)
      */
     @PostMapping("/create")
-    public String createInvoice(@ModelAttribute("newPurchaseInvoice") InvoiceDTO invoice){
+    public String createInvoice(@Valid @ModelAttribute("newPurchaseInvoice") InvoiceDTO invoice, BindingResult bindingResult, Model model){
+
+        if (bindingResult.hasErrors()){
+            List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findClientVendorByClientVendorTypeAndCompany(ClientVendorType.VENDOR);
+            model.addAttribute("vendors", clientVendorDTOList );
+
+            return "invoice/purchase-invoice-create";
+        }
 
         InvoiceDTO createdInvoice = invoiceService.create(invoice, InvoiceType.PURCHASE);
 
