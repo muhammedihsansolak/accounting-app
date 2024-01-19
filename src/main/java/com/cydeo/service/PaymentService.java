@@ -8,4 +8,6 @@ public interface PaymentService {
 
     List<PaymentDTO> retrieveAllPayments();
 
+    PaymentDTO findById(Long paymentId);
+
 }

@@ -5,6 +5,7 @@ import com.cydeo.dto.PaymentDTO;
 import com.cydeo.entity.Company;
 import com.cydeo.entity.Payment;
 import com.cydeo.enums.Months;
+import com.cydeo.exception.PaymentNotFoundException;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.CompanyRepository;
 import com.cydeo.repository.PaymentRepository;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,6 +44,14 @@ public class PaymentServiceImpl implements PaymentService {
         return paymentList.stream()
                 .map(payment -> mapperUtil.convert(payment, new PaymentDTO()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public PaymentDTO findById(Long paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new PaymentNotFoundException("Payment not found with id: " + paymentId));
+
+        return mapperUtil.convert(payment, new PaymentDTO());
     }
 
     /**
