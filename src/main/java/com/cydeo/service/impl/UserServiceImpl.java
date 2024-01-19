@@ -3,6 +3,8 @@ package com.cydeo.service.impl;
 import com.cydeo.dto.UserDTO;
 import com.cydeo.entity.Company;
 import com.cydeo.entity.User;
+import com.cydeo.exception.CompanyNotFoundException;
+import com.cydeo.exception.UserNotFoundException;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.CompanyRepository;
 import com.cydeo.repository.UserRepository;
@@ -47,7 +49,9 @@ public class UserServiceImpl implements UserService {
         User LoggedInUser = userRepository.findByUsername(auth.getName());
 
         if (LoggedInUser.getId() != 1) {
-            Company company = companyRepository.findById(LoggedInUser.getCompany().getId()).orElseThrow();
+            Company company = companyRepository
+                    .findById(LoggedInUser.getCompany().getId())
+                    .orElseThrow(()-> new CompanyNotFoundException("Company can't found with id "+ LoggedInUser.getCompany().getId() ));
 
             List<User> userList = userRepository.findAllUserWithCompanyAndIsDeleted(company, false);
             return userList.stream().map(user -> mapperUtil.convert(user, new UserDTO())).
@@ -86,13 +90,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO findById(Long id) {
-        User user = userRepository.findById(id).orElseThrow();
+        User user = userRepository.findById(id)
+                .orElseThrow(()->new UserNotFoundException("User can't found with id "+id));
         return mapperUtil.convert(user, new UserDTO());
     }
 
     @Override
     public UserDTO updateUser(UserDTO userDtoToBeUpdate) {
-        User user1 = userRepository.findById(userDtoToBeUpdate.getId()).orElseThrow();
+        User user1 = userRepository.findById(userDtoToBeUpdate.getId())
+                .orElseThrow(()->new UserNotFoundException("User can't found with id "+userDtoToBeUpdate.getId()));
         user1.setUsername(user1.getUsername());
         userRepository.save(user1);
         User convertedUser = mapperUtil.convert(userDtoToBeUpdate, new User());
