@@ -38,14 +38,21 @@ public class ProductController {
     public String editProduct(@PathVariable("id") Long id, Model model){
         ProductDTO productToBeUpdated = productService.findById(id);
         model.addAttribute("product",productToBeUpdated);
-        model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("categories", categoryService.listAllCategories());
         model.addAttribute("lowLimitAlert",productToBeUpdated.getLowLimitAlert());
         model.addAttribute("productUnits", List.of(ProductUnit.values()));
         return "/product/product-update";
     }
 
     @PostMapping("/update/{id}")
-    public String updateProduct(@ModelAttribute("product") ProductDTO product) {
+    public String updateProduct(@Valid @ModelAttribute("product") ProductDTO product,
+                                BindingResult bindingResult, Model model) {
+        bindingResult = productService.addUpdateProductNameValidation(product,bindingResult);
+        if (bindingResult.hasFieldErrors()){
+            model.addAttribute("categories", categoryService.listAllCategories());
+            model.addAttribute("productUnits", List.of(ProductUnit.values()));
+            return "/product/product-update";
+        }
         productService.update(product);
         return "redirect:/products/list";
     }

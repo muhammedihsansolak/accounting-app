@@ -117,4 +117,24 @@ public class ProductServiceImpl implements ProductService {
         }
         return bindingResult;
     }
+
+    @Override
+    public BindingResult addUpdateProductNameValidation(ProductDTO product, BindingResult bindingResult) {
+        Long companyId = securityService.getLoggedInUser().getCompany().getId();
+        Product oldProduct = productRepository.findById(product.getId()).orElseThrow();
+
+        if (product.getCategory() != null ) {
+            if (!product.getCategory().getDescription().equals(oldProduct.getCategory().getDescription())
+                    || !product.getName().equals(oldProduct.getName())) {
+                Long categoryId = product.getCategory().getId();
+                // Check if product with the same name exists for the current company
+                if (productRepository.existsByNameAndCategory_IdAndCategory_Company_Id(product.getName(),
+                        categoryId, companyId)) {
+                    bindingResult.addError(new FieldError("newProduct", "name",
+                            "Product name \"" + product.getName() + "\" is already in use for this company."));
+                }
+            }
+        }
+        return bindingResult;
+    }
 }
