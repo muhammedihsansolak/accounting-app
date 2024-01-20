@@ -11,17 +11,21 @@ import com.cydeo.repository.CompanyRepository;
 import com.cydeo.repository.PaymentRepository;
 import com.cydeo.service.PaymentService;
 import com.cydeo.service.SecurityService;
+import com.stripe.Stripe;
+import com.stripe.exception.StripeException;
+import com.stripe.model.Charge;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +37,15 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final SecurityService securityService;
     private final MapperUtil mapperUtil;
+
+
+    @Value("${STRIPE_SECRET_KEY}")
+    private String secretKey;
+
+    @PostConstruct
+    public void init() {
+        Stripe.apiKey = secretKey;
+    }
 
     @Override
     public List<PaymentDTO> retrieveAllPayments(){
@@ -54,9 +67,11 @@ public class PaymentServiceImpl implements PaymentService {
         return mapperUtil.convert(payment, new PaymentDTO());
     }
 
+
     /**
      * Generates monthly payment for each non-deleted company (does not consider whether company is ACTIVE or not).
      */
+    @Override
     public void generateMonthlyPayments() {
         List<Company> companies = companyRepository.findAll();
         companies.removeIf(company -> company.getTitle().equals("CYDEO"));//not generate payment objects for CYDEO
@@ -96,6 +111,18 @@ public class PaymentServiceImpl implements PaymentService {
     @EventListener(ContextRefreshedEvent.class) //By using @EventListener(ContextRefreshedEvent.class), we ensure that the generateMonthlyPaymentsScheduled method will only be executed after the Spring application context has been fully initialized
     public void generateMonthlyPaymentsScheduled() {
         generateMonthlyPayments();
+    }
+
+    @Override
+    public Charge charge(Payment payment) throws StripeException {
+        Map<String, Object> chargeParams = new HashMap<>();
+
+        chargeParams.put("amount",  payment.getAmount().multiply(BigDecimal.valueOf(100)) );
+        chargeParams.put("currency", Currency.getInstance("USD"));
+        chargeParams.put("description", "Monthly subscription fee for CYDEO Accounting App");
+        chargeParams.put("source", payment.getCompanyStripeId() );
+
+        return Charge.create(chargeParams);
     }
 
 }
