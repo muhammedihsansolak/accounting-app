@@ -29,7 +29,7 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
     private final InvoiceService invoiceService;
     private final ProductService productService;
 
-    public InvoiceProductServiceImpl(InvoiceProductRepository repository, MapperUtil mapper, @Lazy InvoiceService invoiceService, ProductService productService) {
+    public InvoiceProductServiceImpl(InvoiceProductRepository repository, MapperUtil mapper, @Lazy InvoiceService invoiceService, @Lazy ProductService productService) {
         this.repository = repository;
         this.mapper = mapper;
         this.invoiceService = invoiceService;
