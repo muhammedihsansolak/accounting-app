@@ -15,4 +15,6 @@ public interface InvoiceProductService {
     InvoiceProductDTO create(InvoiceProductDTO invoiceProductDTO, Long invoiceId);
 
     BindingResult doesProductHaveEnoughStock(InvoiceProductDTO invoiceProductDTO, BindingResult bindingResult );
+
+    boolean doesProductHasInvoice(Long productId);
 }
