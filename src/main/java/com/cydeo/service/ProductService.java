@@ -3,6 +3,7 @@ package com.cydeo.service;
 import com.cydeo.dto.ProductDTO;
 import com.cydeo.entity.Company;
 import com.cydeo.enums.ProductUnit;
+import org.springframework.validation.BindingResult;
 
 import java.util.List;
 
@@ -23,4 +24,6 @@ public interface ProductService {
     List<ProductDTO> findProductsByCompanyAndHaveStock(Company company);
 
     List<ProductDTO> getProductsByCategory(Long id);
+
+    BindingResult addProductNameValidation(ProductDTO productDTO, BindingResult bindingResult);
 }

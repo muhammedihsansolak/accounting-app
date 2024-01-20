@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final MapperUtil mapperUtil;
-    private final CompanyService companyService;
     private final SecurityService securityService;
     private final ProductService productService;
 
@@ -31,7 +30,6 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryServiceImpl(CategoryRepository categoryRepository, MapperUtil mapperUtil, CompanyService companyService, SecurityService securityService, ProductService productService) {
         this.categoryRepository = categoryRepository;
         this.mapperUtil = mapperUtil;
-        this.companyService = companyService;
         this.securityService = securityService;
         this.productService = productService;
     }
@@ -105,6 +103,5 @@ public class CategoryServiceImpl implements CategoryService {
         return !products.isEmpty();
 
     }
-
 
 }
