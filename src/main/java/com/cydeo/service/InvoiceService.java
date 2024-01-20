@@ -25,6 +25,5 @@ public interface InvoiceService {
 
     List<InvoiceDTO> findTop3ByCompanyOrderByDateDesc(); //-->Elif added
 
-
-
+    boolean existsByClientVendorId (Long id);
 }

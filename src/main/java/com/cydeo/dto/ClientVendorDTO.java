@@ -40,6 +40,7 @@ public class ClientVendorDTO {
 
     @Valid
     private AddressDTO address;
+
     private boolean hasInvoice;
 
 

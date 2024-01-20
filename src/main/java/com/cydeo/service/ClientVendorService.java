@@ -1,6 +1,5 @@
 package com.cydeo.service;
 import com.cydeo.dto.ClientVendorDTO;
-import com.cydeo.entity.Company;
 import com.cydeo.enums.ClientVendorType;
 import org.springframework.validation.BindingResult;
 
@@ -15,10 +14,10 @@ public interface ClientVendorService {
     ClientVendorDTO update(Long id , ClientVendorDTO clientVendorDTO);
     List<ClientVendorDTO> getAllClientVendors();
     void delete (Long Id);
-
-
     List<ClientVendorDTO> findClientVendorByClientVendorTypeAndCompany(ClientVendorType clientVendorType);
 
     BindingResult addTypeValidation(String type, BindingResult bindingResult);
+
+    boolean isClientHasInvoice(Long id);
 
 }
