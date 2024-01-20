@@ -94,6 +94,18 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public void increaseProductQuantityInStock(Long id, Integer quantity) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(()-> new NoSuchElementException("Product not found with id: " + id));
+
+        int newQuantity = product.getQuantityInStock() + quantity;//increase stock quantity
+
+        product.setQuantityInStock(newQuantity);
+
+        productRepository.save(product);
+    }
+
+    @Override
     public List<ProductDTO> findProductsByCompanyAndHaveStock(Company company) {
         List<Product> products = productRepository.findAllByCategory_CompanyAndQuantityInStockGreaterThan(company, 0);
 
