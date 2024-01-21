@@ -2,6 +2,7 @@ package com.cydeo.service.impl;
 
 import com.cydeo.dto.CompanyDTO;
 import com.cydeo.dto.PaymentDTO;
+import com.cydeo.dto.request.ChargeRequest;
 import com.cydeo.entity.Company;
 import com.cydeo.entity.Payment;
 import com.cydeo.enums.Months;
@@ -23,7 +24,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -48,7 +51,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public List<PaymentDTO> retrieveAllPayments(){
+    public List<PaymentDTO> retrieveAllPayments() {
         CompanyDTO companyDTO = securityService.getLoggedInUser().getCompany();
         Company company = mapperUtil.convert(companyDTO, new Company());
 
@@ -102,27 +105,41 @@ public class PaymentServiceImpl implements PaymentService {
 
     /**
      * Scheduled method for generating monthly payments.
-     *
+     * <p>
      * This method is triggered in two ways:
      * - First, it is executed when the application starts and the application context is ready.
      * - Then, it runs on the 1st day of each month.
      */
     @Scheduled(cron = "0 0 1 1 * ?") // Run at 1:00 AM on the 1st day of each month
-    @EventListener(ContextRefreshedEvent.class) //By using @EventListener(ContextRefreshedEvent.class), we ensure that the generateMonthlyPaymentsScheduled method will only be executed after the Spring application context has been fully initialized
+    @EventListener(ContextRefreshedEvent.class)
+    //By using @EventListener(ContextRefreshedEvent.class), we ensure that the generateMonthlyPaymentsScheduled method will only be executed after the Spring application context has been fully initialized
     public void generateMonthlyPaymentsScheduled() {
         generateMonthlyPayments();
     }
 
     @Override
-    public Charge charge(Payment payment) throws StripeException {
+    @Transactional
+    public Charge charge(ChargeRequest request, Long paymentId) throws StripeException {
         Map<String, Object> chargeParams = new HashMap<>();
 
-        chargeParams.put("amount",  payment.getAmount().multiply(BigDecimal.valueOf(100)) );
-        chargeParams.put("currency", Currency.getInstance("USD"));
-        chargeParams.put("description", "Monthly subscription fee for CYDEO Accounting App");
-        chargeParams.put("source", payment.getCompanyStripeId() );
+        chargeParams.put("amount", request.getAmount().multiply(BigInteger.valueOf(100)));//amount should be cents
+        chargeParams.put("currency", request.getCurrency());
+        chargeParams.put("description", request.getDescription());
+        chargeParams.put("source", request.getStripeToken());
 
-        return Charge.create(chargeParams);
+        try {
+            Charge charge = Charge.create(chargeParams);
+            if (charge.getStatus().equals("succeeded")) {
+                PaymentDTO paymentDTO = findById(paymentId);
+                Payment convertedPayment = mapperUtil.convert(paymentDTO, new Payment());
+                convertedPayment.setPaid(Boolean.TRUE);
+                paymentRepository.save(convertedPayment);
+                return charge;
+            }
+        } catch (StripeException e) {
+            e.printStackTrace();
+        }
+        return new Charge();
     }
 
 }

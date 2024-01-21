@@ -1,7 +1,9 @@
 package com.cydeo.controller;
 
 import com.cydeo.dto.PaymentDTO;
+import com.cydeo.dto.request.ChargeRequest;
 import com.cydeo.entity.Payment;
+import com.cydeo.enums.Currency;
 import com.cydeo.service.PaymentService;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.annotation.PostConstruct;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -46,17 +49,21 @@ public class PaymentController {
     public String pay(@PathVariable("paymentId")Long paymentId, Model model){
         PaymentDTO paymentDTO = paymentService.findById(paymentId);
 
-        model.addAttribute("amount", paymentDTO.getAmount().unscaledValue());
+        model.addAttribute("amount", paymentDTO.getAmount().multiply(BigDecimal.valueOf(100)));
         model.addAttribute("stripePublicKey", stripePublicKey);
-        model.addAttribute("currency", "USD");
+        model.addAttribute("currency", Currency.USD);
+        model.addAttribute("modelId", paymentDTO.getId());
 
         return "payment/payment-method";
     }
 
-    @PostMapping("/charge")
-    public String charge(Payment payment, Model model) throws StripeException {
+    @PostMapping("/charge/{paymentId}")
+    public String charge(ChargeRequest request, Model model, @PathVariable("paymentId") Long paymentId ) throws StripeException {
 
-        Charge charge = paymentService.charge(payment);
+        request.setCurrency(Currency.USD);
+        request.setDescription("Monthly subscription fee for CYDEO Accounting App");
+
+        Charge charge = paymentService.charge(request, paymentId);
 
         model.addAttribute("id", charge.getId());
         model.addAttribute("status", charge.getStatus());

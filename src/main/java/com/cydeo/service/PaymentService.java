@@ -1,6 +1,7 @@
 package com.cydeo.service;
 
 import com.cydeo.dto.PaymentDTO;
+import com.cydeo.dto.request.ChargeRequest;
 import com.cydeo.entity.Payment;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Charge;
@@ -15,6 +16,6 @@ public interface PaymentService {
 
     PaymentDTO findById(Long paymentId);
 
-    Charge charge(Payment payment) throws StripeException;
+    Charge charge(ChargeRequest chargeRequest, Long paymentId) throws StripeException;
 
 }
