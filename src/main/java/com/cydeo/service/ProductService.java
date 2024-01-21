@@ -26,4 +26,6 @@ public interface ProductService {
     List<ProductDTO> getProductsByCategory(Long id);
 
     BindingResult addProductNameValidation(ProductDTO productDTO, BindingResult bindingResult);
+
+    BindingResult addUpdateProductNameValidation(ProductDTO product, BindingResult bindingResult);
 }

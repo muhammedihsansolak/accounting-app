@@ -8,8 +8,10 @@ import com.cydeo.entity.Product;
 
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.ProductRepository;
+import com.cydeo.service.InvoiceProductService;
 import com.cydeo.service.ProductService;
 import com.cydeo.service.SecurityService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -20,17 +22,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
-
     private final ProductRepository productRepository;
     private final MapperUtil mapperUtil;
     private final SecurityService securityService;
-
-    public ProductServiceImpl(ProductRepository productRepository, MapperUtil mapperUtil, SecurityService securityService) {
-        this.productRepository = productRepository;
-        this.mapperUtil = mapperUtil;
-        this.securityService = securityService;
-    }
+    private final InvoiceProductService invoiceProductService;
 
     @Override
     public ProductDTO findById(Long id) {
@@ -65,11 +62,19 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Long productId) {
+        Optional<Product> productToBeDeleted = productRepository.findById(productId);
+        if (productToBeDeleted.isPresent()){
+            if (productToBeDeleted.get().getQuantityInStock()==0 && isProductNotHasInvoice(productId)) {
+                productToBeDeleted.get().setIsDeleted(true);
+                productRepository.save(productToBeDeleted.get());
+            }
+        }
 
-        Product productToBeDeleted = productRepository.findById(id).get();
-        productToBeDeleted.setIsDeleted(true);
-        productRepository.save(productToBeDeleted);
+    }
+
+    private boolean isProductNotHasInvoice(Long productId) {
+        return !invoiceProductService.doesProductHasInvoice(productId);
     }
 
     @Override
@@ -113,6 +118,26 @@ public class ProductServiceImpl implements ProductService {
                     categoryId,companyId)) {
                 bindingResult.addError(new FieldError("newProduct", "name",
                         "Product name \"" + productDTO.getName() + "\" is already in use for this company."));
+            }
+        }
+        return bindingResult;
+    }
+
+    @Override
+    public BindingResult addUpdateProductNameValidation(ProductDTO product, BindingResult bindingResult) {
+        Long companyId = securityService.getLoggedInUser().getCompany().getId();
+        Product oldProduct = productRepository.findById(product.getId()).orElseThrow();
+
+        if (product.getCategory() != null ) {
+            if (!product.getCategory().getDescription().equals(oldProduct.getCategory().getDescription())
+                    || !product.getName().equals(oldProduct.getName())) {
+                Long categoryId = product.getCategory().getId();
+                // Check if product with the same name exists for the current company
+                if (productRepository.existsByNameAndCategory_IdAndCategory_Company_Id(product.getName(),
+                        categoryId, companyId)) {
+                    bindingResult.addError(new FieldError("newProduct", "name",
+                            "Product name \"" + product.getName() + "\" is already in use for this company."));
+                }
             }
         }
         return bindingResult;
