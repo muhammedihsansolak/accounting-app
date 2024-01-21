@@ -20,6 +20,6 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
     //show the last 3 approved invoices of the company  -->Elif add this :)
     List<Invoice> findTop3ByCompanyAndInvoiceStatusAndIsDeletedOrderByDateDesc(Company company, InvoiceStatus invoiceStatus,boolean isDeleted);
-
+    boolean existsByClientVendorId (Long id);
 
 }
