@@ -4,6 +4,7 @@ import com.cydeo.entity.common.UserPrincipal;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.security.core.Authentication;
@@ -48,5 +49,14 @@ public class LoggingAspect {
                 , getCompany().getCompanyTitleForProfile()
                 , getUserFirstNameLastNameAndUserName()
                 , results.toString());
+
+    }
+
+    @AfterThrowing(pointcut = "execution(* com.cydeo..*.*(..))", throwing = "runtimeException")
+    public void afterThrowingException(JoinPoint joinPoint, RuntimeException runtimeException) {
+        log.error("After Throwing -> Method name: {}, Exception: {}, Message: {}",
+                joinPoint.getSignature().toShortString(),
+                runtimeException.getClass().getSimpleName(),
+                runtimeException.getMessage());
     }
 }
