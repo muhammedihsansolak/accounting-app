@@ -110,7 +110,7 @@ public class InvoiceServiceImplUnitTest {
 
 
     @Test
-    void should_recognize_loggedInUser(){
+    void should_find_All_Invoices(){
 
         UserDTO loggedInUser = new UserDTO();
         CompanyDTO companyDTO =new CompanyDTO();
@@ -135,10 +135,6 @@ public class InvoiceServiceImplUnitTest {
         List<InvoiceDTO> result = invoiceServiceImpl.findAllInvoices(InvoiceType.SALES);
 
         assertNotNull(result);
-
-
-
-
 
     }
 
