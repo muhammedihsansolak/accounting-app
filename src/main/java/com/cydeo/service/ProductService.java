@@ -21,6 +21,8 @@ public interface ProductService {
 
     void decreaseProductQuantityInStock(Long id, Integer quantity);
 
+    void increaseProductQuantityInStock(Long id, Integer quantity);
+
     List<ProductDTO> findProductsByCompanyAndHaveStock(Company company);
 
     List<ProductDTO> getProductsByCategory(Long id);
