@@ -132,7 +132,9 @@ public class PaymentServiceImpl implements PaymentService {
             if (charge.getStatus().equals("succeeded")) {
                 PaymentDTO paymentDTO = findById(paymentId);
                 Payment convertedPayment = mapperUtil.convert(paymentDTO, new Payment());
+
                 convertedPayment.setPaid(Boolean.TRUE);
+                convertedPayment.setCompanyStripeId(charge.getId());
                 paymentRepository.save(convertedPayment);
                 return charge;
             }
