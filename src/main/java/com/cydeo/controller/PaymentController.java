@@ -71,7 +71,7 @@ public class PaymentController {
         model.addAttribute("balance_transaction", charge.getBalanceTransaction());
 
         if (charge.getId()==null){
-            model.addAttribute("error", "Transaction Failed");
+            model.addAttribute("error", "Transaction Failed. Please try again!");
         }
 
         return "payment/payment-result";
