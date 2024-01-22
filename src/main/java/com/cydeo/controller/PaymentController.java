@@ -70,6 +70,10 @@ public class PaymentController {
         model.addAttribute("chargeId", charge.getId());
         model.addAttribute("balance_transaction", charge.getBalanceTransaction());
 
+        if (charge.getId()==null){
+            model.addAttribute("error", "Transaction Failed");
+        }
+
         return "payment/payment-result";
     }
 
