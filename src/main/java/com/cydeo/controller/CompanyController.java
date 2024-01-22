@@ -1,5 +1,6 @@
 package com.cydeo.controller;
 
+import com.cydeo.annotation.LoggingAnnotation;
 import com.cydeo.dto.CompanyDTO;
 import com.cydeo.service.CompanyService;
 import lombok.RequiredArgsConstructor;
@@ -71,6 +72,7 @@ public class CompanyController {
         companyService.updateCompany(company);
         return "redirect:/companies/list";
     }
+    @LoggingAnnotation
     @GetMapping("/activate/{company_id}")
     public String activateCompany(@PathVariable("company_id") long company_id, Model model){
         companyService.activateCompany(company_id);
@@ -78,6 +80,7 @@ public class CompanyController {
         return "redirect:/companies/list";
     }
 
+    @LoggingAnnotation
     @GetMapping("/deactivate/{company_id}")
     public String deactivateCompany(@PathVariable("company_id") long company_id, Model model){
         companyService.deactivateCompany(company_id);
