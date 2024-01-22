@@ -5,6 +5,7 @@ import com.cydeo.dto.CompanyDTO;
 import com.cydeo.dto.ProductDTO;
 import com.cydeo.entity.Category;
 import com.cydeo.entity.Company;
+import com.cydeo.exception.CategoryNotFoundException;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.CategoryRepository;
 import com.cydeo.service.CategoryService;
@@ -23,7 +24,6 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final MapperUtil mapperUtil;
-    private final CompanyService companyService;
     private final SecurityService securityService;
     private final ProductService productService;
 
@@ -31,7 +31,6 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryServiceImpl(CategoryRepository categoryRepository, MapperUtil mapperUtil, CompanyService companyService, SecurityService securityService, ProductService productService) {
         this.categoryRepository = categoryRepository;
         this.mapperUtil = mapperUtil;
-        this.companyService = companyService;
         this.securityService = securityService;
         this.productService = productService;
     }
@@ -40,7 +39,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDTO findById(Long id) {
         Optional<Category> category = categoryRepository.findById(id);
-        return mapperUtil.convert(category, new CategoryDTO());
+        return mapperUtil.convert(category.orElseThrow(() ->
+                new CategoryNotFoundException("Category not found with id: " + id)), new CategoryDTO());
     }
 
     @Override
@@ -67,14 +67,12 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.save(category);
         return mapperUtil.convert(category, new CategoryDTO());
 
-
     }
-
 
     @Override
     public CategoryDTO update(CategoryDTO dto, Long id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Category cannot found with id: " + id));
+                .orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + id));
 
         Category convertedCategory = mapperUtil.convert(dto, new Category());
 
@@ -93,10 +91,11 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void delete(Long id) {
-        Category byId = categoryRepository.findById(id).orElseThrow();
-        byId.setIsDeleted(Boolean.TRUE);
-        categoryRepository.save(byId);
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + id));
 
+        category.setIsDeleted(Boolean.TRUE);
+        categoryRepository.save(category);
     }
 
     @Override
@@ -105,6 +104,5 @@ public class CategoryServiceImpl implements CategoryService {
         return !products.isEmpty();
 
     }
-
 
 }

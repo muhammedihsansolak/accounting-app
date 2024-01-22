@@ -85,11 +85,9 @@ public class ClientVendorController {
   }
 
     @GetMapping("/delete/{id}")
-    public String deleteClientVendor(@PathVariable("id") Long id) {
+    public String deleteClientVendor(@PathVariable("id") Long id, Model model) {
+        boolean hasInvoice = clientVendorService.isClientHasInvoice(id);
         clientVendorService.delete(id);
         return "redirect:/clientVendors/list";
-
-
     }
-
 }

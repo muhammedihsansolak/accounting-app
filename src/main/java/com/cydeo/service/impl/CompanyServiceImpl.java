@@ -10,6 +10,7 @@ import com.cydeo.repository.CompanyRepository;
 import com.cydeo.enums.CompanyStatus;
 
 import com.cydeo.service.CompanyService;
+import com.cydeo.service.PaymentService;
 import com.cydeo.service.SecurityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +33,7 @@ public class CompanyServiceImpl implements CompanyService {
     private final MapperUtil mapperUtil;
     private final CompanyRepository repository;
     private final CountryClient countryClient;
+    private final PaymentService paymentService;
     @Value("${COUNTRIES_API_KEY}")
     private String countriesApiKey;
 
@@ -86,6 +88,8 @@ public class CompanyServiceImpl implements CompanyService {
         public CompanyDTO createCompany (CompanyDTO newCompany){
             newCompany.setCompanyStatus(CompanyStatus.PASSIVE);
             Company savedCompany = repository.save(mapperUtil.convert(newCompany, new Company()));
+
+            paymentService.generateMonthlyPayments();//if a new company created we should generate monthly payments for this company
 
             return mapperUtil.convert(savedCompany, new CompanyDTO());
         }

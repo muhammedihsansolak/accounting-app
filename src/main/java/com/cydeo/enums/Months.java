@@ -19,6 +19,6 @@ public enum Months {
     NOVEMBER("November"),
     DECEMBER("December");
 
-    private final String monthName;
+    private final String value;
 
 }

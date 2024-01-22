@@ -71,8 +71,6 @@ public class PurchasesInvoiceController {
     @PostMapping("/addInvoiceProduct/{id}")
     public String addInvoiceProduct(@Valid @ModelAttribute("newInvoiceProduct")InvoiceProductDTO invoiceProductDTO, BindingResult bindingResult, @PathVariable("id")Long id, Model model){
 
-        bindingResult = invoiceProductService.doesProductHaveEnoughStock(invoiceProductDTO, bindingResult);
-
         if (bindingResult.hasErrors()) {
             InvoiceDTO foundInvoice = invoiceService.findById(id);
             List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceId(id);

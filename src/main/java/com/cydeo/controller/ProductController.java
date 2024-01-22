@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Controller
@@ -37,17 +38,22 @@ public class ProductController {
     public String editProduct(@PathVariable("id") Long id, Model model){
         ProductDTO productToBeUpdated = productService.findById(id);
         model.addAttribute("product",productToBeUpdated);
-        model.addAttribute("categories", categoryService.findAll());
-        model.addAttribute("lowLimitAlert",productService.findById(id).getLowLimitAlert());
+        model.addAttribute("categories", categoryService.listAllCategories());
+        model.addAttribute("lowLimitAlert",productToBeUpdated.getLowLimitAlert());
         model.addAttribute("productUnits", List.of(ProductUnit.values()));
         return "/product/product-update";
     }
 
     @PostMapping("/update/{id}")
-    public String updateProduct(@PathVariable("id") Long id, @ModelAttribute("product") ProductDTO productDtoToBeUpdated) {
-
-        productService.update(id, productDtoToBeUpdated);
-
+    public String updateProduct(@Valid @ModelAttribute("product") ProductDTO product,
+                                BindingResult bindingResult, Model model) {
+        bindingResult = productService.addUpdateProductNameValidation(product,bindingResult);
+        if (bindingResult.hasFieldErrors()){
+            model.addAttribute("categories", categoryService.listAllCategories());
+            model.addAttribute("productUnits", List.of(ProductUnit.values()));
+            return "/product/product-update";
+        }
+        productService.update(product);
         return "redirect:/products/list";
     }
 
@@ -56,22 +62,21 @@ public class ProductController {
     @GetMapping("/create")
     public String createProduct(Model model){
         model.addAttribute("newProduct", new ProductDTO());
-        model.addAttribute("categories",categoryService.findAll());
-        model.addAttribute("name", productService.listAllProducts());
+        model.addAttribute("categories",categoryService.listAllCategories());
         model.addAttribute("productUnits", List.of(ProductUnit.values()));
-
         return "/product/product-create";
     }
 
     @PostMapping("/create")
-    public String createProduct(@ModelAttribute("product") ProductDTO productDTO, Model model){
+    public String createProduct(@Valid @ModelAttribute("newProduct") ProductDTO productDTO,
+                                BindingResult bindingResult, Model model){
+        bindingResult = productService.addProductNameValidation(productDTO,bindingResult);
+        if (bindingResult.hasFieldErrors()){
+            model.addAttribute("categories",categoryService.listAllCategories());
+            model.addAttribute("productUnits", List.of(ProductUnit.values()));
+            return "/product/product-create";
 
-
-        model.addAttribute("categories",categoryService.findAll());
-        model.addAttribute("name", productService.listAllProducts());
-        //model.addAttribute("lowLimitAlert", ???);
-        model.addAttribute("productUnits", List.of(ProductUnit.values()));
-
+        }
 
         productService.save(productDTO);
 

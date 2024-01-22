@@ -8,6 +8,7 @@ import com.cydeo.enums.ClientVendorType;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.entity.ClientVendor;
 import com.cydeo.service.ClientVendorService;
+import com.cydeo.service.InvoiceService;
 import com.cydeo.service.SecurityService;
 import org.springframework.stereotype.Service;
 import com.cydeo.repository.ClientVendorRepository;
@@ -16,6 +17,7 @@ import org.springframework.validation.FieldError;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -27,14 +29,14 @@ public class ClientVendorServiceImpl implements ClientVendorService {
     private final ClientVendorRepository clientVendorRepository;
     private final MapperUtil mapperUtil;
     private final SecurityService securityService;
+    private final InvoiceService invoiceService;
 
-    public ClientVendorServiceImpl(ClientVendorRepository clientVendorRepository, MapperUtil mapperUtil, SecurityService securityService) {
+    public ClientVendorServiceImpl(ClientVendorRepository clientVendorRepository, MapperUtil mapperUtil, SecurityService securityService, InvoiceService invoiceService) {
         this.clientVendorRepository = clientVendorRepository;
         this.mapperUtil = mapperUtil;
         this.securityService = securityService;
+        this.invoiceService = invoiceService;
     }
-
-
 
     @Override
     public ClientVendorDTO findById(Long id) {
@@ -43,14 +45,17 @@ public class ClientVendorServiceImpl implements ClientVendorService {
         return mapperUtil.convert(clientVendor,new ClientVendorDTO());
     }
 
-
-
     @Override
     public List<ClientVendorDTO> getAllClientVendors() {
         UserDTO loggedInUser = securityService.getLoggedInUser();
         List<ClientVendor> clientVendors = clientVendorRepository.findAllByCompanyId(loggedInUser.getCompany().getId());
         return clientVendors.stream().map
-                        (clientVendor -> mapperUtil.convert(clientVendor,new ClientVendorDTO()))
+                        (clientVendor -> {
+                            boolean hasInvoice = isClientHasInvoice(clientVendor.getId());
+                            ClientVendorDTO convert = mapperUtil.convert(clientVendor, new ClientVendorDTO());
+                           convert.setHasInvoice(hasInvoice);
+                                return convert;
+                        })
                 .collect(Collectors.toList());
     }
 
@@ -81,18 +86,21 @@ public class ClientVendorServiceImpl implements ClientVendorService {
         return mapperUtil.convert(saved, new ClientVendorDTO());
     }
 
-
     @Override
     public void delete(Long id) {
-        ClientVendor byId = clientVendorRepository.findById(id).orElseThrow();
-        byId.setIsDeleted(Boolean.TRUE);
-        clientVendorRepository.save(byId);
 
+       Optional<ClientVendor> clientVendorToBeDeleted = clientVendorRepository.findById(id);
+        if (clientVendorToBeDeleted.isPresent()){
+            if (!invoiceService.existsByClientVendorId(id)) {
+                clientVendorToBeDeleted.get().setIsDeleted(true);
+                clientVendorRepository.save(clientVendorToBeDeleted.get());
+            }else {
+                ClientVendorDTO clientVendorDTO =mapperUtil.convert(clientVendorToBeDeleted, new ClientVendorDTO());
+                clientVendorDTO.setHasInvoice(true);
+            }
+        }
 
     }
-
-
-
 
    @Override
     public List<ClientVendorDTO> findClientVendorByClientVendorTypeAndCompany(ClientVendorType clientVendorType) {
@@ -105,8 +113,6 @@ public class ClientVendorServiceImpl implements ClientVendorService {
                 .collect(Collectors.toList());
     }
 
-
-
     @Override
     public BindingResult addTypeValidation(String type, BindingResult bindingResult) {
         if (clientVendorRepository.existsByClientVendorName(type)) {
@@ -117,9 +123,10 @@ public class ClientVendorServiceImpl implements ClientVendorService {
 
     }
 
-
-
-
+    @Override
+    public boolean isClientHasInvoice(Long id) {
+        return invoiceService.existsByClientVendorId(id);
+    }
 
 }
 
