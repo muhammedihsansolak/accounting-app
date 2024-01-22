@@ -3,11 +3,14 @@ package com.cydeo.service.impl;
 import com.cydeo.dto.InvoiceDTO;
 import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.entity.InvoiceProduct;
+import com.cydeo.entity.Product;
+import com.cydeo.enums.InvoiceType;
 import com.cydeo.exception.InvoiceProductNotFoundException;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.InvoiceProductRepository;
 import com.cydeo.service.InvoiceProductService;
 import com.cydeo.service.InvoiceService;
+import com.cydeo.service.ProductService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
@@ -16,7 +19,6 @@ import org.springframework.validation.ObjectError;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,11 +27,13 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
     private final InvoiceProductRepository repository;
     private final MapperUtil mapper;
     private final InvoiceService invoiceService;
+    private final ProductService productService;
 
-    public InvoiceProductServiceImpl(InvoiceProductRepository repository, MapperUtil mapper, @Lazy InvoiceService invoiceService) {
+    public InvoiceProductServiceImpl(InvoiceProductRepository repository, MapperUtil mapper, @Lazy InvoiceService invoiceService, @Lazy ProductService productService) {
         this.repository = repository;
         this.mapper = mapper;
         this.invoiceService = invoiceService;
+        this.productService = productService;
     }
 
     @Override

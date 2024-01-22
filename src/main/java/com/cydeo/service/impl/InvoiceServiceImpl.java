@@ -1,9 +1,6 @@
 package com.cydeo.service.impl;
 
-import com.cydeo.dto.CompanyDTO;
-import com.cydeo.dto.InvoiceDTO;
-import com.cydeo.dto.InvoiceProductDTO;
-import com.cydeo.dto.UserDTO;
+import com.cydeo.dto.*;
 import com.cydeo.entity.Company;
 import com.cydeo.entity.Invoice;
 import com.cydeo.enums.InvoiceStatus;
@@ -19,7 +16,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -29,10 +25,9 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     private final InvoiceRepository invoiceRepository;
     private final MapperUtil mapper;
-    private final UserService userService;
     private final SecurityService securityService;
     private final InvoiceProductService invoiceProductService;
-    private final CompanyService companyService;
+    private final ProductService productService;
 
     /**
      * Finds invoices by invoiceId based on logged-in user's company. Calculates price, tax amount and total price of the invoice.
@@ -199,6 +194,30 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceToApprove.setInvoiceStatus(InvoiceStatus.APPROVED);
 
         invoiceRepository.save(invoiceToApprove);
+
+        List<InvoiceProductDTO> invoiceProductList = invoiceProductService.findByInvoiceId(invoiceToApprove.getId());
+
+        if (invoiceToApprove.getInvoiceType() == InvoiceType.SALES) {
+            decreaseProductRemainingQuantity(invoiceProductList);
+        } else if (invoiceToApprove.getInvoiceType() == InvoiceType.PURCHASE) {
+            increaseProductRemainingQuantity(invoiceProductList);
+        }
+    }
+
+    private void decreaseProductRemainingQuantity(List<InvoiceProductDTO> invoiceProductList) {
+        invoiceProductList.forEach(invoiceProductDTO -> {
+            ProductDTO product = invoiceProductDTO.getProduct();
+            Integer quantity = invoiceProductDTO.getQuantity();
+            productService.decreaseProductQuantityInStock(product.getId(), quantity);
+        });
+    }
+
+    private void increaseProductRemainingQuantity(List<InvoiceProductDTO> invoiceProductList) {
+        invoiceProductList.forEach(invoiceProductDTO -> {
+            ProductDTO product = invoiceProductDTO.getProduct();
+            Integer quantity = invoiceProductDTO.getQuantity();
+            productService.increaseProductQuantityInStock(product.getId(), quantity);
+        });
     }
 
     /**
