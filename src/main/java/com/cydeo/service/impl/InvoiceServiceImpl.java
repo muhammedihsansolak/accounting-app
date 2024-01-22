@@ -16,7 +16,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -196,14 +195,29 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         invoiceRepository.save(invoiceToApprove);
 
-        if (invoiceToApprove.getInvoiceType() == InvoiceType.SALES){
-            List<InvoiceProductDTO> invoiceProductList = invoiceProductService.findByInvoiceId(invoiceToApprove.getId());
-            invoiceProductList.stream().forEach(invoiceProductDTO -> {
-                ProductDTO product = invoiceProductDTO.getProduct();
-                Integer quantity = invoiceProductDTO.getQuantity();
-                productService.decreaseProductQuantityInStock(product.getId(), quantity);
-            });
+        List<InvoiceProductDTO> invoiceProductList = invoiceProductService.findByInvoiceId(invoiceToApprove.getId());
+
+        if (invoiceToApprove.getInvoiceType() == InvoiceType.SALES) {
+            decreaseProductRemainingQuantity(invoiceProductList);
+        } else if (invoiceToApprove.getInvoiceType() == InvoiceType.PURCHASE) {
+            increaseProductRemainingQuantity(invoiceProductList);
         }
+    }
+
+    private void decreaseProductRemainingQuantity(List<InvoiceProductDTO> invoiceProductList) {
+        invoiceProductList.forEach(invoiceProductDTO -> {
+            ProductDTO product = invoiceProductDTO.getProduct();
+            Integer quantity = invoiceProductDTO.getQuantity();
+            productService.decreaseProductQuantityInStock(product.getId(), quantity);
+        });
+    }
+
+    private void increaseProductRemainingQuantity(List<InvoiceProductDTO> invoiceProductList) {
+        invoiceProductList.forEach(invoiceProductDTO -> {
+            ProductDTO product = invoiceProductDTO.getProduct();
+            Integer quantity = invoiceProductDTO.getQuantity();
+            productService.increaseProductQuantityInStock(product.getId(), quantity);
+        });
     }
 
     /**

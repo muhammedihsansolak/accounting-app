@@ -94,12 +94,6 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
         invoiceProduct.setId(null);//bug fix
         InvoiceProduct savedInvoice = repository.save(invoiceProduct);
 
-
-        Product product = invoiceProduct.getProduct();
-        if (invoiceDTO.getInvoiceType() == InvoiceType.PURCHASE){
-            productService.increaseProductQuantityInStock(product.getId(), invoiceProduct.getQuantity());//increase product stock
-        }
-
         return mapper.convert(savedInvoice, new InvoiceProductDTO());
     }
 
