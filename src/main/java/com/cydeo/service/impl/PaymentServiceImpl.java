@@ -119,10 +119,10 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public Charge charge(ChargeRequest request, Long paymentId) throws StripeException {
+    public Charge charge(ChargeRequest request, Long paymentId) {
         Map<String, Object> chargeParams = new HashMap<>();
 
-        chargeParams.put("amount", request.getAmount().multiply(BigInteger.valueOf(100)));//amount should be cents
+        chargeParams.put("amount", BigInteger.valueOf(request.getAmount().multiply(BigDecimal.valueOf(100)).longValue()));//amount should be cents, type should be Integer
         chargeParams.put("currency", request.getCurrency());
         chargeParams.put("description", request.getDescription());
         chargeParams.put("source", request.getStripeToken());

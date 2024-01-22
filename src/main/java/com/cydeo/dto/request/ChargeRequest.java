@@ -16,7 +16,7 @@ import java.math.BigInteger;
 public class ChargeRequest {
 
     private String description;
-    private BigInteger amount;
+    private BigDecimal amount;
     private Currency currency;
     private String stripeEmail;
     private String stripeToken;
