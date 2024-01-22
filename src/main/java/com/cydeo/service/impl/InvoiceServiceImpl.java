@@ -178,6 +178,9 @@ public class InvoiceServiceImpl implements InvoiceService {
         //delete operation
         invoiceToDelete.setIsDeleted(Boolean.TRUE);
 
+        // delete the invoice product that related with this invoice
+        invoiceProductService.deleteByInvoice(mapper.convert(invoiceToDelete, new InvoiceDTO()));
+
         invoiceRepository.save(invoiceToDelete);
     }
 

@@ -2,6 +2,7 @@ package com.cydeo.service;
 
 import com.cydeo.dto.InvoiceDTO;
 import com.cydeo.dto.InvoiceProductDTO;
+import com.cydeo.enums.InvoiceStatus;
 import org.springframework.validation.BindingResult;
 
 import java.util.List;
@@ -17,4 +18,8 @@ public interface InvoiceProductService {
     BindingResult doesProductHaveEnoughStock(InvoiceProductDTO invoiceProductDTO, BindingResult bindingResult );
 
     boolean doesProductHasInvoice(Long productId);
+    List<InvoiceProductDTO> findAll();
+
+    void deleteByInvoice(InvoiceDTO invoice);
+    List<InvoiceProductDTO> findAllApprovedInvoiceInvoiceProduct(InvoiceStatus invoiceStatus);
 }
