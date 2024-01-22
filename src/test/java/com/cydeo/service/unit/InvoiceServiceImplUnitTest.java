@@ -6,6 +6,7 @@ import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.dto.UserDTO;
 import com.cydeo.entity.Company;
 import com.cydeo.entity.Invoice;
+import com.cydeo.entity.Product;
 import com.cydeo.enums.InvoiceType;
 import com.cydeo.exception.InvoiceNotFoundException;
 import com.cydeo.mapper.MapperUtil;
@@ -105,8 +106,45 @@ public class InvoiceServiceImplUnitTest {
         assertEquals(tax,result.getTax());
         assertEquals(withoutTax.add(tax),result.getTotal());
 
+    }
+
+
+    @Test
+    void should_recognize_loggedInUser(){
+
+        UserDTO loggedInUser = new UserDTO();
+        CompanyDTO companyDTO =new CompanyDTO();
+        companyDTO.setTitle("Test Company");
+        loggedInUser.setCompany(companyDTO);
+
+        List<Invoice> invoiceList = Arrays.asList(new Invoice(),new Invoice());
+        List<InvoiceProductDTO> invoiceProductDTOList = Arrays.asList(new InvoiceProductDTO());
+
+        // Mock behavior of securityService.getLoggedInUser() to return the sample user
+        when(securityServiceImpl.getLoggedInUser()).thenReturn(loggedInUser);
+        // Mock behavior of invoiceRepository.findInvoiceByInvoiceTypeAndCompany_TitleAndIsDeletedOrderByInvoiceNoDesc()
+        when(invoiceRepository.findInvoiceByInvoiceTypeAndCompany_TitleAndIsDeletedOrderByInvoiceNoDesc(any(),any(), anyBoolean())).thenReturn(invoiceList); //TODO this line doesnt work..
+
+        // Mock behavior of invoiceProductService.findByInvoiceId() to return the sample list of invoice products
+        when(invoiceProductServiceImpl.findByInvoiceId(loggedInUser.getId())).thenReturn(invoiceProductDTOList);
+
+        // Mock behavior of mapper.convert() for each invoice
+        when(mapper.convert(any(),InvoiceDTO.class));
+
+        // Call the method to test  //TODO How I can add InvoiceType.PURCHASE ???
+        List<InvoiceDTO> result = invoiceServiceImpl.findAllInvoices(InvoiceType.SALES);
+
+        assertNotNull(result);
+
+
+
+
 
     }
+
+
+
+
 
 
 }
