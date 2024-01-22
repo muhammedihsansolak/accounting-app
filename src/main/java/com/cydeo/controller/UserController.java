@@ -1,5 +1,6 @@
 package com.cydeo.controller;
 
+import com.cydeo.annotation.ExecutionTime;
 import com.cydeo.dto.UserDTO;
 import com.cydeo.service.CompanyService;
 import com.cydeo.service.RoleService;
@@ -27,6 +28,7 @@ public class UserController {
 
     //    End-user should be able to List (display) all Users in the user_list page...
     @GetMapping("/list")
+    @ExecutionTime
     public String getAllUsers(Model model) {
         model.addAttribute("roles", roleService.getAllRoles());
         model.addAttribute("users", userService.getAllUsers());
@@ -36,6 +38,7 @@ public class UserController {
     //    End-user should be able to Edit each User, when click on Edit button, end-user should land on user_update
     //    page and the edit form should be populated with the information of that very same User.
     @GetMapping("/update/{id}")
+    @ExecutionTime
     public String updateUser(@PathVariable("id") Long id, Model model) {
         model.addAttribute("user", userService.findById(id));
         model.addAttribute("userRoles", roleService.getAllRolesForCurrentUser());
@@ -45,6 +48,7 @@ public class UserController {
     }
 
     @PostMapping("/update/{id}")
+    @ExecutionTime
     public String updateUser(@Valid @ModelAttribute("user") UserDTO userDTO, BindingResult bindingResult, @PathVariable("id") Long id, Model model) {
         boolean emailExist = userService.findByUsernameCheck(userDTO.getUsername());
 
@@ -65,6 +69,7 @@ public class UserController {
 
     //    End-user should be able to Delete each User (soft delete), then end up to the user_list page with updated User list.
     @GetMapping("/delete/{id}")
+    @ExecutionTime
     public String deleteUser(@PathVariable("id") Long id) {
         userService.delete(id);
         return "redirect:/users/list";
@@ -72,6 +77,7 @@ public class UserController {
 
     //    When End-User clicks on "Create-User" button, user_create page should be displayed with an Empty user form,
     @GetMapping("/create")
+    @ExecutionTime
     public String createUser(Model model) {
         model.addAttribute("newUser", new UserDTO());
         model.addAttribute("userRoles", roleService.getAllRolesForCurrentUser());
@@ -80,6 +86,7 @@ public class UserController {
     }
 
     @PostMapping("/create")
+    @ExecutionTime
     public String createUser(@Valid @ModelAttribute("newUser") UserDTO userDTO, BindingResult bindingResult, Model model) {
         boolean emailExist = userService.findByUsernameCheck(userDTO.getUsername());
         if (bindingResult.hasErrors()) {
