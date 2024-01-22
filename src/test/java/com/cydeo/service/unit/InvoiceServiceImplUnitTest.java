@@ -26,6 +26,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -56,18 +58,55 @@ public class InvoiceServiceImplUnitTest {
     @InjectMocks
     InvoiceServiceImpl invoiceServiceImpl;
 
-@Test
- public void should_throw_exception_when_invoice_not_found(){
+    @Test
+    public void should_throw_exception_when_invoice_not_found() {
 
-    Mockito.when(invoiceRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
-    Throwable throwable = catchThrowable(() -> invoiceServiceImpl.findById(1L));
-    assertThat(throwable).isInstanceOf(InvoiceNotFoundException.class);
-    assertThat(throwable).hasMessage("Invoice can not found with id: "+1L);
+        Mockito.when(invoiceRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+        Throwable throwable = catchThrowable(() -> invoiceServiceImpl.findById(1L));
+        assertThat(throwable).isInstanceOf(InvoiceNotFoundException.class);
+        assertThat(throwable).hasMessage("Invoice can not found with id: " + 1L);
 
-}
+    }
+
+    @Test
+    void should_find_invoice_by_id_and_calculate_total() {
+        // Given - Preparation
+        Long invoiceId = 1L;
+        Invoice invoice = new Invoice();
+        invoice.setId(invoiceId);
+        invoice.setInvoiceNo("Inv-001");
+
+        // Mock behavior for the invoiceRepository
+        when(invoiceRepository.findById(invoiceId)).thenReturn(Optional.of(invoice));
+
+        InvoiceDTO invoiceDTO = new InvoiceDTO();
+        invoiceDTO.setId(invoiceId);
+
+        // Mock behavior for the mapper
+        when(mapper.convert(any(), any())).thenReturn(invoiceDTO);
+
+        //TODO fix NullPointerException !
+        List<InvoiceProductDTO> invoiceProductDTOList = new ArrayList<>();
+        invoiceProductDTOList.add(new InvoiceProductDTO());
+        // Mock behavior for the invoiceProductService
+        when(invoiceProductServiceImpl.findByInvoiceId(invoiceId)).thenReturn(invoiceProductDTOList);
+
+        BigDecimal withoutTax = BigDecimal.TEN;
+        BigDecimal tax = BigDecimal.valueOf(5);
+        // Mock behavior for calculateTotalPriceWithoutTax and calculateTax methods
+        when(invoiceServiceImpl.calculateTotalPriceWithoutTax(invoiceProductDTOList)).thenReturn(withoutTax);
+        when(invoiceServiceImpl.calculateTax(invoiceProductDTOList)).thenReturn(tax);
+
+        // When - Action
+        InvoiceDTO result = invoiceServiceImpl.findById(invoiceId);
+        // Then - Assertion/Verification
+        assertEquals(invoiceId,result.getId());
+        assertEquals(withoutTax,result.getPrice());
+        assertEquals(tax,result.getTax());
+        assertEquals(withoutTax.add(tax),result.getTotal());
 
 
-
+    }
 
 
 }
