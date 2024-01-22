@@ -311,6 +311,9 @@ public class InvoiceServiceImpl implements InvoiceService {
 
 
     }
+    @Override
+    public boolean existsByClientVendorId(Long id) {
+       return invoiceRepository.existsByClientVendorId(id);
 
-
+    }
 }
