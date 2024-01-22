@@ -97,7 +97,7 @@ public class InvoiceServiceImpl implements InvoiceService {
      * @param invoiceProductDTOList
      * @return tax amount (BigDecimal)
      */
-    private BigDecimal calculateTax(List<InvoiceProductDTO> invoiceProductDTOList) {
+    public BigDecimal calculateTax(List<InvoiceProductDTO> invoiceProductDTOList) {
         BigDecimal sum = invoiceProductDTOList.stream()
                 .map(this::calculateTaxForProduct)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -136,7 +136,7 @@ public class InvoiceServiceImpl implements InvoiceService {
      * @param invoiceProductDTOList
      * @return Total Price Without Tax (BigDecimal)
      */
-    private BigDecimal calculateTotalPriceWithoutTax(List<InvoiceProductDTO> invoiceProductDTOList) {
+    public BigDecimal calculateTotalPriceWithoutTax(List<InvoiceProductDTO> invoiceProductDTOList) {
         BigDecimal sum = invoiceProductDTOList.stream()
                 .map(invoiceProductDTO ->
                         (invoiceProductDTO.getPrice()).multiply(BigDecimal.valueOf(invoiceProductDTO.getQuantity())))//total price amount without tax
