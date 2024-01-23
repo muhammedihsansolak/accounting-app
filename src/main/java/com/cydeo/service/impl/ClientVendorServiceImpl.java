@@ -5,6 +5,7 @@ import com.cydeo.dto.CompanyDTO;
 import com.cydeo.dto.UserDTO;
 import com.cydeo.entity.Company;
 import com.cydeo.enums.ClientVendorType;
+import com.cydeo.exception.ClientVendorNotFoundException;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.entity.ClientVendor;
 import com.cydeo.service.ClientVendorService;
@@ -16,7 +17,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -41,7 +41,7 @@ public class ClientVendorServiceImpl implements ClientVendorService {
     @Override
     public ClientVendorDTO findById(Long id) {
         ClientVendor clientVendor = clientVendorRepository.findById(id).orElseThrow(()->
-                new NoSuchElementException("Client vendor cannot be found with id: "+id));
+                new ClientVendorNotFoundException("Client vendor cannot be found with id: "+id));
         return mapperUtil.convert(clientVendor,new ClientVendorDTO());
     }
 
