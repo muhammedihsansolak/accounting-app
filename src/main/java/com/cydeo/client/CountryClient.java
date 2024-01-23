@@ -1,4 +1,4 @@
-package com.cydeo.FeinClient;
+package com.cydeo.client;
 import com.cydeo.dto.CountryInfoDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
