@@ -1,5 +1,6 @@
 package com.cydeo.service.impl;
 
+import com.cydeo.dto.InvoiceDTO;
 import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.entity.InvoiceProduct;
 import com.cydeo.exception.InvoiceProductNotFoundException;
@@ -118,7 +119,51 @@ class InvoiceProductServiceImplTest {
          assertEquals(BigDecimal.valueOf(220), invoiceProductDTO1.getTotal()); // Total = 100 * 2 + 20
          assertEquals(BigDecimal.valueOf(240), invoiceProductDTO2.getTotal()); // Total = 200 * 1 + 40
     }
+    /*
+     ************** findByInvoiceId() **************
+     */
+    @Test
+    void should_throw_exception_when_invoice_product_can_not_found_with_id(){
+        //given
+        Long id = 1L;
 
+        when(repository.findById(id)).thenReturn(Optional.empty());
 
+        //when
+        Throwable throwable = catchThrowable(() -> invoiceProductService.deleteById(id));
+
+        //then
+        assertThat(throwable).isInstanceOf(InvoiceProductNotFoundException.class);
+    }
+
+    /*
+     ************** deleteById() **************
+     */
+    @Test
+    void should_sets_is_deleted_field_to_true(){
+        //given
+        Long id = 1L;
+
+        InvoiceProduct invoiceToDelete = new InvoiceProduct();
+        invoiceToDelete.setIsDeleted(Boolean.FALSE);
+
+        InvoiceProduct deleted = new InvoiceProduct();
+        deleted.setIsDeleted(Boolean.TRUE);
+
+        InvoiceProductDTO invoiceProductDTO = new InvoiceProductDTO();
+
+        when(repository.findById(id)).thenReturn(Optional.of(invoiceToDelete));
+        when(repository.save(invoiceToDelete)).thenReturn(deleted);
+        when(mapper.convert(any(InvoiceProduct.class), any(InvoiceProductDTO.class))).thenReturn(invoiceProductDTO);
+
+        //when
+        InvoiceProductDTO result = invoiceProductService.deleteById(id);
+
+        //then
+        verify(repository).findById(id);
+        verify(repository).save(invoiceToDelete);
+        verify(mapper).convert(deleted, new InvoiceProductDTO());
+        assertNotNull(result);
+    }
 
 }

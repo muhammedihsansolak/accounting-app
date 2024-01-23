@@ -65,14 +65,14 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
     }
 
     @Override
-    public InvoiceDTO deleteById(Long id) {
+    public InvoiceProductDTO deleteById(Long id) {
         InvoiceProduct invoiceToDelete = repository.findById(id)
                 .orElseThrow(() -> new InvoiceProductNotFoundException("InvoiceProduct can not found with id: " + id));
 
         invoiceToDelete.setIsDeleted(Boolean.TRUE);
 
         InvoiceProduct deleted = repository.save(invoiceToDelete);
-        return mapper.convert(deleted, new InvoiceDTO());
+        return mapper.convert(deleted, new InvoiceProductDTO());
     }
 
     @Override
