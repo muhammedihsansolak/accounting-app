@@ -2,8 +2,10 @@ package com.cydeo.service.impl;
 
 import com.cydeo.dto.InvoiceDTO;
 import com.cydeo.dto.InvoiceProductDTO;
+import com.cydeo.entity.Invoice;
 import com.cydeo.entity.InvoiceProduct;
 import com.cydeo.entity.Product;
+import com.cydeo.enums.InvoiceStatus;
 import com.cydeo.enums.InvoiceType;
 import com.cydeo.exception.InvoiceProductNotFoundException;
 import com.cydeo.mapper.MapperUtil;
@@ -27,13 +29,11 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
     private final InvoiceProductRepository repository;
     private final MapperUtil mapper;
     private final InvoiceService invoiceService;
-    private final ProductService productService;
 
-    public InvoiceProductServiceImpl(InvoiceProductRepository repository, MapperUtil mapper, @Lazy InvoiceService invoiceService, @Lazy ProductService productService) {
+    public InvoiceProductServiceImpl(InvoiceProductRepository repository, MapperUtil mapper, @Lazy InvoiceService invoiceService) {
         this.repository = repository;
         this.mapper = mapper;
         this.invoiceService = invoiceService;
-        this.productService = productService;
     }
 
     @Override
@@ -117,5 +117,26 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
     @Override
     public boolean doesProductHasInvoice(Long productId) {
         return repository.existsByProductId(productId);
+    }
+
+    @Override
+    public List<InvoiceProductDTO> findAll() {
+        return repository.findAll().stream()
+                .map(invoiceProduct -> mapper.convert(invoiceProduct,new InvoiceProductDTO()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteByInvoice(InvoiceDTO invoice) {
+        List<InvoiceProduct> products = repository.findByInvoiceId(invoice.getId());
+        products.forEach(invoiceProduct -> invoiceProduct.setIsDeleted(true));
+        repository.saveAll(products);
+    }
+
+    @Override
+    public List<InvoiceProductDTO> findAllApprovedInvoiceInvoiceProduct(InvoiceStatus invoiceStatus) {
+        return repository.findAllByInvoice_InvoiceStatus(invoiceStatus).stream()
+                .map(invoiceProduct -> mapper.convert(invoiceProduct,new InvoiceProductDTO()))
+                .collect(Collectors.toList());
     }
 }
