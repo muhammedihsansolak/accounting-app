@@ -35,7 +35,7 @@ public class DashboardServiceImpl implements DashboardService {
                 .map(invoiceDTO -> invoiceDTO.getTotal()).reduce(BigDecimal.ZERO,BigDecimal::add);
 
        //Calculate profit/loss
-       BigDecimal profitLoss = totalCost.subtract(totalSales);
+       BigDecimal profitLoss = totalSales.subtract(totalCost);
 
         summaryNumbers.put("totalCost",totalCost);
         summaryNumbers.put("totalSales",totalSales);
