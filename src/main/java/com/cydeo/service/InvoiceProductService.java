@@ -18,7 +18,6 @@ public interface InvoiceProductService {
     BindingResult doesProductHaveEnoughStock(InvoiceProductDTO invoiceProductDTO, BindingResult bindingResult );
 
     boolean doesProductHasInvoice(Long productId);
-    List<InvoiceProductDTO> findAll();
 
     void deleteByInvoice(InvoiceDTO invoice);
     List<InvoiceProductDTO> findAllApprovedInvoiceInvoiceProduct(InvoiceStatus invoiceStatus);

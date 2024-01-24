@@ -120,13 +120,6 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
     }
 
     @Override
-    public List<InvoiceProductDTO> findAll() {
-        return repository.findAll().stream()
-                .map(invoiceProduct -> mapper.convert(invoiceProduct,new InvoiceProductDTO()))
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public void deleteByInvoice(InvoiceDTO invoice) {
         List<InvoiceProduct> products = repository.findByInvoiceId(invoice.getId());
         products.forEach(invoiceProduct -> invoiceProduct.setIsDeleted(true));
