@@ -2,19 +2,16 @@ package com.cydeo.service.impl;
 import com.cydeo.dto.InvoiceDTO;
 import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.dto.ProductDTO;
-import com.cydeo.entity.Invoice;
-import com.cydeo.entity.InvoiceProduct;
-import com.cydeo.entity.Product;
+import com.cydeo.entity.*;
+import com.cydeo.enums.InvoiceStatus;
 import com.cydeo.mapper.MapperUtil;
-import com.cydeo.repository.InvoiceProductRepository;
-import com.cydeo.repository.InvoiceRepository;
-import com.cydeo.repository.ProductRepository;
+import com.cydeo.repository.*;
 import com.cydeo.service.InvoiceProductService;
 import com.cydeo.service.InvoiceService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 
@@ -35,9 +32,6 @@ public class InvoiceProductServiceImplIntegrationTest {
     private MapperUtil mapper;
 
     @Autowired
-    private InvoiceService invoiceService;
-
-    @Autowired
     private InvoiceProductService invoiceProductService;
 
     @Autowired
@@ -45,6 +39,12 @@ public class InvoiceProductServiceImplIntegrationTest {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private CompanyRepository companyRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     /*
     ************** findById() **************
@@ -95,7 +95,6 @@ public class InvoiceProductServiceImplIntegrationTest {
         //given
         InvoiceProduct invoiceProduct = new InvoiceProduct();
         InvoiceProduct saved = repository.save(invoiceProduct);
-
 
         assertFalse(saved.getIsDeleted());
 
@@ -291,7 +290,72 @@ public class InvoiceProductServiceImplIntegrationTest {
 
         assertThat(savedInvoiceProduct1Result).isPresent();
         assertTrue(savedInvoiceProduct1Result.get().getIsDeleted());//should deleted
-
     }
+
+    /*
+     ************** findAllApprovedInvoiceInvoiceProduct() **************
+     */
+    @Test
+    @Transactional
+    void should_find_all_invoice_products_which_belongs_to_approved_invoice() {
+        // Given
+        Invoice invoiceApproved = new Invoice();
+        invoiceApproved.setInvoiceStatus(InvoiceStatus.APPROVED);
+        invoiceApproved = invoiceRepository.save(invoiceApproved);
+
+        Company company = new Company();
+        Category category = new Category();
+        category.setCompany(company);
+        category = categoryRepository.save(category);
+
+        Product product1 = new Product();
+        product1.setCategory(category);
+        product1 = productRepository.save(product1);
+
+        InvoiceProduct invoiceProductApproved = new InvoiceProduct();
+        invoiceProductApproved.setProduct(product1);
+        invoiceProductApproved.setInvoice(invoiceApproved);
+        invoiceProductApproved = repository.save(invoiceProductApproved);
+        InvoiceProductDTO result = mapper.convert(invoiceProductApproved, new InvoiceProductDTO());
+
+        // When
+        List<InvoiceProductDTO> resultList = invoiceProductService.findAllApprovedInvoiceInvoiceProduct(InvoiceStatus.APPROVED);
+
+        // Then
+        assertThat(resultList).isNotNull();
+        assertThat(resultList.contains(result));
+    }
+
+    @Test
+    @Transactional
+    void should_find_all_invoice_products_which_belongs_to_awaiting_approved_invoice() {
+        // Given
+        Invoice Awaiting = new Invoice();
+        Awaiting.setInvoiceStatus(InvoiceStatus.AWAITING_APPROVAL);
+        Awaiting = invoiceRepository.save(Awaiting);
+
+        Company company = new Company();
+        Category category = new Category();
+        category.setCompany(company);
+        category = categoryRepository.save(category);
+
+        Product product1 = new Product();
+        product1.setCategory(category);
+        product1 = productRepository.save(product1);
+
+        InvoiceProduct invoiceProduct = new InvoiceProduct();
+        invoiceProduct.setProduct(product1);
+        invoiceProduct.setInvoice(Awaiting);
+        invoiceProduct = repository.save(invoiceProduct);
+        InvoiceProductDTO result = mapper.convert(invoiceProduct, new InvoiceProductDTO());
+
+        // When
+        List<InvoiceProductDTO> resultList = invoiceProductService.findAllApprovedInvoiceInvoiceProduct(InvoiceStatus.AWAITING_APPROVAL);
+
+        // Then
+        assertThat(resultList).isNotNull();
+        assertThat(resultList.contains(result));
+    }
+
 
 }
