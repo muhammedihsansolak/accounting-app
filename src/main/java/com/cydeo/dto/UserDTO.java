@@ -15,17 +15,17 @@ public class UserDTO {
     private Long id;
 
     @NotBlank(message = "Email is required field.")
-    @NotNull
+    @NotNull(message = "Username is a required field.")
     @Email(message = "A user with this email already exists. Please try with different email.")
     private String username;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @NotBlank
+    @NotBlank(message = "Password is a required field.")
     @Pattern(regexp = "(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{4,}", message = "Password should be at least 4 characters long and needs to contain 1 capital letter, 1 small letter and 1 special character or number.")
     private String password;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @NotNull
+    @NotNull(message = "ConfirmPassword is a required field.")
     private String confirmPassword;
 
     @NotBlank(message = "First Name is required field.")
