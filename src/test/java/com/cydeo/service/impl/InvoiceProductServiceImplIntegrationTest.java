@@ -1,10 +1,14 @@
 package com.cydeo.service.impl;
+import com.cydeo.dto.InvoiceDTO;
 import com.cydeo.dto.InvoiceProductDTO;
+import com.cydeo.dto.ProductDTO;
 import com.cydeo.entity.Invoice;
 import com.cydeo.entity.InvoiceProduct;
+import com.cydeo.entity.Product;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.InvoiceProductRepository;
 import com.cydeo.repository.InvoiceRepository;
+import com.cydeo.repository.ProductRepository;
 import com.cydeo.service.InvoiceProductService;
 import com.cydeo.service.InvoiceService;
 import org.junit.jupiter.api.Test;
@@ -36,6 +40,9 @@ public class InvoiceProductServiceImplIntegrationTest {
 
     @Autowired
     private InvoiceRepository invoiceRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     /*
     ************** findById() **************
@@ -114,6 +121,31 @@ public class InvoiceProductServiceImplIntegrationTest {
 
         assertThat(deletedInvoiceProduct).isPresent();
         assertThat(deletedInvoiceProduct.get().getIsDeleted()).isTrue();
+    }
+
+    /*
+     ************** create() **************
+     */
+    @Test
+    void should_create_invoice_product_and_set_related_invoice(){
+        Invoice invoice = new Invoice();
+        invoiceRepository.save(invoice);
+
+        Product product = new Product();
+        Product savedProduct = productRepository.save(product);
+        ProductDTO convertedProduct = mapper.convert(savedProduct, new ProductDTO());
+
+        InvoiceProductDTO invoiceProductDTO = new InvoiceProductDTO();
+        invoiceProductDTO.setQuantity(1);
+        invoiceProductDTO.setPrice(BigDecimal.valueOf(100));
+        invoiceProductDTO.setTax(10);
+        invoiceProductDTO.setProduct(convertedProduct);
+
+        InvoiceProductDTO created = invoiceProductService.create(invoiceProductDTO, invoice.id);
+
+        assertThat(created).isNotNull();
+        assertThat(created.getId()).isNotNull();
+        assertThat(created.getInvoice().getId()).isEqualTo(invoice.id);
     }
 
 }
