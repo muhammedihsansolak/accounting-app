@@ -4,6 +4,7 @@ import com.cydeo.dto.InvoiceDTO;
 import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.dto.ProductDTO;
 import com.cydeo.entity.InvoiceProduct;
+import com.cydeo.enums.InvoiceStatus;
 import com.cydeo.exception.InvoiceProductNotFoundException;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.InvoiceProductRepository;
@@ -310,6 +311,38 @@ class InvoiceProductServiceImplTest {
 
         List<InvoiceProduct> capturedInvoiceProducts = captor.getValue();
         assertTrue(capturedInvoiceProducts.stream().allMatch(InvoiceProduct::getIsDeleted));//assert that each InvoiceProduct in this list has isDeleted set to true.
+    }
+
+    /*
+     ************** findAllApprovedInvoiceInvoiceProduct() **************
+     */
+    @Test
+    void should_find_all_invoice_products_belongs_to_approved_invoices() {
+        // Given
+        InvoiceStatus approvedStatus = InvoiceStatus.APPROVED;
+        List<InvoiceProduct> invoiceProducts = Arrays.asList(
+                new InvoiceProduct(),
+                new InvoiceProduct()
+        );
+
+        when(repository.findAllByInvoice_InvoiceStatus(approvedStatus)).thenReturn(invoiceProducts);
+
+        InvoiceProductDTO invoiceProductDTO1 = new InvoiceProductDTO();
+        InvoiceProductDTO invoiceProductDTO2 = new InvoiceProductDTO();
+
+        when(mapper.convert(invoiceProducts.get(0), new InvoiceProductDTO())).thenReturn(invoiceProductDTO1);
+        when(mapper.convert(invoiceProducts.get(1), new InvoiceProductDTO())).thenReturn(invoiceProductDTO2);
+
+        // When
+        List<InvoiceProductDTO> result = invoiceProductService.findAllApprovedInvoiceInvoiceProduct(approvedStatus);
+
+        // Then
+        assertEquals(2, result.size());
+        assertSame(invoiceProductDTO1, result.get(0));
+        assertSame(invoiceProductDTO2, result.get(1));
+        verify(repository).findAllByInvoice_InvoiceStatus(approvedStatus);
+        verify(mapper).convert(invoiceProducts.get(0), new InvoiceProductDTO());
+        verify(mapper).convert(invoiceProducts.get(1), new InvoiceProductDTO());
     }
 
 
