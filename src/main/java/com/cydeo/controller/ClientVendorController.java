@@ -31,11 +31,9 @@ public class ClientVendorController {
 
     @GetMapping("/create")
     public String showCreateForm(Model model) {
-        List<String> countries = new ArrayList<>(Arrays.asList("UK", "USA"));
-
         model.addAttribute("newClientVendor", new ClientVendorDTO());
         model.addAttribute("clientVendorTypes", Arrays.asList(ClientVendorType.values()));
-        model.addAttribute("countries", countries);
+        model.addAttribute("countries", clientVendorService.getCountries());
         return "clientVendor/clientVendor-create";
 
     }
@@ -46,7 +44,7 @@ public class ClientVendorController {
         bindingResult = clientVendorService.addTypeValidation(newClientVendor.getClientVendorName(),bindingResult);
 
         if (bindingResult.hasFieldErrors()){
-            model.addAttribute("countries",List.of("USA","UK"));
+            model.addAttribute("countries", clientVendorService.getCountries());
             model.addAttribute("clientVendorTypes", Arrays.asList(ClientVendorType.values()));
             return "clientVendor/clientVendor-create";
         }
@@ -63,7 +61,8 @@ public class ClientVendorController {
         List<String> countries = new ArrayList<>(Arrays.asList("UK", "USA"));
 
         model.addAttribute("clientVendorTypes", Arrays.asList(ClientVendorType.values()));
-        model.addAttribute("countries", countries);
+        //model.addAttribute("countries", countries);
+        model.addAttribute("countries",clientVendorService.getCountries());
         model.addAttribute("clientVendor", clientVendor);
         return "clientVendor/clientVendor-update";
     }
@@ -73,10 +72,9 @@ public class ClientVendorController {
   public String updateClientVendor(@PathVariable("id") Long id,
                                    @Valid @ModelAttribute("clientVendor") ClientVendorDTO clientVendor,
                                    BindingResult bindingResult, Model model) {
-      //  bindingResult = clientVendorService.addTypeValidation(clientVendor.getClientVendorName(),bindingResult);
       if (bindingResult.hasErrors()) {
           model.addAttribute("clientVendorTypes", Arrays.asList(ClientVendorType.values()));
-          model.addAttribute("countries", Arrays.asList("USA", "UK"));
+          model.addAttribute("countries",clientVendorService.getCountries());
           return "clientVendor/clientVendor-update";
       }
 
