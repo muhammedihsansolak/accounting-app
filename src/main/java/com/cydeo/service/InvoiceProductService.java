@@ -10,7 +10,7 @@ import java.util.List;
 public interface InvoiceProductService {
     InvoiceProductDTO findById(Long id);
     List<InvoiceProductDTO> findByInvoiceId(Long invoiceId);
-    InvoiceDTO deleteById(Long id);
+    InvoiceProductDTO deleteById(Long id);
     void removeInvoiceProductFromInvoice(Long invoiceId, Long invoiceProductId);
 
     InvoiceProductDTO create(InvoiceProductDTO invoiceProductDTO, Long invoiceId);
@@ -18,7 +18,6 @@ public interface InvoiceProductService {
     BindingResult doesProductHaveEnoughStock(InvoiceProductDTO invoiceProductDTO, BindingResult bindingResult );
 
     boolean doesProductHasInvoice(Long productId);
-    List<InvoiceProductDTO> findAll();
 
     void deleteByInvoice(InvoiceDTO invoice);
     List<InvoiceProductDTO> findAllApprovedInvoiceInvoiceProduct(InvoiceStatus invoiceStatus);
