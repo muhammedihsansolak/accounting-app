@@ -241,4 +241,57 @@ public class InvoiceProductServiceImplIntegrationTest {
         assertTrue(doesProductHasInvoice);
     }
 
+    /*
+     ************** deleteByInvoice() **************
+     */
+    @Test
+    void should_delete_all_invoice_products_related_to_given_invoice(){
+        //given
+        Invoice invoice1 = new Invoice();
+        Invoice invoice2 = new Invoice();
+        invoiceRepository.saveAll(List.of(invoice1,invoice2));
+
+        InvoiceDTO convertedInvoice1 = mapper.convert(invoice1, new InvoiceDTO());
+        InvoiceDTO convertedInvoice2 = mapper.convert(invoice2, new InvoiceDTO());
+
+        Product product1 = new Product();
+        Product savedProduct1 = productRepository.save(product1);
+        ProductDTO convertedProduct1 = mapper.convert(savedProduct1, new ProductDTO());
+
+        Product product2 = new Product();
+        Product savedProduct2 = productRepository.save(product2);
+        ProductDTO convertedProduct2 = mapper.convert(savedProduct2, new ProductDTO());
+
+        InvoiceProductDTO invoiceProductDTO1 = new InvoiceProductDTO();
+        invoiceProductDTO1.setInvoice(convertedInvoice1);
+        invoiceProductDTO1.setQuantity(1);
+        invoiceProductDTO1.setPrice(BigDecimal.valueOf(100));
+        invoiceProductDTO1.setTax(10);
+        invoiceProductDTO1.setProduct(convertedProduct1);
+        InvoiceProduct convertedInvoiceProduct1 = mapper.convert(invoiceProductDTO1, new InvoiceProduct());
+        InvoiceProduct savedInvoiceProduct1 = repository.save(convertedInvoiceProduct1);
+
+        InvoiceProductDTO invoiceProductDTO2 = new InvoiceProductDTO();
+        invoiceProductDTO2.setInvoice(convertedInvoice2);
+        invoiceProductDTO2.setQuantity(1);
+        invoiceProductDTO2.setPrice(BigDecimal.valueOf(100));
+        invoiceProductDTO2.setTax(10);
+        invoiceProductDTO2.setProduct(convertedProduct2);
+        InvoiceProduct convertedInvoiceProduct2 = mapper.convert(invoiceProductDTO2, new InvoiceProduct());
+        InvoiceProduct savedInvoiceProduct2 = repository.save(convertedInvoiceProduct2);
+
+        //when
+        invoiceProductService.deleteByInvoice(convertedInvoice1);
+        Optional<InvoiceProduct> savedInvoiceProduct1Result = repository.findById(savedInvoiceProduct1.id);
+        Optional<InvoiceProduct> savedInvoiceProduct2Result = repository.findById(savedInvoiceProduct2.id);//returns null since @Where annotation
+
+        //then
+        assertThat(savedInvoiceProduct2Result).isPresent();
+        assertFalse(savedInvoiceProduct2Result.get().getIsDeleted());//should not be deleted
+
+        assertThat(savedInvoiceProduct1Result).isPresent();
+        assertTrue(savedInvoiceProduct1Result.get().getIsDeleted());//should deleted
+
+    }
+
 }
