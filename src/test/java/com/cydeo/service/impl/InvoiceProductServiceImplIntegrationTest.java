@@ -7,7 +7,6 @@ import com.cydeo.enums.InvoiceStatus;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.*;
 import com.cydeo.service.InvoiceProductService;
-import com.cydeo.service.InvoiceService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,9 +38,6 @@ public class InvoiceProductServiceImplIntegrationTest {
 
     @Autowired
     private ProductRepository productRepository;
-
-    @Autowired
-    private CompanyRepository companyRepository;
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -104,8 +100,7 @@ public class InvoiceProductServiceImplIntegrationTest {
 
         // Then
         assertThat(invoiceProductDTO).isNotNull();
-        assertThat(deletedInvoiceProduct).isPresent();
-        assertThat(deletedInvoiceProduct.get().getIsDeleted()).isTrue();
+        assertThat(deletedInvoiceProduct).isNotPresent();
     }
 
     /*
@@ -129,8 +124,7 @@ public class InvoiceProductServiceImplIntegrationTest {
         Optional<InvoiceProduct> deletedInvoiceProduct = repository.findById(invoiceProduct.id);//returns null since @Where annotation
 
         //then
-        assertThat(deletedInvoiceProduct).isPresent();
-        assertThat(deletedInvoiceProduct.get().getIsDeleted()).isTrue();
+        assertThat(deletedInvoiceProduct).isNotPresent();
     }
 
     /*
@@ -288,8 +282,7 @@ public class InvoiceProductServiceImplIntegrationTest {
         assertThat(savedInvoiceProduct2Result).isPresent();
         assertFalse(savedInvoiceProduct2Result.get().getIsDeleted());//should not be deleted
 
-        assertThat(savedInvoiceProduct1Result).isPresent();
-        assertTrue(savedInvoiceProduct1Result.get().getIsDeleted());//should deleted
+        assertThat(savedInvoiceProduct1Result).isNotPresent();//should be deleted
     }
 
     /*
