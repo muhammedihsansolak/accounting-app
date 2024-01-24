@@ -1,11 +1,11 @@
 package com.cydeo.service.unit;
 
 import com.cydeo.dto.RoleDTO;
+import com.cydeo.dto.UserDTO;
 import com.cydeo.entity.Role;
 import com.cydeo.exception.RoleNotFoundException;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.RoleRepository;
-import com.cydeo.service.SecurityService;
 import com.cydeo.service.impl.RoleServiceImpl;
 import com.cydeo.service.impl.SecurityServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -19,8 +19,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -45,9 +43,9 @@ public class RoleServiceImplUnitTesting {
         //when
         when(roleRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
         //then
-        RoleNotFoundException exception = assertThrows(RoleNotFoundException.class, () -> {
-            roleServiceImpl.findById(id);
-        });
+        RoleNotFoundException exception = assertThrows(RoleNotFoundException.class, () ->
+            roleServiceImpl.findById(id)
+        );
         assertEquals("Role not found with this id:" + id, exception.getMessage());
     }
 
@@ -128,15 +126,90 @@ public class RoleServiceImplUnitTesting {
     }
 
     @Test
-    void should_get_All_Roles_For_Current_User_Except_Root(){
+    void should_get_All_Roles_For_Current_User_Except_Root() {
+         // Given
+        // Create a mock user with a non-root role
+        UserDTO user = new UserDTO();
+        RoleDTO userRole = new RoleDTO();
+        userRole.setId(2L); // Non-root role
+        userRole.setDescription("Admin");
+        user.setRole(userRole);
 
+        // Mock the behavior of the security service to return the mock user
+        when(securityServiceImpl.getLoggedInUser()).thenReturn(user);
 
+        // Mock the behavior of the role repository to return a list of admin roles
+        Role adminRole1 = new Role();
+        adminRole1.setId(1L);
+        adminRole1.setDescription("Role 1");
 
+        Role adminRole2 = new Role();
+        adminRole2.setId(2L);
+        adminRole2.setDescription("Role 2");
+
+        List<Role> adminRoles = Arrays.asList(adminRole1, adminRole2);
+        when(roleRepository.getAllRoleForAdmin("Admin")).thenReturn(adminRoles);
+
+        // Mock the behavior of the mapper utility to convert roles to role DTOs
+        RoleDTO roleDTO1 = new RoleDTO();
+        roleDTO1.setId(1L);
+        roleDTO1.setDescription("Role 1");
+
+        RoleDTO roleDTO2 = new RoleDTO();
+        roleDTO2.setId(2L);
+        roleDTO2.setDescription("Role 2");
+
+        when(mapperUtil.convert(any(Role.class), any(RoleDTO.class))).thenReturn(roleDTO1, roleDTO2);
+
+        // When
+        // Call the method under test
+        List<RoleDTO> result = roleServiceImpl.getAllRolesForCurrentUser();
+
+        // Then
+        // Verify that the result contains the expected role DTOs
+        assertEquals(2, result.size());
+        assertEquals(roleDTO1, result.get(0));
+        assertEquals(roleDTO2, result.get(1));
 
 
     }
 
+    @Test
+    void should_return_root_role_for_root_user() {
+        // Given
+        // Create a mock user with a root role
+        UserDTO user = new UserDTO();
+        RoleDTO userRole = new RoleDTO();
+        userRole.setId(1L); // Root role
+        userRole.setDescription("Root");
+        user.setRole(userRole);
 
+        // Mock the behavior of the security service to return the mock user
+        when(securityServiceImpl.getLoggedInUser()).thenReturn(user);
+
+        // Mock the behavior of the role repository to return the root role
+        Role rootRole = new Role();
+        rootRole.setId(1L);
+        rootRole.setDescription("Root");
+
+        when(roleRepository.getAllRoleForRoot("Root")).thenReturn(rootRole);
+
+        // Mock the behavior of the mapper utility to convert the root role to a role DTO
+        RoleDTO roleDTO = new RoleDTO();
+        roleDTO.setId(1L);
+        roleDTO.setDescription("Root");
+
+        when(mapperUtil.convert(any(Role.class), any(RoleDTO.class))).thenReturn(roleDTO);
+
+        // When
+        // Call the method under test
+        List<RoleDTO> result = roleServiceImpl.getAllRolesForCurrentUser();
+
+        // Then
+        // Verify that the result contains the expected root role DTO
+        assertEquals(1, result.size());
+        assertEquals(roleDTO, result.get(0));
+    }
 
 
 }
