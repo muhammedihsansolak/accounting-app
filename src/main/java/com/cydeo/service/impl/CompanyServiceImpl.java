@@ -1,6 +1,6 @@
 package com.cydeo.service.impl;
 
-import com.cydeo.FeinClient.CountryClient;
+import com.cydeo.client.CountryClient;
 import com.cydeo.dto.CompanyDTO;
 import com.cydeo.dto.CountryInfoDTO;
 import com.cydeo.dto.UserDTO;

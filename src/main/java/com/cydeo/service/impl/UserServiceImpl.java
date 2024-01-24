@@ -51,13 +51,13 @@ public class UserServiceImpl implements UserService {
         if (LoggedInUser.getId() != 1) {
             Company company = companyRepository
                     .findById(LoggedInUser.getCompany().getId())
-                    .orElseThrow(()-> new CompanyNotFoundException("Company can't found with id "+ LoggedInUser.getCompany().getId() ));
+                    .orElseThrow(() -> new CompanyNotFoundException("Company can't found with id " + LoggedInUser.getCompany().getId()));
 
             List<User> userList = userRepository.findAllUserWithCompanyAndIsDeleted(company, false);
             return userList.stream().map(user -> mapperUtil.convert(user, new UserDTO())).
                     collect(Collectors.toList());
         } else {
-            List<User> userList = userRepository.findAllAdminRole("Admin");
+            List<User> userList = userRepository.findAllAdminRole("Admin",false);
             return userList.stream()
                     .map(user -> mapperUtil.convert(user, new UserDTO()))
                     .peek(dto -> dto.setOnlyAdmin(isOnlyAdmin(dto)))
@@ -77,34 +77,32 @@ public class UserServiceImpl implements UserService {
         userDTO.setEnabled(true);
         User user = mapperUtil.convert(userDTO, new User());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(mapperUtil.convert(userDTO, new User()));
+        userRepository.save(user);
     }
 
     @Override
     public void delete(Long id) {
         User user = userRepository.findByIdAndIsDeleted(id, false);
         user.setIsDeleted(true);
-        user.setUsername(user.getUsername() + " deleted"+user.getId());
+        user.setUsername(user.getUsername() + " deleted" + user.getId());
         userRepository.save(user);
     }
 
     @Override
     public UserDTO findById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(()->new UserNotFoundException("User can't found with id "+id));
+                .orElseThrow(() -> new UserNotFoundException("User can't found with id " + id));
         return mapperUtil.convert(user, new UserDTO());
     }
 
     @Override
     public UserDTO updateUser(UserDTO userDtoToBeUpdate) {
-        User user1 = userRepository.findById(userDtoToBeUpdate.getId())
-                .orElseThrow(()->new UserNotFoundException("User can't found with id "+userDtoToBeUpdate.getId()));
-        user1.setUsername(user1.getUsername());
-        userRepository.save(user1);
-        User convertedUser = mapperUtil.convert(userDtoToBeUpdate, new User());
-        convertedUser.setId(user1.getId());
-        userRepository.save(convertedUser);
-        return mapperUtil.convert(convertedUser, new UserDTO());
+        User existingUser = userRepository.findById(userDtoToBeUpdate.getId())
+                .orElseThrow(() -> new UserNotFoundException("User can't found with id " + userDtoToBeUpdate.getId()));
+        existingUser.setUsername(userDtoToBeUpdate.getUsername());
+        existingUser.setPassword(passwordEncoder.encode(userDtoToBeUpdate.getPassword()));
+        userRepository.save(existingUser);
+        return mapperUtil.convert(existingUser, new UserDTO());
     }
 
 

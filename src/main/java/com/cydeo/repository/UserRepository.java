@@ -16,8 +16,8 @@ public interface UserRepository extends JpaRepository<User,Long> {
     @Query("SELECT u FROM User u WHERE u.company=?1 AND u.isDeleted=?2 ORDER BY u.role.description asc ")
     List<User> findAllUserWithCompanyAndIsDeleted(Company company,Boolean isDeleted);
 
-    @Query("SELECT u FROM User u WHERE u.role.description=?1")
-    List<User>findAllAdminRole(String role);
+    @Query("SELECT u FROM User u WHERE u.role.description=?1 AND u.isDeleted=?2")
+    List<User>findAllAdminRole(String role, Boolean isDeleted);
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.company = ?1 AND u.role.id = 2")
     Integer isUserOnlyAdmin(Company company, Role role);

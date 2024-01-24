@@ -1,5 +1,6 @@
 package com.cydeo.client;
 
+import com.cydeo.annotation.ExecutionTime;
 import com.cydeo.dto.exchange.ExchangeResponseDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public interface ExchangeClient {
 
     @GetMapping(value = "",consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ExecutionTime
     ExchangeResponseDTO getExchangesRates();
 
 }
