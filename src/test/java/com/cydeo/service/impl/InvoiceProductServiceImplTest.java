@@ -4,15 +4,14 @@ import com.cydeo.dto.InvoiceDTO;
 import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.dto.ProductDTO;
 import com.cydeo.entity.InvoiceProduct;
-import com.cydeo.entity.Product;
 import com.cydeo.exception.InvoiceProductNotFoundException;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.InvoiceProductRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -25,7 +24,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
-import static org.assertj.core.api.BDDAssertions.then;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -283,5 +281,36 @@ class InvoiceProductServiceImplTest {
 
         verify(bindingResult, atLeastOnce()).addError(any(ObjectError.class)); //if product has enough stock we add error to bindingResult
     }
+
+    /*
+     ************** deleteByInvoice() **************
+     */
+    @Test
+    void should_delete_invoice_products_belongs_to_invoice(){
+        // Given
+        Long invoiceId = 1L;
+        InvoiceDTO invoiceDTO = new InvoiceDTO();
+        invoiceDTO.setId(invoiceId);
+
+        InvoiceProduct invoiceProduct1 = new InvoiceProduct();
+        InvoiceProduct invoiceProduct2 = new InvoiceProduct();
+
+        List<InvoiceProduct> invoiceProductList = Arrays.asList(invoiceProduct1, invoiceProduct2);
+
+        when(repository.findByInvoiceId(invoiceId)).thenReturn(invoiceProductList);
+
+        ArgumentCaptor<List<InvoiceProduct>> captor = ArgumentCaptor.forClass(List.class);
+
+        // When
+        invoiceProductService.deleteByInvoice(invoiceDTO);
+
+        // Then
+        verify(repository).findByInvoiceId(invoiceId);
+        verify(repository).saveAll(captor.capture());
+
+        List<InvoiceProduct> capturedInvoiceProducts = captor.getValue();
+        assertTrue(capturedInvoiceProducts.stream().allMatch(InvoiceProduct::getIsDeleted));//assert that each InvoiceProduct in this list has isDeleted set to true.
+    }
+
 
 }
