@@ -10,6 +10,7 @@ import java.util.List;
 public interface InvoiceProductService {
     InvoiceProductDTO findById(Long id);
     List<InvoiceProductDTO> findByInvoiceId(Long invoiceId);
+    List<InvoiceProductDTO> findByInvoiceIdAndTotalCalculated(Long invoiceId);
     InvoiceDTO deleteById(Long id);
     void removeInvoiceProductFromInvoice(Long invoiceId, Long invoiceProductId);
 
@@ -22,4 +23,6 @@ public interface InvoiceProductService {
 
     void deleteByInvoice(InvoiceDTO invoice);
     List<InvoiceProductDTO> findAllApprovedInvoiceInvoiceProduct(InvoiceStatus invoiceStatus);
+
+    void save(InvoiceProductDTO invoiceProductDTO);
 }

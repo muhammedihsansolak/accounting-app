@@ -3,6 +3,7 @@ package com.cydeo.service.impl;
 import com.cydeo.dto.*;
 import com.cydeo.entity.Company;
 import com.cydeo.entity.Invoice;
+import com.cydeo.entity.InvoiceProduct;
 import com.cydeo.enums.InvoiceStatus;
 import com.cydeo.enums.InvoiceType;
 import com.cydeo.exception.InvoiceNotFoundException;
@@ -12,6 +13,7 @@ import com.cydeo.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -178,7 +180,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         //delete operation
         invoiceToDelete.setIsDeleted(Boolean.TRUE);
 
-        // delete the invoice product that related with this invoice
+        // delete the invoiceProduct that related with this invoice
         invoiceProductService.deleteByInvoice(mapper.convert(invoiceToDelete, new InvoiceDTO()));
 
         invoiceRepository.save(invoiceToDelete);
@@ -201,21 +203,53 @@ public class InvoiceServiceImpl implements InvoiceService {
         List<InvoiceProductDTO> invoiceProductList = invoiceProductService.findByInvoiceId(invoiceToApprove.getId());
 
         if (invoiceToApprove.getInvoiceType() == InvoiceType.SALES) {
-            decreaseProductRemainingQuantity(invoiceProductList);
+            saveSalesInvoiceProductProfitLossAndRemainingQuantity(invoiceProductList);
+            decreaseProductQuantityInStock(invoiceProductList);
         } else if (invoiceToApprove.getInvoiceType() == InvoiceType.PURCHASE) {
-            increaseProductRemainingQuantity(invoiceProductList);
+            savePurchaseInvoiceProductProfitLossAndRemainingQuantity(invoiceProductList);
+            increaseProductQuantityInStock(invoiceProductList);
         }
     }
+    private void saveSalesInvoiceProductProfitLossAndRemainingQuantity(List<InvoiceProductDTO> invoiceProductDTOList){
+        invoiceProductDTOList.forEach(invPro -> {
+            invPro.setProfitLoss(BigDecimal.ZERO);
+            invPro.setRemainingQuantity(invPro.getQuantity());
+            invoiceProductService.save(invPro);
+        });
+    }
+    private void savePurchaseInvoiceProductProfitLossAndRemainingQuantity(List<InvoiceProductDTO> invoiceProductDTOList){
+        invoiceProductDTOList.forEach(invPro -> {
+            // set profitLoss and mean time set the remainingQuantity of previous Perches
+                    invPro.setProfitLoss(calculateProfitLoss(invPro));
+                    invPro.setRemainingQuantity(0);
+                    invoiceProductService.save(invPro);
+                });
+    }
 
-    private void decreaseProductRemainingQuantity(List<InvoiceProductDTO> invoiceProductList) {
+    private BigDecimal calculateProfitLoss(InvoiceProductDTO salesInvoicePro){
+        // TODO  calculate the profit loss
+        int quantity = salesInvoicePro.getQuantity();
+        BigDecimal price = salesInvoicePro.getPrice();
+        int taxRate = salesInvoicePro.getTax();
+
+        BigDecimal totalSale = (price.multiply(BigDecimal.valueOf(quantity)).multiply(BigDecimal.valueOf(taxRate)))
+                .divide(PERCENTAGE_DIVISOR,2,RoundingMode.HALF_UP);
+
+        BigDecimal totalPerches = calculateTotalPerchesAndSaveRemainingQuan(salesInvoicePro);
+
+        return totalSale.subtract(totalPerches);
+    }
+
+
+
+    private void decreaseProductQuantityInStock(List<InvoiceProductDTO> invoiceProductList) {
         invoiceProductList.forEach(invoiceProductDTO -> {
             ProductDTO product = invoiceProductDTO.getProduct();
             Integer quantity = invoiceProductDTO.getQuantity();
             productService.decreaseProductQuantityInStock(product.getId(), quantity);
         });
     }
-
-    private void increaseProductRemainingQuantity(List<InvoiceProductDTO> invoiceProductList) {
+    private void increaseProductQuantityInStock(List<InvoiceProductDTO> invoiceProductList) {
         invoiceProductList.forEach(invoiceProductDTO -> {
             ProductDTO product = invoiceProductDTO.getProduct();
             Integer quantity = invoiceProductDTO.getQuantity();

@@ -43,7 +43,7 @@ public class SalesInvoiceController {
     @GetMapping("/update/{id}")
     public String editInvoice(@PathVariable("id")Long id, Model model){
         InvoiceDTO foundInvoice = invoiceService.findById(id);
-        List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceId(id);
+        List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceIdAndTotalCalculated(id);
         List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findClientVendorByClientVendorTypeAndCompany(ClientVendorType.CLIENT);
 
         model.addAttribute("invoice",foundInvoice);

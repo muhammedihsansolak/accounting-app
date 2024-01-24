@@ -47,9 +47,14 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
     @Override
     public List<InvoiceProductDTO> findByInvoiceId(Long invoiceId) {
         List<InvoiceProduct> invoiceProductList = repository.findByInvoiceId(invoiceId);
+        return invoiceProductList.stream().map(invoiceProduct ->
+                mapper.convert(invoiceProduct,new InvoiceProductDTO()))
+                .collect(Collectors.toList());
+    }
 
-        List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductList.stream()
-                .map(invoiceProduct -> mapper.convert(invoiceProduct, new InvoiceProductDTO()))
+    @Override
+    public List<InvoiceProductDTO> findByInvoiceIdAndTotalCalculated(Long invoiceId) {
+        return findByInvoiceId(invoiceId).stream()
                 .map(invoiceProduct -> {
                     BigDecimal taxAmount = invoiceService.calculateTaxForProduct(invoiceProduct);
                     invoiceProduct.setTotal(
@@ -58,10 +63,7 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
                                     .add(taxAmount));
 
                     return invoiceProduct;
-                })
-                .collect(Collectors.toList());
-
-        return invoiceProductDTOList;
+                }).collect(Collectors.toList());
     }
 
     @Override
@@ -138,5 +140,10 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
         return repository.findAllByInvoice_InvoiceStatus(invoiceStatus).stream()
                 .map(invoiceProduct -> mapper.convert(invoiceProduct,new InvoiceProductDTO()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void save(InvoiceProductDTO invoiceProductDTO) {
+        repository.save(mapper.convert(invoiceProductDTO, new InvoiceProduct()));
     }
 }
