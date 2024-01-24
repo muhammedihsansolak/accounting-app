@@ -49,6 +49,7 @@ public class RoleServiceImplUnitTesting {
         assertEquals("Role not found with this id:" + id, exception.getMessage());
     }
 
+
     @Test
     void should_execute_mapper_at_least_once_and_should_return_what_is_converted() {
 
