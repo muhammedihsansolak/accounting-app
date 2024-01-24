@@ -1,4 +1,5 @@
 package com.cydeo.service.impl;
+import com.cydeo.dto.InvoiceDTO;
 import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.dto.ProductDTO;
 import com.cydeo.entity.Invoice;
@@ -209,6 +210,35 @@ public class InvoiceProductServiceImplIntegrationTest {
 
         //then
         assertFalse(result.hasErrors());
+    }
+
+    /*
+     ************** doesProductHasInvoice() **************
+     */
+    @Test
+    void should_return_true_when_product_has_invoice(){
+        //given
+        Invoice invoice = new Invoice();
+        Invoice savedInvoice = invoiceRepository.save(invoice);
+        InvoiceDTO convertedInvoice = mapper.convert(savedInvoice, new InvoiceDTO());
+
+        Product product = new Product();
+        Product savedProduct = productRepository.save(product);
+        ProductDTO convertedProduct = mapper.convert(savedProduct, new ProductDTO());
+
+        InvoiceProductDTO invoiceProductDTO = new InvoiceProductDTO();
+        invoiceProductDTO.setInvoice(convertedInvoice);
+        invoiceProductDTO.setQuantity(1);
+        invoiceProductDTO.setPrice(BigDecimal.valueOf(100));
+        invoiceProductDTO.setTax(10);
+        invoiceProductDTO.setProduct(convertedProduct);
+        InvoiceProduct savedInvoiceProduct = mapper.convert(invoiceProductDTO, new InvoiceProduct());
+        repository.save(savedInvoiceProduct);
+
+        //when
+        boolean doesProductHasInvoice = invoiceProductService.doesProductHasInvoice(savedProduct.id);
+
+        assertTrue(doesProductHasInvoice);
     }
 
 }
