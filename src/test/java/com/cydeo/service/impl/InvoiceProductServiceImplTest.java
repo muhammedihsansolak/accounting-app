@@ -173,7 +173,7 @@ class InvoiceProductServiceImplTest {
     /*
      ************** removeInvoiceProductFromInvoice() **************
      */
-    //TODO
+    //TODO fix error
     @Test
     void should_remove_invoice_product_from_invoice() {
         // Given
@@ -204,19 +204,19 @@ class InvoiceProductServiceImplTest {
         invoiceProductDTOList.add(invoiceProductDTO2);
 
         when(repository.findByInvoiceId(invoiceId)).thenReturn(invoiceProductList);
-        when(mapper.convert(invoiceProduct1, new InvoiceProductDTO())).thenReturn(invoiceProductDTO1);
-        when(mapper.convert(invoiceProduct2, new InvoiceProductDTO())).thenReturn(invoiceProductDTO2);
+        when(mapper.convert(invoiceProductList.get(0), new InvoiceProductDTO())).thenReturn(invoiceProductDTO1);
+        when(mapper.convert(invoiceProductList.get(1), new InvoiceProductDTO())).thenReturn(invoiceProductDTO2);
         when(invoiceService.calculateTaxForProduct(invoiceProductDTO1)).thenReturn(BigDecimal.valueOf(5));
         when(invoiceService.calculateTaxForProduct(invoiceProductDTO2)).thenReturn(BigDecimal.valueOf(5));
-        when(invoiceProductService.findByInvoiceId(invoiceId)).thenReturn(invoiceProductDTOList);
+        when(repository.findById(2L)).thenReturn(Optional.of(invoiceProduct1));
 
         // When
         invoiceProductService.removeInvoiceProductFromInvoice(invoiceId, invoiceProductId);
 
         // Then
-        verify(invoiceProductService).findByInvoiceId(invoiceId);
-        verify(invoiceProductService).deleteById(invoiceProductId);
-        verify(invoiceProductService, never()).deleteById(3L); // Verifying that it's not called for invoiceProductDTO2
+        verify(repository).findByInvoiceId(invoiceId);
+        verify(repository).findById(invoiceProductId);
+        verify(repository, never()).deleteById(3L); // Verifying that it's not called for invoiceProductDTO2
     }
 
     /*
