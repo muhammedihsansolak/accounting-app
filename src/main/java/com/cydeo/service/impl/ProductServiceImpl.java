@@ -6,6 +6,7 @@ import com.cydeo.entity.Company;
 import com.cydeo.entity.Product;
 
 
+import com.cydeo.exception.ProductNotFoundException;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.ProductRepository;
 import com.cydeo.service.InvoiceProductService;
@@ -32,7 +33,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductDTO findById(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Product can not be found with id: " + id));
+                .orElseThrow(() -> new ProductNotFoundException("Product can not be found with id: " + id));
         return mapperUtil.convert(product, new ProductDTO());
     }
 
@@ -81,7 +82,7 @@ public class ProductServiceImpl implements ProductService {
     public void decreaseProductQuantityInStock(Long id, Integer quantity) {
 
         Product product = productRepository.findById(id)
-                .orElseThrow(()-> new NoSuchElementException("Product not found with id: " + id));
+                .orElseThrow(()-> new ProductNotFoundException("Product not found with id: " + id));
 
         int newQuantity = product.getQuantityInStock() - quantity;
 
@@ -96,7 +97,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void increaseProductQuantityInStock(Long id, Integer quantity) {
         Product product = productRepository.findById(id)
-                .orElseThrow(()-> new NoSuchElementException("Product not found with id: " + id));
+                .orElseThrow(()-> new ProductNotFoundException("Product not found with id: " + id));
 
         int newQuantity = product.getQuantityInStock() + quantity;//increase stock quantity
 
