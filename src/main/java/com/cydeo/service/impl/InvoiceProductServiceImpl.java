@@ -99,15 +99,23 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
     }
 
     @Override
-    public BindingResult checkIfProductAddedBefore(InvoiceProductDTO invoiceProductDTO, Long invoiceId, BindingResult bindingResult) {
+    public BindingResult validateProductStockBeforeAddingToInvoice(InvoiceProductDTO productToAdd, Long invoiceId, BindingResult bindingResult) {
 
-        List<InvoiceProductDTO> invoiceProductDTOList = findByInvoiceId(invoiceId);
+        List<InvoiceProductDTO> existingInvoiceProducts  = findByInvoiceId(invoiceId);
 
-        boolean result = invoiceProductDTOList.stream().anyMatch(invoiceProduct -> invoiceProduct.getProduct().getName().equals(invoiceProductDTO.getProduct().getName()));
+        Integer totalAddedQuantity = existingInvoiceProducts .stream()
+                .filter(invoiceProduct -> invoiceProduct.getProduct().getId().equals(productToAdd.getProduct().getId()))
+                .map(InvoiceProductDTO::getQuantity)
+                .reduce(0, Integer::sum);
 
-        if (result){
-            ObjectError error = new FieldError("newInvoiceProduct", "product", "Product " + invoiceProductDTO.getProduct().getName() + " has added before!");
-            bindingResult.addError(error);
+        Integer stockQuantity  = productToAdd.getProduct().getQuantityInStock();
+
+        Integer requestedQuantity  = productToAdd.getQuantity();
+
+        if ((totalAddedQuantity + requestedQuantity) > stockQuantity) {
+            String errorMessage = "Insufficient stock for product " + productToAdd.getProduct().getName() + ".";
+            FieldError stockError = new FieldError("newInvoiceProduct", "quantity", errorMessage);
+            bindingResult.addError(stockError);
         }
 
         return bindingResult;

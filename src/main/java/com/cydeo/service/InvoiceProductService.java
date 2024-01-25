@@ -22,5 +22,5 @@ public interface InvoiceProductService {
     void deleteByInvoice(InvoiceDTO invoice);
     List<InvoiceProductDTO> findAllApprovedInvoiceInvoiceProduct(InvoiceStatus invoiceStatus);
 
-    BindingResult checkIfProductAddedBefore(InvoiceProductDTO invoiceProductDTO, Long invoiceId, BindingResult bindingResult);
+    BindingResult validateProductStockBeforeAddingToInvoice(InvoiceProductDTO invoiceProductDTO, Long invoiceId, BindingResult bindingResult);
 }
