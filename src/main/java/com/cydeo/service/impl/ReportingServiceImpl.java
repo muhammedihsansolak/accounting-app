@@ -1,55 +1,76 @@
 package com.cydeo.service.impl;
 
+import com.cydeo.dto.CompanyDTO;
 import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.enums.InvoiceStatus;
-import com.cydeo.service.InvoiceProductService;
-import com.cydeo.service.ReportingService;
+import com.cydeo.enums.InvoiceType;
+import com.cydeo.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class ReportingServiceImpl implements ReportingService {
     private final InvoiceProductService invoiceProductService;
+    private final SecurityService securityService;
+    private final CompanyService companyService;
+
     public List<InvoiceProductDTO> getInvoiceProductList() {
       return invoiceProductService.findAllApprovedInvoiceInvoiceProduct(InvoiceStatus.APPROVED);
     }
 
     @Override
-    public Map<String, BigDecimal> getMonthlyProfitLossMap() {
+    @Transactional
+    public List<Map.Entry<String ,BigDecimal>> getMonthlyProfitLossListMap() {
+
+        List<Map.Entry<String ,BigDecimal>> listOfMap = new ArrayList<>();
+
         // Starting data of the company subscription, get the current user's company inserted day
-        LocalDate startDate = LocalDate.of(2022, 3, 22);
+        String companyName = securityService.getLoggedInUser().getCompany().getTitle();
+        CompanyDTO currentCompany = companyService.findByCompanyTitle(companyName);
 
-        List<BigDecimal> profitLossData = invoiceProductService.getCumulativeTotalProfitLossUpToMonth(startDate);
+        LocalDateTime startDate = currentCompany.getInsertDateTime();
 
-        return null;
+        List<LocalDate> keys = mapKeyGenerator(startDate);
+
+        for (LocalDate currentKey : keys) {
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy MMMM");
+            String key = currentKey.format(formatter);
+
+            BigDecimal profitLoss = invoiceProductService
+                    .getProfitLossBasedOneMonth(currentKey.getYear(), currentKey.getMonthValue()
+                            , currentCompany.getId(), InvoiceType.SALES);
+
+            listOfMap.add(Map.entry(key.toUpperCase(),profitLoss));
+        }
+        return listOfMap;
     }
 
-//    public BigDecimal getCumulativeTotalProfitLossUpToMonth(LocalDate startDate) {
-//        return invoiceProductRepository.getCumulativeTotalProfitLossUpToMonth(startDate);
-//    }
-//
-//    // You can use this method to iterate through months and get the cumulative total profit/loss
-//    public void printCumulativeTotalProfitLossForMonths() {
-//        LocalDate startDate = LocalDate.of(2022, 3, 22); // Adjust the start date as needed
-//
-//        for (int month = 0; month < 12; month++) {
-//            LocalDate currentDate = startDate.plusMonths(month);
-//            BigDecimal cumulativeTotalProfitLoss = getCumulativeTotalProfitLossUpToMonth(currentDate);
-//            System.out.println(String.format("%s %d cumulativeTotalProfitLoss = %s",
-//                    getMonthName(currentDate.getMonthValue()), currentDate.getYear(), cumulativeTotalProfitLoss));
-//        }
-//    }
-//
-//    private String getMonthName(int month) {
-//        // You can implement logic to get the month name based on the month number
-//        // For simplicity, assuming you have a utility method for this
-//        return MonthNameUtility.getMonthName(month);
-//    }
-//}
+    private List<LocalDate> mapKeyGenerator(LocalDateTime localDate) {
+        int startYear = localDate.getYear();
+        Month startMonth = localDate.getMonth();
+        int startDay = localDate.getDayOfMonth();
+
+        LocalDate startDate = LocalDate.of(startYear, startMonth, startDay);
+        List<LocalDate> mapKeys = new ArrayList<>();
+        LocalDate now = LocalDate.now();
+
+        while (startDate.isBefore(now)) {
+            mapKeys.add(now);
+            now = now.minusMonths(1);  // Use minusMonths for descending order
+        }
+        return mapKeys;
+    }
+
+
+
 }

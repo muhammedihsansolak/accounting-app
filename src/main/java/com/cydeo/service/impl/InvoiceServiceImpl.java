@@ -3,7 +3,6 @@ package com.cydeo.service.impl;
 import com.cydeo.dto.*;
 import com.cydeo.entity.Company;
 import com.cydeo.entity.Invoice;
-import com.cydeo.entity.InvoiceProduct;
 import com.cydeo.enums.InvoiceStatus;
 import com.cydeo.enums.InvoiceType;
 import com.cydeo.exception.InvoiceNotFoundException;
@@ -221,7 +220,6 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceProductDTOList.forEach(invPro -> {
             // set the remainingQuantity, profitLoss and save
                     invPro.setRemainingQuantity(0);
-                    invPro.setProfitLoss(BigDecimal.ZERO);
                     invoiceProductService.save(invPro);
             // meantime calculate the profitLoss and remainingQuantity of products from evey previous Perches
             calculateTotalPerchesRemainingQuanProfitLossAndSave(invPro);
@@ -246,6 +244,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             int updatedRemainingQuantity = Math.max(currentRemainingQuantity - salesQuantity, 0);
 
             invoiceProduct.setRemainingQuantity(updatedRemainingQuantity);
+            invoiceProductService.save(invoiceProduct);
 
 //          sold quantity from remaining quantity
             int soldQuantity = currentRemainingQuantity-updatedRemainingQuantity;
@@ -273,9 +272,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                 soldQuantity,sales.getTax());
 
         // calculate the profitLoss and save to database than exit the loop
-        perches.setProfitLoss(perches.getProfitLoss()
-                .add(totalSale.subtract(totalPerches)));
-        invoiceProductService.save(perches);
+        sales.setProfitLoss(totalSale.subtract(totalPerches));
+        invoiceProductService.save(sales);
     }
 
     private BigDecimal calculateTotal(BigDecimal price, int quantity, int taxRate){

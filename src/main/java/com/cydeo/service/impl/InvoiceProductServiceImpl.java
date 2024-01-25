@@ -1,10 +1,7 @@
 package com.cydeo.service.impl;
-
 import com.cydeo.dto.InvoiceDTO;
 import com.cydeo.dto.InvoiceProductDTO;
-import com.cydeo.entity.Invoice;
 import com.cydeo.entity.InvoiceProduct;
-import com.cydeo.entity.Product;
 import com.cydeo.enums.InvoiceStatus;
 import com.cydeo.enums.InvoiceType;
 import com.cydeo.exception.InvoiceProductNotFoundException;
@@ -12,15 +9,12 @@ import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.InvoiceProductRepository;
 import com.cydeo.service.InvoiceProductService;
 import com.cydeo.service.InvoiceService;
-import com.cydeo.service.ProductService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
-
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -153,7 +147,9 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
     }
 
     @Override
-    public List<BigDecimal> getCumulativeTotalProfitLossUpToMonth(LocalDate startDate) {
-        return null;
+    public BigDecimal getProfitLossBasedOneMonth(int year, int month, Long companyId, InvoiceType invoiceType) {
+
+        return repository
+               .getTotalProfitLossForMonthAndCompanyAndInvoiceType(year,month,companyId, InvoiceType.SALES);
     }
 }

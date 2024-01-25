@@ -25,7 +25,7 @@ public class ReportingController {
     @GetMapping("/profitLossData")
     public String getProfitLossList(Model model){
 
-        model.addAttribute("monthlyProfitLossDataMap",reportingService.getMonthlyProfitLossMap());
+        model.addAttribute("monthlyProfitLossDataMap",reportingService.getMonthlyProfitLossListMap());
 
         return "report/profit-loss-report";
     }
