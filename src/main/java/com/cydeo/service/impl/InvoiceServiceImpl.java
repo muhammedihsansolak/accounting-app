@@ -240,6 +240,21 @@ public class InvoiceServiceImpl implements InvoiceService {
                 });
     }
 
+    private void decreaseProductRemainingQuantity(List<InvoiceProductDTO> invoiceProductList) {
+        invoiceProductList.forEach(invoiceProductDTO -> {
+            ProductDTO product = invoiceProductDTO.getProduct();
+            Integer quantity = invoiceProductDTO.getQuantity();
+            productService.decreaseProductQuantityInStock(product.getId(), quantity);
+        });
+    }
+
+    private void increaseProductRemainingQuantity(List<InvoiceProductDTO> invoiceProductList) {
+        invoiceProductList.forEach(invoiceProductDTO -> {
+            ProductDTO product = invoiceProductDTO.getProduct();
+            Integer quantity = invoiceProductDTO.getQuantity();
+            productService.increaseProductQuantityInStock(product.getId(), quantity);
+        });
+    }
     @Transactional
     public void calculateTotalPerchesRemainingQuanProfitLossAndSave(InvoiceProductDTO invPro){
         // get the list of perchesInvoices invoiceProductList
