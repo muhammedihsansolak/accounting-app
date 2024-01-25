@@ -1,9 +1,13 @@
 package com.cydeo.controller;
 
+import com.cydeo.dto.InvoiceDTO;
+import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.dto.PaymentDTO;
 import com.cydeo.dto.request.ChargeRequest;
 import com.cydeo.entity.Payment;
 import com.cydeo.enums.Currency;
+import com.cydeo.service.InvoiceProductService;
+import com.cydeo.service.InvoiceService;
 import com.cydeo.service.PaymentService;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
@@ -30,6 +34,10 @@ import java.util.List;
 public class PaymentController {
 
     private final PaymentService paymentService;
+
+    private final InvoiceProductService invoiceProductService;
+
+    private final InvoiceService invoiceService;
 
     @Value("${STRIPE_PUBLIC_KEY}")
     private String stripePublicKey;
@@ -76,5 +84,20 @@ public class PaymentController {
 
         return "payment/payment-result";
     }
+
+    @GetMapping("/toInvoice/{invoiceId}")
+    public String printSalesInvoice(@PathVariable("invoiceId")Long invoiceId , Model model){
+        InvoiceDTO invoice = invoiceService.findById(invoiceId);
+        List<InvoiceProductDTO> invoiceProductDTOList =  invoiceProductService.findByInvoiceId(invoiceId);
+
+        model.addAttribute("invoice", invoice);
+        model.addAttribute("company", invoice.getCompany());
+        model.addAttribute("invoiceProducts", invoiceProductDTOList);
+        model.addAttribute("payment",paymentService.retrieveAllPayments());
+
+        return "invoice/invoice_print";
+    }
+
+
 
 }
