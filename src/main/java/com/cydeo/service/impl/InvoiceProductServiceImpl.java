@@ -121,7 +121,7 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
                     Integer invoiceProductQuantity = invoiceProductDTO.getQuantity();
                     Integer quantityInStock = invoiceProductDTO.getProduct().getQuantityInStock();
                     if (quantityInStock < invoiceProductQuantity){
-                        ObjectError error = new FieldError("newInvoiceProduct", "product", "Product " + invoiceProductDTO.getProduct().getName() + " has no enough stock!");
+                        ObjectError error = new FieldError("newInvoiceProduct", "quantity", "Product " + invoiceProductDTO.getProduct().getName() + " has no enough stock!");
                         bindingResult.addError(error);
                     }
                 }
