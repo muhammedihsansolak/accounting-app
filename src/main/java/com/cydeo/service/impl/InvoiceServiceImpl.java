@@ -210,37 +210,80 @@ public class InvoiceServiceImpl implements InvoiceService {
             increaseProductQuantityInStock(invoiceProductList);
         }
     }
-    private void saveSalesInvoiceProductProfitLossAndRemainingQuantity(List<InvoiceProductDTO> invoiceProductDTOList){
+    private void savePurchaseInvoiceProductProfitLossAndRemainingQuantity(List<InvoiceProductDTO> invoiceProductDTOList){
         invoiceProductDTOList.forEach(invPro -> {
             invPro.setProfitLoss(BigDecimal.ZERO);
             invPro.setRemainingQuantity(invPro.getQuantity());
             invoiceProductService.save(invPro);
         });
     }
-    private void savePurchaseInvoiceProductProfitLossAndRemainingQuantity(List<InvoiceProductDTO> invoiceProductDTOList){
+    private void saveSalesInvoiceProductProfitLossAndRemainingQuantity(List<InvoiceProductDTO> invoiceProductDTOList){
         invoiceProductDTOList.forEach(invPro -> {
-            // set profitLoss and mean time set the remainingQuantity of previous Perches
-                    invPro.setProfitLoss(calculateProfitLoss(invPro));
+            // set the remainingQuantity, profitLoss and save
                     invPro.setRemainingQuantity(0);
+                    invPro.setProfitLoss(BigDecimal.ZERO);
                     invoiceProductService.save(invPro);
+            // meantime calculate the profitLoss and remainingQuantity of products from evey previous Perches
+            calculateTotalPerchesRemainingQuanProfitLossAndSave(invPro);
+
                 });
     }
 
-    private BigDecimal calculateProfitLoss(InvoiceProductDTO salesInvoicePro){
-        // TODO  calculate the profit loss
-        int quantity = salesInvoicePro.getQuantity();
-        BigDecimal price = salesInvoicePro.getPrice();
-        int taxRate = salesInvoicePro.getTax();
+    @Transactional
+    public void calculateTotalPerchesRemainingQuanProfitLossAndSave(InvoiceProductDTO invPro){
+        // get the list of perchesInvoices invoiceProductList
+        String companyName = invPro.getInvoice().getCompany().getTitle();
+        String productName = invPro.getProduct().getName();
 
-        BigDecimal totalSale = (price.multiply(BigDecimal.valueOf(quantity)).multiply(BigDecimal.valueOf(taxRate)))
-                .divide(PERCENTAGE_DIVISOR,2,RoundingMode.HALF_UP);
+        List<InvoiceProductDTO> invoiceProducts = invoiceProductService
+                .getPerchesInvoiceProductsListQuantityNotZero(
+                        companyName,productName,InvoiceType.PURCHASE, 0);
 
-        BigDecimal totalPerches = calculateTotalPerchesAndSaveRemainingQuan(salesInvoicePro);
+        int salesQuantity = invPro.getQuantity();
 
-        return totalSale.subtract(totalPerches);
+        for (InvoiceProductDTO invoiceProduct : invoiceProducts) {
+            int currentRemainingQuantity = invoiceProduct.getRemainingQuantity();
+            int updatedRemainingQuantity = Math.max(currentRemainingQuantity - salesQuantity, 0);
+
+            invoiceProduct.setRemainingQuantity(updatedRemainingQuantity);
+
+//          sold quantity from remaining quantity
+            int soldQuantity = currentRemainingQuantity-updatedRemainingQuantity;
+
+            salesQuantity -= soldQuantity;
+
+            if (salesQuantity <= 0) {
+                // calculate the profitLoss of perches and save the remaining quantity and profitLoss to dataBase
+                // then exit the loop
+                calculateProfitLossAndSaveToDatabase(invPro,invoiceProduct,soldQuantity);
+                break;
+            }
+            // calculate the profitLoss of perches and save the remaining quantity and profitLoss to dataBase
+            calculateProfitLossAndSaveToDatabase(invPro,invoiceProduct,soldQuantity);
+        }
     }
 
+    private void calculateProfitLossAndSaveToDatabase(InvoiceProductDTO sales, InvoiceProductDTO perches, int soldQuantity){
+        // calculate the product perches totalPrice
+        BigDecimal totalPerches = calculateTotal(perches.getPrice(),
+                soldQuantity,perches.getTax());
 
+        // calculate sales totalPrice
+        BigDecimal totalSale = calculateTotal(sales.getPrice(),
+                soldQuantity,sales.getTax());
+
+        // calculate the profitLoss and save to database than exit the loop
+        perches.setProfitLoss(perches.getProfitLoss()
+                .add(totalSale.subtract(totalPerches)));
+        invoiceProductService.save(perches);
+    }
+
+    private BigDecimal calculateTotal(BigDecimal price, int quantity, int taxRate){
+        BigDecimal totalPrice = price.multiply(BigDecimal.valueOf(quantity));
+        BigDecimal taxRateMod = BigDecimal.valueOf(taxRate)
+                .divide(PERCENTAGE_DIVISOR,2,RoundingMode.HALF_UP);
+        return totalPrice.add(totalPrice.multiply(taxRateMod));
+    }
 
     private void decreaseProductQuantityInStock(List<InvoiceProductDTO> invoiceProductList) {
         invoiceProductList.forEach(invoiceProductDTO -> {

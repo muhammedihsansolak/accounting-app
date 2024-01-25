@@ -146,4 +146,14 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
     public void save(InvoiceProductDTO invoiceProductDTO) {
         repository.save(mapper.convert(invoiceProductDTO, new InvoiceProduct()));
     }
+
+    @Override
+    public List<InvoiceProductDTO> getPerchesInvoiceProductsListQuantityNotZero(
+            String companyName, String productName, InvoiceType invoiceType, int quantity) {
+         return repository
+                .findByInvoice_Company_TitleAndProduct_NameAndInvoice_InvoiceTypeAndRemainingQuantityGreaterThanOrderByInsertDateTimeAsc(
+                        companyName, productName, invoiceType,quantity)
+                .stream().map(invPro->mapper.convert(invPro,new InvoiceProductDTO()))
+                 .collect(Collectors.toList());
+    }
 }
