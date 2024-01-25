@@ -3,6 +3,7 @@ package com.cydeo.service;
 import com.cydeo.dto.InvoiceDTO;
 import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.enums.InvoiceStatus;
+import com.cydeo.enums.InvoiceType;
 import org.springframework.validation.BindingResult;
 
 import java.util.List;
