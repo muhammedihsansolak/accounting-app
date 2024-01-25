@@ -1,2 +1,0 @@
-1. if invoice approved invoiceProduct should calculate the remainingQuantity, profitLoss.
-    at the same time the product in stack quantity should be calculated
