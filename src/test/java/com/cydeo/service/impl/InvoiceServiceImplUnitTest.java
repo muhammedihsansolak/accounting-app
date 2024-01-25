@@ -3,8 +3,6 @@ package com.cydeo.service.impl;
 import com.cydeo.dto.InvoiceDTO;
 import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.entity.Invoice;
-import com.cydeo.enums.InvoiceStatus;
-import com.cydeo.enums.InvoiceType;
 import com.cydeo.exception.InvoiceNotFoundException;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.InvoiceRepository;
@@ -124,19 +122,5 @@ public class InvoiceServiceImplUnitTest {
         verify(invoiceRepository, times(1)).save(invoiceToDelete);
         verify(invoiceProductServiceImpl, times(1)).deleteByInvoice(any(InvoiceDTO.class));
     }
-
-    @Test
-    void should_approve_invoice() { //TODO I couldnt solve
-        // Given
-        Long invoiceId = 1L;
-
-        Invoice invoiceToApprove = new Invoice();
-        invoiceToApprove.setId(invoiceId);
-        invoiceToApprove.setInvoiceStatus(InvoiceStatus.APPROVED);
-        invoiceToApprove.setInvoiceType(InvoiceType.SALES);
-
-
-    }
-
 
 }
