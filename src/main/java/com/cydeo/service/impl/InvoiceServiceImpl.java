@@ -6,6 +6,7 @@ import com.cydeo.entity.Invoice;
 import com.cydeo.enums.InvoiceStatus;
 import com.cydeo.enums.InvoiceType;
 import com.cydeo.exception.InvoiceNotFoundException;
+import com.cydeo.exception.NoEnoughStockException;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.InvoiceRepository;
 import com.cydeo.service.*;
@@ -195,19 +196,31 @@ public class InvoiceServiceImpl implements InvoiceService {
         Invoice invoiceToApprove = invoiceRepository.findById(invoiceId)
                 .orElseThrow(() -> new InvoiceNotFoundException("Invoice can not found with id: " + invoiceId));
 
-        invoiceToApprove.setInvoiceStatus(InvoiceStatus.APPROVED);
-
-        invoiceRepository.save(invoiceToApprove);
-
         List<InvoiceProductDTO> invoiceProductList = invoiceProductService.findByInvoiceId(invoiceToApprove.getId());
 
         if (invoiceToApprove.getInvoiceType() == InvoiceType.SALES) {
             saveSalesInvoiceProductProfitLossAndRemainingQuantity(invoiceProductList);
-            decreaseProductQuantityInStock(invoiceProductList);
+            decreaseProductRemainingQuantity(invoiceProductList);
         } else if (invoiceToApprove.getInvoiceType() == InvoiceType.PURCHASE) {
             savePurchaseInvoiceProductProfitLossAndRemainingQuantity(invoiceProductList);
-            increaseProductQuantityInStock(invoiceProductList);
+            increaseProductRemainingQuantity(invoiceProductList);
         }
+
+        invoiceToApprove.setInvoiceStatus(InvoiceStatus.APPROVED);
+
+        invoiceRepository.save(invoiceToApprove);
+    }
+
+    private boolean validateInvoiceProducts(List<InvoiceProductDTO> invoiceProductList, Long invoiceId) {
+        invoiceProductList.stream().forEach(invoiceProduct -> {
+            Integer invoiceProductQuantity = invoiceProduct.getQuantity();
+            Integer quantityInStock = invoiceProduct.getProduct().getQuantityInStock();
+            if (quantityInStock < invoiceProductQuantity) {
+                invoiceProductService.removeInvoiceProductFromInvoice(invoiceId, invoiceProduct.getId());
+                throw new NoEnoughStockException("Your invoice can not be approved! Product do not have enough stock: " + invoiceProduct.getProduct().getName() + ". Product removed from invoice.");
+            }
+        });
+        return true;
     }
     private void savePurchaseInvoiceProductProfitLossAndRemainingQuantity(List<InvoiceProductDTO> invoiceProductDTOList){
         invoiceProductDTOList.forEach(invPro -> {
@@ -375,7 +388,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         //Get the company of the logged-in user
         Company company = mapper.convert(logInUser, new Company());
 
-         // Query the database to find the top 3 invoices based on certain criteria
+        // Query the database to find the top 3 invoices based on certain criteria
         List<InvoiceDTO> invoiceDTOList = invoiceRepository.findTop3ByCompanyAndInvoiceStatusAndIsDeletedOrderByDateDesc(company, InvoiceStatus.APPROVED, false).stream()
                 .map(invoice -> {
                     InvoiceDTO invoiceDTO = mapper.convert(invoice, new InvoiceDTO());
@@ -403,9 +416,10 @@ public class InvoiceServiceImpl implements InvoiceService {
 
 
     }
+
     @Override
     public boolean existsByClientVendorId(Long id) {
-       return invoiceRepository.existsByClientVendorId(id);
+        return invoiceRepository.existsByClientVendorId(id);
 
     }
 }

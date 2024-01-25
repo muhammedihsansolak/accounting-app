@@ -25,6 +25,8 @@ public interface InvoiceProductService {
     void deleteByInvoice(InvoiceDTO invoice);
     List<InvoiceProductDTO> findAllApprovedInvoiceInvoiceProduct(InvoiceStatus invoiceStatus);
 
+    BindingResult validateProductStockBeforeAddingToInvoice(InvoiceProductDTO invoiceProductDTO, Long invoiceId, BindingResult bindingResult);
+
     void save(InvoiceProductDTO invoiceProductDTO);
 
     List<InvoiceProductDTO> getPerchesInvoiceProductsListQuantityNotZero(
