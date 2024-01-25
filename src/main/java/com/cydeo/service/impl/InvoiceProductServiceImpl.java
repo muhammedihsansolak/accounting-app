@@ -8,6 +8,7 @@ import com.cydeo.entity.Product;
 import com.cydeo.enums.InvoiceStatus;
 import com.cydeo.enums.InvoiceType;
 import com.cydeo.exception.InvoiceProductNotFoundException;
+import com.cydeo.exception.NoEnoughStockException;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.InvoiceProductRepository;
 import com.cydeo.service.InvoiceProductService;
@@ -95,6 +96,21 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
         InvoiceProduct savedInvoice = repository.save(invoiceProduct);
 
         return mapper.convert(savedInvoice, new InvoiceProductDTO());
+    }
+
+    @Override
+    public BindingResult checkIfProductAddedBefore(InvoiceProductDTO invoiceProductDTO, Long invoiceId, BindingResult bindingResult) {
+
+        List<InvoiceProductDTO> invoiceProductDTOList = findByInvoiceId(invoiceId);
+
+        boolean result = invoiceProductDTOList.stream().anyMatch(invoiceProduct -> invoiceProduct.getProduct().getName().equals(invoiceProductDTO.getProduct().getName()));
+
+        if (result){
+            ObjectError error = new FieldError("newInvoiceProduct", "product", "Product " + invoiceProductDTO.getProduct().getName() + " has added before!");
+            bindingResult.addError(error);
+        }
+
+        return bindingResult;
     }
 
     @Override

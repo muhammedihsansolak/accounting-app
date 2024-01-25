@@ -76,6 +76,7 @@ public class SalesInvoiceController {
     public String addInvoiceProduct(@Valid @ModelAttribute("newInvoiceProduct")InvoiceProductDTO invoiceProductDTO, BindingResult bindingResult, @PathVariable("id")Long id, Model model){
 
         bindingResult = invoiceProductService.doesProductHaveEnoughStock(invoiceProductDTO, bindingResult);
+        bindingResult = invoiceProductService.checkIfProductAddedBefore(invoiceProductDTO, id , bindingResult);
 
         if (bindingResult.hasFieldErrors()) {
             InvoiceDTO foundInvoice = invoiceService.findById(id);
