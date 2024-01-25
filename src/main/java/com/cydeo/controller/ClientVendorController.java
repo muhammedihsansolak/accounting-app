@@ -10,7 +10,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,11 +30,9 @@ public class ClientVendorController {
 
     @GetMapping("/create")
     public String showCreateForm(Model model) {
-        List<String> countries = new ArrayList<>(Arrays.asList("UK", "USA"));
-
         model.addAttribute("newClientVendor", new ClientVendorDTO());
         model.addAttribute("clientVendorTypes", Arrays.asList(ClientVendorType.values()));
-        model.addAttribute("countries", countries);
+        model.addAttribute("countries", clientVendorService.getCountries());
         return "clientVendor/clientVendor-create";
 
     }
@@ -46,7 +43,7 @@ public class ClientVendorController {
         bindingResult = clientVendorService.addTypeValidation(newClientVendor.getClientVendorName(),bindingResult);
 
         if (bindingResult.hasFieldErrors()){
-            model.addAttribute("countries",List.of("USA","UK"));
+            model.addAttribute("countries", clientVendorService.getCountries());
             model.addAttribute("clientVendorTypes", Arrays.asList(ClientVendorType.values()));
             return "clientVendor/clientVendor-create";
         }
@@ -60,10 +57,9 @@ public class ClientVendorController {
     @GetMapping("/update/{id}")
     public String showUpdateForm(@PathVariable("id") Long id, Model model) {
         ClientVendorDTO clientVendor = clientVendorService.findById(id);
-        List<String> countries = new ArrayList<>(Arrays.asList("UK", "USA"));
 
         model.addAttribute("clientVendorTypes", Arrays.asList(ClientVendorType.values()));
-        model.addAttribute("countries", countries);
+        model.addAttribute("countries",clientVendorService.getCountries());
         model.addAttribute("clientVendor", clientVendor);
         return "clientVendor/clientVendor-update";
     }
@@ -73,10 +69,9 @@ public class ClientVendorController {
   public String updateClientVendor(@PathVariable("id") Long id,
                                    @Valid @ModelAttribute("clientVendor") ClientVendorDTO clientVendor,
                                    BindingResult bindingResult, Model model) {
-      //  bindingResult = clientVendorService.addTypeValidation(clientVendor.getClientVendorName(),bindingResult);
       if (bindingResult.hasErrors()) {
           model.addAttribute("clientVendorTypes", Arrays.asList(ClientVendorType.values()));
-          model.addAttribute("countries", Arrays.asList("USA", "UK"));
+          model.addAttribute("countries",clientVendorService.getCountries());
           return "clientVendor/clientVendor-update";
       }
 
@@ -85,7 +80,7 @@ public class ClientVendorController {
   }
 
     @GetMapping("/delete/{id}")
-    public String deleteClientVendor(@PathVariable("id") Long id, Model model) {
+    public String deleteClientVendor(@PathVariable("id") Long id) {
         boolean hasInvoice = clientVendorService.isClientHasInvoice(id);
         clientVendorService.delete(id);
         return "redirect:/clientVendors/list";
