@@ -59,10 +59,7 @@ public class InvoiceServiceImplUnitTest {
     @InjectMocks
     InvoiceServiceImpl invoiceServiceImpl;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
+    @ExtendWith(MockitoExtension.class)
 
     @Test
     public void should_throw_exception_when_invoice_not_found() {
