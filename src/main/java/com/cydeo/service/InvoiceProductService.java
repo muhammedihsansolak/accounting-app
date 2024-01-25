@@ -6,6 +6,8 @@ import com.cydeo.enums.InvoiceStatus;
 import com.cydeo.enums.InvoiceType;
 import org.springframework.validation.BindingResult;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface InvoiceProductService {
@@ -28,4 +30,6 @@ public interface InvoiceProductService {
 
     List<InvoiceProductDTO> getPerchesInvoiceProductsListQuantityNotZero(
             String companyName, String productName, InvoiceType invoiceType, int quantity);
+
+    List<BigDecimal> getCumulativeTotalProfitLossUpToMonth(LocalDate startDate);
 }

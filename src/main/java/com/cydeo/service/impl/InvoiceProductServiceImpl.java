@@ -20,6 +20,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -91,6 +92,7 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
         InvoiceDTO invoiceDTO = invoiceService.findById(invoiceId);
 
         invoiceProductDTO.setInvoice(invoiceDTO);
+        invoiceProductDTO.setProfitLoss(BigDecimal.ZERO);
 
         InvoiceProduct invoiceProduct = mapper.convert(invoiceProductDTO, new InvoiceProduct());
         invoiceProduct.setId(null);//bug fix
@@ -148,5 +150,10 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
                         companyName, productName, invoiceType,quantity)
                 .stream().map(invPro->mapper.convert(invPro,new InvoiceProductDTO()))
                  .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BigDecimal> getCumulativeTotalProfitLossUpToMonth(LocalDate startDate) {
+        return null;
     }
 }

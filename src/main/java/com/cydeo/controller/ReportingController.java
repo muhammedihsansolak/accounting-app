@@ -18,6 +18,15 @@ public class ReportingController {
     public String getStockReportList(Model model){
 
         model.addAttribute("invoiceProducts",reportingService.getInvoiceProductList());
+
         return "report/stock-report";
+    }
+
+    @GetMapping("/profitLossData")
+    public String getProfitLossList(Model model){
+
+        model.addAttribute("monthlyProfitLossDataMap",reportingService.getMonthlyProfitLossMap());
+
+        return "report/profit-loss-report";
     }
 }
