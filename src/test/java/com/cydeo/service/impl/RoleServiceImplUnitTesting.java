@@ -1,4 +1,4 @@
-package com.cydeo.service.unit;
+package com.cydeo.service.impl;
 
 import com.cydeo.dto.RoleDTO;
 import com.cydeo.dto.UserDTO;
@@ -6,8 +6,6 @@ import com.cydeo.entity.Role;
 import com.cydeo.exception.RoleNotFoundException;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.RoleRepository;
-import com.cydeo.service.impl.RoleServiceImpl;
-import com.cydeo.service.impl.SecurityServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

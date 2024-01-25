@@ -1,11 +1,7 @@
-package com.cydeo.service.unit;
+package com.cydeo.service.impl;
 
 import com.cydeo.dto.RoleDTO;
 import com.cydeo.entity.Role;
-import com.cydeo.mapper.MapperUtil;
-import com.cydeo.repository.RoleRepository;
-import com.cydeo.service.SecurityService;
-import com.cydeo.service.impl.RoleServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,12 +11,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @SpringBootTest
 public class RoleServiceImplIntegrationTesting {
 
-    @Autowired
-    private  RoleRepository roleRepository;
-    @Autowired
-    private  MapperUtil mapperUtil;
-    @Autowired
-    private  SecurityService securityService;
     @Autowired
     private RoleServiceImpl roleService;
 
