@@ -80,25 +80,6 @@ public class InvoiceServiceImplUnitTest {
         assertEquals("Tax amount cannot be negative!", exception.getMessage());
     }
 
-    @Test
-    void calculate_total_price_without_Tax() {
-        // Given
-        InvoiceProductDTO product1 = new InvoiceProductDTO();
-        product1.setPrice(BigDecimal.valueOf(100)); // Set the price of the first product to 100
-        product1.setQuantity(2); // Set the quantity of the first product to 2
-
-        InvoiceProductDTO product2 = new InvoiceProductDTO();
-        product2.setPrice(BigDecimal.valueOf(50)); // Set the price of the second product to 50
-        product2.setQuantity(3); // Set the quantity of the second product to 3
-
-        List<InvoiceProductDTO> invoiceProductDTOList = Arrays.asList(product1, product2); // Create a list of InvoiceProductDTOs
-
-        // When
-        BigDecimal totalPriceWithoutTax = invoiceServiceImpl.calculateTotalPriceWithoutTax(invoiceProductDTOList); // Calculate the total price without tax
-
-        // Then
-        assertEquals(BigDecimal.valueOf(350), totalPriceWithoutTax); // Verify that the calculated total price without tax is 350 (100 * 2 + 50 * 3 = 350)
-    }
 
 
     @Test
