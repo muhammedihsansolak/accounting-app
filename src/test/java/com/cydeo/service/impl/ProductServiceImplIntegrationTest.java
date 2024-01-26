@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
@@ -46,12 +47,6 @@ class ProductServiceImplIntegrationTest {
     @Autowired
     private MapperUtil mapperUtil;
 
-    @Autowired
-    private SecurityService securityService;
-
-    @Autowired
-    private InvoiceProductService invoiceProductService;
-
     //under test
     @Autowired
     private ProductService productService;
@@ -64,9 +59,6 @@ class ProductServiceImplIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private UserService userService;
 
     Company relatedCompany;
     Company nonRelatedCompany;
@@ -217,4 +209,28 @@ class ProductServiceImplIntegrationTest {
         assertThat(decreasedStock).isEqualTo(150);
     }
 
+    /*
+     ***************** findProductsByCompanyAndHaveStock() *****************
+     */
+    @Test
+    void should_return_product_that_has_available_stock(){
+        relatedProduct.setQuantityInStock(100);
+        relatedProduct.setName("product");
+
+        List<ProductDTO> productList = productService.findProductsByCompanyAndHaveStock(relatedCompany);
+        List<String> productNames = productList.stream().map(ProductDTO::getName).collect(Collectors.toList());
+
+        assertTrue(productNames.contains("product"));
+    }
+
+    @Test
+    void should_return_product_that_has_not_available_stock(){
+        relatedProduct.setQuantityInStock(0);
+        relatedProduct.setName("product");
+
+        List<ProductDTO> productList = productService.findProductsByCompanyAndHaveStock(relatedCompany);
+        List<String> productNames = productList.stream().map(ProductDTO::getName).collect(Collectors.toList());
+
+        assertFalse(productNames.contains("product"));
+    }
 }
