@@ -1,7 +1,9 @@
 package com.cydeo.service.impl;
 
+import com.cydeo.client.CountryClient;
 import com.cydeo.dto.ClientVendorDTO;
 import com.cydeo.dto.CompanyDTO;
+import com.cydeo.dto.CountryInfoDTO;
 import com.cydeo.dto.UserDTO;
 import com.cydeo.entity.Company;
 import com.cydeo.enums.ClientVendorType;
@@ -11,6 +13,8 @@ import com.cydeo.entity.ClientVendor;
 import com.cydeo.service.ClientVendorService;
 import com.cydeo.service.InvoiceService;
 import com.cydeo.service.SecurityService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.cydeo.repository.ClientVendorRepository;
 import org.springframework.validation.BindingResult;
@@ -31,11 +35,16 @@ public class ClientVendorServiceImpl implements ClientVendorService {
     private final SecurityService securityService;
     private final InvoiceService invoiceService;
 
-    public ClientVendorServiceImpl(ClientVendorRepository clientVendorRepository, MapperUtil mapperUtil, SecurityService securityService, InvoiceService invoiceService) {
+    private final CountryClient countryClient;
+    @Value("${COUNTRIES_API_KEY}")
+    private String countriesApiKey;
+
+    public ClientVendorServiceImpl(ClientVendorRepository clientVendorRepository, MapperUtil mapperUtil, SecurityService securityService, InvoiceService invoiceService, CountryClient countryClient) {
         this.clientVendorRepository = clientVendorRepository;
         this.mapperUtil = mapperUtil;
         this.securityService = securityService;
         this.invoiceService = invoiceService;
+        this.countryClient = countryClient;
     }
 
     @Override
@@ -49,8 +58,7 @@ public class ClientVendorServiceImpl implements ClientVendorService {
     public List<ClientVendorDTO> getAllClientVendors() {
         UserDTO loggedInUser = securityService.getLoggedInUser();
         List<ClientVendor> clientVendors = clientVendorRepository.findAllByCompanyId(loggedInUser.getCompany().getId());
-        return clientVendors.stream().map
-                        (clientVendor -> {
+        return clientVendors.stream().map(clientVendor -> {
                             boolean hasInvoice = isClientHasInvoice(clientVendor.getId());
                             ClientVendorDTO convert = mapperUtil.convert(clientVendor, new ClientVendorDTO());
                            convert.setHasInvoice(hasInvoice);
@@ -126,6 +134,18 @@ public class ClientVendorServiceImpl implements ClientVendorService {
     @Override
     public boolean isClientHasInvoice(Long id) {
         return invoiceService.existsByClientVendorId(id);
+    }
+
+    @Override
+    public List<String> getCountries() {
+        ResponseEntity<List<CountryInfoDTO>> countries = countryClient.getCountries(countriesApiKey);
+        if (countries.getStatusCode().is2xxSuccessful()){
+            return countries.getBody().stream()
+                    .map(CountryInfoDTO::getName)
+                    .collect(Collectors.toList());
+        }
+        return List.of();
+
     }
 
 }

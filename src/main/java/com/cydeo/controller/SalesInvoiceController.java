@@ -8,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -43,7 +41,7 @@ public class SalesInvoiceController {
     @GetMapping("/update/{id}")
     public String editInvoice(@PathVariable("id")Long id, Model model){
         InvoiceDTO foundInvoice = invoiceService.findById(id);
-        List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceId(id);
+        List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceIdAndTotalCalculated(id);
         List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findClientVendorByClientVendorTypeAndCompany(ClientVendorType.CLIENT);
 
         model.addAttribute("invoice",foundInvoice);
@@ -76,6 +74,7 @@ public class SalesInvoiceController {
     public String addInvoiceProduct(@Valid @ModelAttribute("newInvoiceProduct")InvoiceProductDTO invoiceProductDTO, BindingResult bindingResult, @PathVariable("id")Long id, Model model){
 
         bindingResult = invoiceProductService.doesProductHaveEnoughStock(invoiceProductDTO, bindingResult);
+        bindingResult = invoiceProductService.validateProductStockBeforeAddingToInvoice(invoiceProductDTO, id , bindingResult);
 
         if (bindingResult.hasFieldErrors()) {
             InvoiceDTO foundInvoice = invoiceService.findById(id);
@@ -113,6 +112,7 @@ public class SalesInvoiceController {
     public String approveInvoice(@PathVariable("id")Long invoiceId){
 
         invoiceService.approve(invoiceId);
+        productService.checkProductLowLimitAlert(invoiceId);
 
         return "redirect:/salesInvoices/list";
     }

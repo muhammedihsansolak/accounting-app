@@ -20,4 +20,6 @@ public interface ClientVendorService {
 
     boolean isClientHasInvoice(Long id);
 
+    List<String> getCountries();
+
 }
