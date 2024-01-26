@@ -112,6 +112,7 @@ public class SalesInvoiceController {
     public String approveInvoice(@PathVariable("id")Long invoiceId){
 
         invoiceService.approve(invoiceId);
+        productService.checkProductLowLimitAlert(invoiceId);
 
         return "redirect:/salesInvoices/list";
     }
