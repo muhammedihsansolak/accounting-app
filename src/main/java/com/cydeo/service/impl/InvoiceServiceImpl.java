@@ -199,8 +199,10 @@ public class InvoiceServiceImpl implements InvoiceService {
         List<InvoiceProductDTO> invoiceProductList = invoiceProductService.findByInvoiceId(invoiceToApprove.getId());
 
         if (invoiceToApprove.getInvoiceType() == InvoiceType.SALES) {
-            saveSalesInvoiceProductProfitLossAndRemainingQuantity(invoiceProductList);
-            decreaseProductRemainingQuantity(invoiceProductList);
+            if ((validateInvoiceProducts(invoiceProductList, invoiceId))) {
+                saveSalesInvoiceProductProfitLossAndRemainingQuantity(invoiceProductList);
+                decreaseProductRemainingQuantity(invoiceProductList);
+            }
         } else if (invoiceToApprove.getInvoiceType() == InvoiceType.PURCHASE) {
             savePurchaseInvoiceProductProfitLossAndRemainingQuantity(invoiceProductList);
             increaseProductRemainingQuantity(invoiceProductList);
