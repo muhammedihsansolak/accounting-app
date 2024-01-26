@@ -28,8 +28,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -139,6 +143,78 @@ class ProductServiceImplIntegrationTest {
         assertThat(productDTOList).isNotEmpty();
         assertThat(productDTOList).hasSize(1);
         assertThat(productDTOList.get(0).getName()).isEqualTo("relatedProduct");
+    }
+
+    /*
+     ***************** save() *****************
+     */
+    @Test
+    void should_save_product_to_db(){
+        ProductDTO productToSave = new ProductDTO();
+        productToSave.setName("product name");
+
+        productService.save(productToSave);
+
+        List<Product> allProducts = productRepository.findAll();
+        List<String> allProductNames = allProducts.stream().map(product -> product.getName()).collect(Collectors.toList());
+
+        assertTrue(allProductNames.contains(productToSave.getName()));
+    }
+
+    /*
+     ***************** update() *****************
+     */
+    @Test
+    void should_update_product(){
+        relatedProduct.setName("updated product");
+        ProductDTO convertedProduct = mapperUtil.convert(relatedProduct, new ProductDTO());
+
+        productService.update(convertedProduct);
+
+        String updatedName = productRepository.findById(relatedProduct.id).get().getName();
+
+        assertThat(updatedName).isEqualTo("updated product");
+    }
+
+    /*
+     ***************** delete() *****************
+     */
+    @Test
+    void should_delete_product(){
+        Product product = new Product();
+        product.setQuantityInStock(0);
+        product = productRepository.save(product);
+
+        productService.delete(product.id);
+
+        Optional<Product> deletedProduct = productRepository.findById(product.id);//should return empty since @Where(is_deleted=false)
+        assertThat(deletedProduct).isNotPresent();
+    }
+
+    /*
+     ***************** decreaseProductQuantityInStock() *****************
+     */
+    @Test
+    void should_decrease_product_stock(){
+        relatedProduct.setQuantityInStock(100);
+
+        productService.decreaseProductQuantityInStock(relatedProduct.id, 50);
+
+        int decreasedStock = productRepository.findById(relatedProduct.id).get().getQuantityInStock();
+        assertThat(decreasedStock).isEqualTo(50);
+    }
+
+    /*
+     ***************** increaseProductQuantityInStock() *****************
+     */
+    @Test
+    void should_increase_product_stock(){
+        relatedProduct.setQuantityInStock(100);
+
+        productService.increaseProductQuantityInStock(relatedProduct.id, 50);
+
+        int decreasedStock = productRepository.findById(relatedProduct.id).get().getQuantityInStock();
+        assertThat(decreasedStock).isEqualTo(150);
     }
 
 }
