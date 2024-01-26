@@ -1,11 +1,14 @@
 package com.cydeo.service.impl;
 
+import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.dto.ProductDTO;
 
 import com.cydeo.entity.Company;
 import com.cydeo.entity.Product;
 
 
+import com.cydeo.enums.ProductUnit;
+import com.cydeo.exception.ProductLowLimitAlertException;
 import com.cydeo.exception.ProductNotFoundException;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.ProductRepository;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -154,5 +158,25 @@ public class ProductServiceImpl implements ProductService {
             }
         }
         return bindingResult;
+    }
+
+    @Override
+    public void checkProductLowLimitAlert(Long invoiceId) {
+        List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceId(invoiceId);
+        ArrayList<String> belowLowLimitProductNames = new ArrayList<>();
+
+        invoiceProductDTOList.stream().forEach(invoiceProduct -> {
+            Integer quantityInStock = invoiceProduct.getProduct().getQuantityInStock();
+            Integer lowLimitAlert = invoiceProduct.getProduct().getLowLimitAlert();
+            if (quantityInStock < lowLimitAlert){
+                belowLowLimitProductNames.add(invoiceProduct.getProduct().getName());
+            }
+        } );
+
+        String productNames = belowLowLimitProductNames.stream().collect(Collectors.joining(", "));
+
+        if ( ! belowLowLimitProductNames.isEmpty()){
+            throw new ProductLowLimitAlertException("Stock of "+ productNames + " decreased below low limit!");
+        }
     }
 }
