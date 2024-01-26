@@ -5,6 +5,8 @@ import com.cydeo.dto.CompanyDTO;
 import com.cydeo.dto.CountryInfoDTO;
 import com.cydeo.dto.UserDTO;
 import com.cydeo.entity.Company;
+import com.cydeo.exception.CompanyNotFoundException;
+import com.cydeo.exception.CountryClientException;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.CompanyRepository;
 import com.cydeo.enums.CompanyStatus;
@@ -41,7 +43,7 @@ public class CompanyServiceImpl implements CompanyService {
     public CompanyDTO findById(Long companyId) {
         if (companyId !=1) {
             Company company = repository.findById(companyId)
-                    .orElseThrow(() -> new NoSuchElementException("Company with id: " + companyId + " Not Found "));
+                    .orElseThrow(() -> new CompanyNotFoundException("Company with id: " + companyId + " Not Found "));
             return mapperUtil.convert(company, new CompanyDTO());
         }
         return null;
@@ -97,7 +99,7 @@ public class CompanyServiceImpl implements CompanyService {
         @Override
         public void activateCompany ( long companyId){
             Company companyToBeActivate = repository.findById(companyId)
-                    .orElseThrow(() -> new NoSuchElementException("Company with id: " + companyId + " Not Found "));
+                    .orElseThrow(() -> new CompanyNotFoundException("Company with id: " + companyId + " Not Found "));
             companyToBeActivate.setCompanyStatus(CompanyStatus.ACTIVE);
             repository.save(companyToBeActivate);
 
@@ -106,7 +108,7 @@ public class CompanyServiceImpl implements CompanyService {
         @Override
         public void deactivateCompany ( long companyId){
             Company companyToBeDeactivate = repository.findById(companyId)
-                    .orElseThrow(() -> new NoSuchElementException("Company with id: " + companyId + " Not Found "));
+                    .orElseThrow(() -> new CompanyNotFoundException("Company with id: " + companyId + " Not Found "));
             companyToBeDeactivate.setCompanyStatus(CompanyStatus.PASSIVE);
             repository.save(companyToBeDeactivate);
         }
@@ -144,8 +146,7 @@ public class CompanyServiceImpl implements CompanyService {
                     .map(CountryInfoDTO::getName)
                     .collect(Collectors.toList());
         }
-//        throw new CountryServiceException("Countries didn't fetched"); // add exception when we do exception handling
-       return List.of();
-
+//        throw new CountryServiceException("Countries didn't fetched");
+        throw new CountryClientException("Countries didn't fetched from County Client");
     }
 }
