@@ -19,7 +19,6 @@ import javax.persistence.Table;
 public class Category extends BaseEntity{
 
     private String description;
-
     @ManyToOne(cascade = CascadeType.PERSIST)
     private Company company;
 

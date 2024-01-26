@@ -185,4 +185,9 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
         return repository
                .getTotalProfitLossForMonthAndCompanyAndInvoiceType(year,month,companyId, InvoiceType.SALES);
     }
+
+    @Override
+    public BigDecimal getProductProfitLoss(Long productId, Long companyId) {
+        return repository.getProductProfitLoss(productId, companyId,InvoiceType.SALES);
+    }
 }

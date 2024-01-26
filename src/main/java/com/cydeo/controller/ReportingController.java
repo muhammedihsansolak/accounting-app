@@ -1,6 +1,5 @@
 package com.cydeo.controller;
 
-import com.cydeo.service.InvoiceProductService;
 import com.cydeo.service.ReportingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -28,5 +27,12 @@ public class ReportingController {
         model.addAttribute("monthlyProfitLossDataMap",reportingService.getMonthlyProfitLossListMap());
 
         return "report/profit-loss-report";
+    }
+    @GetMapping("/productProfitLoss")
+    public String getProfitLossListForProduct(Model model){
+
+        model.addAttribute("productProfitLossDataMap",reportingService.getProductProfitLossListMap());
+
+        return "report/product-profit-loss";
     }
 }
