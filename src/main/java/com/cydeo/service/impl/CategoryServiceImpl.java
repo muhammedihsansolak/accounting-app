@@ -15,7 +15,6 @@ import com.cydeo.service.SecurityService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -45,8 +44,12 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDTO> findAll() {
-        List<Category> categoryList = categoryRepository.findAllByIsDeleted(false);
+        List<Category> categoryList = categoryRepository.findAll();
         return categoryList.stream().map(category -> mapperUtil.convert(category, new CategoryDTO())).collect(Collectors.toList());
+    }
+    @Override
+    public List<ProductDTO> getProductsByCategory(Long id) {
+        return List.of(new ProductDTO());
     }
 
 
@@ -54,7 +57,7 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryDTO> listAllCategories() {
         CompanyDTO companyDTO = securityService.getLoggedInUser().getCompany();
         Company company = mapperUtil.convert(companyDTO, new Company());
-        List<Category> categoryList = categoryRepository.findAllByCompanyAndIsDeleted(company, false);
+        List<Category> categoryList = categoryRepository.findAllByCompany(company);
 
         return categoryList.stream().map(category -> mapperUtil.convert(category, new CategoryDTO())).
                 collect(Collectors.toList());
@@ -85,9 +88,11 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public boolean isCategoryDescriptionUnique(String description) {
-        Category category = categoryRepository.findByDescription(description);
+        Company company = securityService.getLoggedInUser().getCompany;
+        Category category = categoryRepository.findByDescriptionAndCompany(description, company);
         return category != null;
     }
+
 
     @Override
     public void delete(Long id) {
