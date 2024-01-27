@@ -22,7 +22,7 @@ public class Category extends BaseEntity{
 
     private String description;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.MERGE)
     private Company company;
 
 

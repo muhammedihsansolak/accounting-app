@@ -9,10 +9,7 @@ public interface CategoryService {
 
     CategoryDTO findById(Long id);
 
-    List<CategoryDTO> findAll();
-
     List<CategoryDTO> listAllCategories();
-
 
     CategoryDTO save(CategoryDTO dto);
 

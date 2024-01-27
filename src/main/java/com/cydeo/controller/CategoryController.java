@@ -23,7 +23,7 @@ public class CategoryController {
 
     @GetMapping("/list")
     public String CategoryList(Model model) {
-        model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("categories", categoryService.listAllCategories());
         return "/category/category-list";
     }
 
@@ -63,7 +63,6 @@ public class CategoryController {
     public String editCategory(@PathVariable("id") Long id, Model model){
 
         model.addAttribute("category", categoryService.findById(id));
-        model.addAttribute("products", categoryService.listAllCategories());
 
         return "category/category-update";
     }

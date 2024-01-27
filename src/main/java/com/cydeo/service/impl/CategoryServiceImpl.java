@@ -12,6 +12,7 @@ import com.cydeo.service.CategoryService;
 import com.cydeo.service.CompanyService;
 import com.cydeo.service.ProductService;
 import com.cydeo.service.SecurityService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,7 +28,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final ProductService productService;
 
 
-    public CategoryServiceImpl(CategoryRepository categoryRepository, MapperUtil mapperUtil, CompanyService companyService, SecurityService securityService, ProductService productService) {
+    public CategoryServiceImpl(CategoryRepository categoryRepository, MapperUtil mapperUtil, SecurityService securityService, @Lazy ProductService productService) {
         this.categoryRepository = categoryRepository;
         this.mapperUtil = mapperUtil;
         this.securityService = securityService;
@@ -43,17 +44,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDTO> findAll() {
-        List<Category> categoryList = categoryRepository.findAll();
-        return categoryList.stream().map(category -> mapperUtil.convert(category, new CategoryDTO())).collect(Collectors.toList());
-    }
-    @Override
-    public List<ProductDTO> getProductsByCategory(Long id) {
-        return List.of(new ProductDTO());
-    }
-
-
-    @Override
     public List<CategoryDTO> listAllCategories() {
         CompanyDTO companyDTO = securityService.getLoggedInUser().getCompany();
         Company company = mapperUtil.convert(companyDTO, new Company());
@@ -66,10 +56,12 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDTO save(CategoryDTO dto) {
-        Category category = mapperUtil.convert(dto, new Category());
-        categoryRepository.save(category);
-        return mapperUtil.convert(category, new CategoryDTO());
+        CompanyDTO companyDTO = securityService.getLoggedInUser().getCompany();
+        dto.setCompany(companyDTO);
+        Category categoryToSave = mapperUtil.convert(dto, new Category());
 
+        Category savedCategory = categoryRepository.save(categoryToSave);
+        return mapperUtil.convert(savedCategory, new CategoryDTO());
     }
 
     @Override
@@ -88,8 +80,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public boolean isCategoryDescriptionUnique(String description) {
-        Company company = securityService.getLoggedInUser().getCompany;
-        Category category = categoryRepository.findByDescriptionAndCompany(description, company);
+        CompanyDTO company = securityService.getLoggedInUser().getCompany();
+        Company convertedCompany = mapperUtil.convert(company, new Company());
+
+        Category category = categoryRepository.findByDescriptionAndCompany(description, convertedCompany);
         return category != null;
     }
 
