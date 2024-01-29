@@ -160,7 +160,7 @@ public class PurchasesInvoiceController {
     public String printPurchaseInvoice(@PathVariable("invoiceId")Long invoiceId , Model model){
         InvoiceDTO invoice = invoiceService.findById(invoiceId);
 
-        List<InvoiceProductDTO> invoiceProductDTOList =  invoiceProductService.findByInvoiceId(invoiceId);
+        List<InvoiceProductDTO> invoiceProductDTOList =  invoiceProductService.findByInvoiceIdAndTotalCalculated(invoiceId);
 
         model.addAttribute("invoice", invoice);
         model.addAttribute("company", invoice.getCompany());
