@@ -36,7 +36,7 @@ public class UserDTO {
     @Size(min = 2, max = 50, message = "First Name must be between 2 and 50 characters long.")
     private String lastname;
 
-    @Pattern(regexp = "^\\+\\d{1,4}\\s\\(\\d{1,}\\)\\s\\d{1,}-\\d{1,}$", message = "Phone Number is required field and may be in any valid phone number format. Ex: +1 (222) 333-4444")
+    @Pattern(regexp = "^\\+\\d{1,4}\\s\\(\\d{1,}\\)\\s\\d{1,}-\\d{1,}$", message = "Phone Number is required field and may be in any valid phone number format. +CC (AAA) NNNN-NNNN Ex: +1 (222) 333-4444")
     private String phone;
 
     @NotNull(message = "Please select a Role.")
