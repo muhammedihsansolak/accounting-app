@@ -33,4 +33,6 @@ public interface InvoiceProductService {
             String companyName, String productName, InvoiceType invoiceType, int quantity);
 
     BigDecimal getProfitLossBasedOneMonth(int year, int month, Long companyId, InvoiceType invoiceType);
+
+    BigDecimal getProductProfitLoss(Long productId, Long companyId);
 }

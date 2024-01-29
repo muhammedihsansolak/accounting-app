@@ -243,14 +243,15 @@
                                                 <div class="row contacts">
                                                     <div class="col invoice-to">
                                                         <div class="text-gray-light">INVOICE TO:</div>
-                                                        <h2 class="to" th:text="${company.getTitle()}"></h2>
-                                                        <div class="address" th:text="${company.address1}"></div>
-                                                        <div class="address" th:text="${company.getZip()} + ' / ' + ${company.state.stateName}"></div>
-                                                        <div class="email"><a href="mailto:john@example.com" th:text="${company.email}"></a></div>
+                                                        <h2 class="to" th:text="${paidCompany.getTitle()}"></h2>
+                                                        <div class="address" th:text="${paidCompany.address.getAddressLine1()}"></div>
+                                                        <div class="address" th:text="${paidCompany.address.getAddressLine2()}"></div>
+                                                        <div class="address" th:text="${paidCompany.address.zipCode} + ' / ' + ${paidCompany.address.state}"></div>
+                                                        <div class="email"><a href="mailto:john@example.com"></a></div>
                                                     </div>
                                                 </div>
                                                 <div class="col invoice-details">
-                                                    <div class="date" th:text="'Invoice For: '+${payment.getMonth().value + ' / ' + payment.year.getYear()}">Due Date: 01/01/2022</div>
+                                                    <div class="date" th:text="'Invoice For: '+${payment.getMonth().value + ' / ' + payment.getYear()}">Due Date: 01/01/2022</div>
                                                 </div>
                                                 <table>
                                                     <col style="width:10%">

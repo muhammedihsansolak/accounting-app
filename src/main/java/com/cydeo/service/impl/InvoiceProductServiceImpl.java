@@ -159,7 +159,9 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
 
     @Override
     public List<InvoiceProductDTO> findAllApprovedInvoiceInvoiceProduct(InvoiceStatus invoiceStatus) {
-        return repository.findAllByInvoice_InvoiceStatus(invoiceStatus).stream()
+        CompanyDTO companyDto = securityService.getLoggedInUser().getCompany();
+        Company company = mapper.convert(companyDto, new Company());
+        return repository.findByInvoice_CompanyAndInvoice_InvoiceStatus(company,invoiceStatus).stream()
                 .map(invoiceProduct -> mapper.convert(invoiceProduct, new InvoiceProductDTO()))
                 .collect(Collectors.toList());
     }
@@ -184,5 +186,10 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
 
         return repository
                .getTotalProfitLossForMonthAndCompanyAndInvoiceType(year,month,companyId, InvoiceType.SALES);
+    }
+
+    @Override
+    public BigDecimal getProductProfitLoss(Long productId, Long companyId) {
+        return repository.getProductProfitLoss(productId, companyId,InvoiceType.SALES);
     }
 }

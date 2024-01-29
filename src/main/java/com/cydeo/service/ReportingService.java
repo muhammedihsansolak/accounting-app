@@ -10,4 +10,6 @@ public interface ReportingService {
     List<InvoiceProductDTO> getInvoiceProductList();
 
     List<Map.Entry<String ,BigDecimal>> getMonthlyProfitLossListMap();
+
+    List<Map.Entry<String ,BigDecimal>> getProductProfitLossListMap();
 }

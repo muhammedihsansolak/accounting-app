@@ -1,8 +1,10 @@
 package com.cydeo.service.impl;
 
+import com.cydeo.dto.CategoryDTO;
 import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.dto.ProductDTO;
 
+import com.cydeo.entity.Category;
 import com.cydeo.entity.Company;
 import com.cydeo.entity.Product;
 
@@ -12,6 +14,7 @@ import com.cydeo.exception.ProductLowLimitAlertException;
 import com.cydeo.exception.ProductNotFoundException;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.ProductRepository;
+import com.cydeo.service.CategoryService;
 import com.cydeo.service.InvoiceProductService;
 import com.cydeo.service.ProductService;
 import com.cydeo.service.SecurityService;
@@ -33,6 +36,7 @@ public class ProductServiceImpl implements ProductService {
     private final MapperUtil mapperUtil;
     private final SecurityService securityService;
     private final InvoiceProductService invoiceProductService;
+    private final CategoryService categoryService;
 
     @Override
     public ProductDTO findById(Long id) {
@@ -121,8 +125,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDTO> getProductsByCategory(Long id) {
+        CategoryDTO categoryDTO = categoryService.findById(id);
+        Category convertedCategory = mapperUtil.convert(categoryDTO, new Category());
 
-        return List.of(new ProductDTO());
+        List<Product> productList = productRepository.findByCategory(convertedCategory);
+
+        return productList.stream()
+                .map(product -> mapperUtil.convert(product, new ProductDTO()))
+                .collect(Collectors.toList());
     }
 
     @Override

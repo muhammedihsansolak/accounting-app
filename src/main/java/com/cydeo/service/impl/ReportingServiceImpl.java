@@ -2,6 +2,7 @@ package com.cydeo.service.impl;
 
 import com.cydeo.dto.CompanyDTO;
 import com.cydeo.dto.InvoiceProductDTO;
+import com.cydeo.dto.ProductDTO;
 import com.cydeo.enums.InvoiceStatus;
 import com.cydeo.enums.InvoiceType;
 import com.cydeo.service.*;
@@ -22,6 +23,7 @@ public class ReportingServiceImpl implements ReportingService {
     private final InvoiceProductService invoiceProductService;
     private final SecurityService securityService;
     private final CompanyService companyService;
+    private final ProductService productService;
 
     public List<InvoiceProductDTO> getInvoiceProductList() {
       return invoiceProductService.findAllApprovedInvoiceInvoiceProduct(InvoiceStatus.APPROVED);
@@ -51,6 +53,23 @@ public class ReportingServiceImpl implements ReportingService {
                             , currentCompany.getId(), InvoiceType.SALES);
 
             listOfMap.add(Map.entry(key.toUpperCase(),profitLoss));
+        }
+        return listOfMap;
+    }
+
+    @Override
+    public List<Map.Entry<String, BigDecimal>> getProductProfitLossListMap() {
+
+        List<Map.Entry<String ,BigDecimal>> listOfMap = new ArrayList<>();
+        // get the current company id;
+        Long companyId = securityService.getLoggedInUser().getCompany().getId();
+
+        List<ProductDTO> allProducts = productService.listAllProducts();
+
+        for (ProductDTO product : allProducts) {
+            BigDecimal profitLoss = invoiceProductService
+                    .getProductProfitLoss(product.getId(), companyId);
+            listOfMap.add(Map.entry(product.getName(),profitLoss));
         }
         return listOfMap;
     }
