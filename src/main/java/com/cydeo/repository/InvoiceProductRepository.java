@@ -32,4 +32,11 @@ public interface InvoiceProductRepository extends JpaRepository<InvoiceProduct,L
             "AND ip.invoice.company.id = :companyId " +
             "AND ip.invoice.invoiceType = :invoiceType ")
     BigDecimal getTotalProfitLossForMonthAndCompanyAndInvoiceType(int year, int month, Long companyId, InvoiceType invoiceType);
+
+    @Query(value = "SELECT COALESCE(SUM(ip.profitLoss), 0.00) " +
+            "FROM InvoiceProduct ip " +
+            "WHERE ip.product.id = :productId "+
+            "AND ip.invoice.company.id = :companyId " +
+            "AND ip.invoice.invoiceType = :invoiceType ")
+    BigDecimal getProductProfitLoss(Long productId, Long companyId, InvoiceType invoiceType);
 }
