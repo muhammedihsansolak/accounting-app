@@ -38,10 +38,13 @@ This project is a web-based accounting system designed as a Software as a Servic
 # Client Company Admin View
 
 ## User Registration
-![Admin User](src/main/resources/static/images/app-view/user-list.png)
+
 <li>
 The root company can create admins, whereas the admins of client companies have the capability to create users (admin, manager, employee) for their own company.
 </li>
+
+![Admin User](src/main/resources/static/images/app-view/user-list.png)
+
 
 ![Admin User](src/main/resources/static/images/app-view/user-create.png)
 
