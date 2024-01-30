@@ -31,6 +31,10 @@ This project is a web-based accounting system designed as a Software as a Servic
 ![Login Page](src/main/resources/static/images/app-view/login.png)
 
 # Root User View
+<li>
+Root users have the capability to establish companies and designate their admin users, granting client companies system access. They have the power to enable or disable companies. When a company is disabled, its users lose access to the system.
+</li>
+
 ![Root User](src/main/resources/static/images/app-view/root1.png)
 ![Root User](src/main/resources/static/images/app-view/root2.png)
 ![Root User](src/main/resources/static/images/app-view/root3.png)
