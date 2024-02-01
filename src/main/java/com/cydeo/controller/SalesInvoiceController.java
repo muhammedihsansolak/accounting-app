@@ -41,7 +41,7 @@ public class SalesInvoiceController {
     @GetMapping("/update/{id}")
     public String editInvoice(@PathVariable("id")Long id, Model model){
         InvoiceDTO foundInvoice = invoiceService.findById(id);
-        List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceId(id);
+        List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductService.findByInvoiceIdAndTotalCalculated(id);
         List<ClientVendorDTO> clientVendorDTOList = clientVendorService.findClientVendorByClientVendorTypeAndCompany(ClientVendorType.CLIENT);
 
         model.addAttribute("invoice",foundInvoice);
@@ -112,6 +112,7 @@ public class SalesInvoiceController {
     public String approveInvoice(@PathVariable("id")Long invoiceId){
 
         invoiceService.approve(invoiceId);
+        productService.checkProductLowLimitAlert(invoiceId);
 
         return "redirect:/salesInvoices/list";
     }
@@ -164,7 +165,7 @@ public class SalesInvoiceController {
     @GetMapping("/print/{invoiceId}")
     public String printSalesInvoice(@PathVariable("invoiceId")Long invoiceId , Model model){
         InvoiceDTO invoice = invoiceService.findById(invoiceId);
-        List<InvoiceProductDTO> invoiceProductDTOList =  invoiceProductService.findByInvoiceId(invoiceId);
+        List<InvoiceProductDTO> invoiceProductDTOList =  invoiceProductService.findByInvoiceIdAndTotalCalculated(invoiceId);
 
         model.addAttribute("invoice", invoice);
         model.addAttribute("company", invoice.getCompany());

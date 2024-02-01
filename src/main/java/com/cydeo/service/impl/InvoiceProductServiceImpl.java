@@ -6,6 +6,7 @@ import com.cydeo.dto.InvoiceProductDTO;
 import com.cydeo.entity.Company;
 import com.cydeo.entity.InvoiceProduct;
 import com.cydeo.enums.InvoiceStatus;
+import com.cydeo.enums.InvoiceType;
 import com.cydeo.exception.InvoiceProductNotFoundException;
 import com.cydeo.mapper.MapperUtil;
 import com.cydeo.repository.InvoiceProductRepository;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,9 +48,14 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
     @Override
     public List<InvoiceProductDTO> findByInvoiceId(Long invoiceId) {
         List<InvoiceProduct> invoiceProductList = repository.findByInvoiceId(invoiceId);
+        return invoiceProductList.stream().map(invoiceProduct ->
+                mapper.convert(invoiceProduct,new InvoiceProductDTO()))
+                .collect(Collectors.toList());
+    }
 
-        List<InvoiceProductDTO> invoiceProductDTOList = invoiceProductList.stream()
-                .map(invoiceProduct -> mapper.convert(invoiceProduct, new InvoiceProductDTO()))
+    @Override
+    public List<InvoiceProductDTO> findByInvoiceIdAndTotalCalculated(Long invoiceId) {
+        return findByInvoiceId(invoiceId).stream()
                 .map(invoiceProduct -> {
                     BigDecimal taxAmount = invoiceService.calculateTaxForProduct(invoiceProduct);
                     invoiceProduct.setTotal(
@@ -59,10 +64,7 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
                                     .add(taxAmount));
 
                     return invoiceProduct;
-                })
-                .collect(Collectors.toList());
-
-        return invoiceProductDTOList;
+                }).collect(Collectors.toList());
     }
 
     @Override
@@ -90,6 +92,7 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
         InvoiceDTO invoiceDTO = invoiceService.findById(invoiceId);
 
         invoiceProductDTO.setInvoice(invoiceDTO);
+        invoiceProductDTO.setProfitLoss(BigDecimal.ZERO);
 
         InvoiceProduct invoiceProduct = mapper.convert(invoiceProductDTO, new InvoiceProduct());
         invoiceProduct.setId(null);//bug fix
@@ -156,8 +159,37 @@ public class InvoiceProductServiceImpl implements InvoiceProductService {
 
     @Override
     public List<InvoiceProductDTO> findAllApprovedInvoiceInvoiceProduct(InvoiceStatus invoiceStatus) {
-        return repository.findAllByInvoice_InvoiceStatus(invoiceStatus).stream()
+        CompanyDTO companyDto = securityService.getLoggedInUser().getCompany();
+        Company company = mapper.convert(companyDto, new Company());
+        return repository.findByInvoice_CompanyAndInvoice_InvoiceStatus(company,invoiceStatus).stream()
                 .map(invoiceProduct -> mapper.convert(invoiceProduct, new InvoiceProductDTO()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void save(InvoiceProductDTO invoiceProductDTO) {
+        repository.save(mapper.convert(invoiceProductDTO, new InvoiceProduct()));
+    }
+
+    @Override
+    public List<InvoiceProductDTO> getPerchesInvoiceProductsListQuantityNotZero(
+            String companyName, String productName, InvoiceType invoiceType, int quantity) {
+         return repository
+                .findByInvoice_Company_TitleAndProduct_NameAndInvoice_InvoiceTypeAndRemainingQuantityGreaterThanOrderByInsertDateTimeAsc(
+                        companyName, productName, invoiceType,quantity)
+                .stream().map(invPro->mapper.convert(invPro,new InvoiceProductDTO()))
+                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public BigDecimal getProfitLossBasedOneMonth(int year, int month, Long companyId, InvoiceType invoiceType) {
+
+        return repository
+               .getTotalProfitLossForMonthAndCompanyAndInvoiceType(year,month,companyId, InvoiceType.SALES);
+    }
+
+    @Override
+    public BigDecimal getProductProfitLoss(Long productId, Long companyId) {
+        return repository.getProductProfitLoss(productId, companyId,InvoiceType.SALES);
     }
 }

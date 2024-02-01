@@ -7,6 +7,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -32,4 +34,6 @@ public class CompanyDTO {
 
     @Valid
     private AddressDTO address;
+
+    private LocalDateTime insertDateTime;
 }

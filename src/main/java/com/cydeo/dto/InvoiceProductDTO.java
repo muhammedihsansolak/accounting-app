@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -43,6 +44,8 @@ public class InvoiceProductDTO {
 
     @NotNull(message = "Product is a required field.")
     private ProductDTO product;
+
+    private LocalDateTime insertDateTime;
 
 
 }

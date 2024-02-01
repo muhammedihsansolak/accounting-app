@@ -13,6 +13,7 @@ import com.cydeo.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -179,7 +180,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         //delete operation
         invoiceToDelete.setIsDeleted(Boolean.TRUE);
 
-        // delete the invoice product that related with this invoice
+        // delete the invoiceProduct that related with this invoice
         invoiceProductService.deleteByInvoice(mapper.convert(invoiceToDelete, new InvoiceDTO()));
 
         invoiceRepository.save(invoiceToDelete);
@@ -198,10 +199,12 @@ public class InvoiceServiceImpl implements InvoiceService {
         List<InvoiceProductDTO> invoiceProductList = invoiceProductService.findByInvoiceId(invoiceToApprove.getId());
 
         if (invoiceToApprove.getInvoiceType() == InvoiceType.SALES) {
-            if (validateInvoiceProducts(invoiceProductList, invoiceId)) {
+            if ((validateInvoiceProducts(invoiceProductList, invoiceId))) {
+                saveSalesInvoiceProductProfitLossAndRemainingQuantity(invoiceProductList);
                 decreaseProductRemainingQuantity(invoiceProductList);
             }
         } else if (invoiceToApprove.getInvoiceType() == InvoiceType.PURCHASE) {
+            savePurchaseInvoiceProductProfitLossAndRemainingQuantity(invoiceProductList);
             increaseProductRemainingQuantity(invoiceProductList);
         }
 
@@ -221,6 +224,23 @@ public class InvoiceServiceImpl implements InvoiceService {
         });
         return true;
     }
+    private void savePurchaseInvoiceProductProfitLossAndRemainingQuantity(List<InvoiceProductDTO> invoiceProductDTOList){
+        invoiceProductDTOList.forEach(invPro -> {
+            invPro.setProfitLoss(BigDecimal.ZERO);
+            invPro.setRemainingQuantity(invPro.getQuantity());
+            invoiceProductService.save(invPro);
+        });
+    }
+    private void saveSalesInvoiceProductProfitLossAndRemainingQuantity(List<InvoiceProductDTO> invoiceProductDTOList){
+        invoiceProductDTOList.forEach(invPro -> {
+            // set the remainingQuantity, profitLoss and save
+                    invPro.setRemainingQuantity(0);
+                    invoiceProductService.save(invPro);
+            // meantime calculate the profitLoss and remainingQuantity of products from evey previous Perches
+            calculateTotalPerchesRemainingQuanProfitLossAndSave(invPro);
+
+                });
+    }
 
     private void decreaseProductRemainingQuantity(List<InvoiceProductDTO> invoiceProductList) {
         invoiceProductList.forEach(invoiceProductDTO -> {
@@ -231,6 +251,76 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     private void increaseProductRemainingQuantity(List<InvoiceProductDTO> invoiceProductList) {
+        invoiceProductList.forEach(invoiceProductDTO -> {
+            ProductDTO product = invoiceProductDTO.getProduct();
+            Integer quantity = invoiceProductDTO.getQuantity();
+            productService.increaseProductQuantityInStock(product.getId(), quantity);
+        });
+    }
+    @Transactional
+    public void calculateTotalPerchesRemainingQuanProfitLossAndSave(InvoiceProductDTO invPro){
+        // get the list of perchesInvoices invoiceProductList
+        String companyName = invPro.getInvoice().getCompany().getTitle();
+        String productName = invPro.getProduct().getName();
+
+        List<InvoiceProductDTO> invoiceProducts = invoiceProductService
+                .getPerchesInvoiceProductsListQuantityNotZero(
+                        companyName,productName,InvoiceType.PURCHASE, 0);
+
+        int salesQuantity = invPro.getQuantity();
+
+        for (InvoiceProductDTO invoiceProduct : invoiceProducts) {
+            int currentRemainingQuantity = invoiceProduct.getRemainingQuantity();
+            int updatedRemainingQuantity = Math.max(currentRemainingQuantity - salesQuantity, 0);
+
+            invoiceProduct.setRemainingQuantity(updatedRemainingQuantity);
+            invoiceProductService.save(invoiceProduct);
+
+//          sold quantity from remaining quantity
+            int soldQuantity = currentRemainingQuantity-updatedRemainingQuantity;
+
+            salesQuantity -= soldQuantity;
+
+            if (salesQuantity <= 0) {
+                // calculate the profitLoss of perches and save the remaining quantity and profitLoss to dataBase
+                // then exit the loop
+                calculateProfitLossAndSaveToDatabase(invPro,invoiceProduct,soldQuantity);
+                break;
+            }
+            // calculate the profitLoss of perches and save the remaining quantity and profitLoss to dataBase
+            calculateProfitLossAndSaveToDatabase(invPro,invoiceProduct,soldQuantity);
+        }
+    }
+
+    private void calculateProfitLossAndSaveToDatabase(InvoiceProductDTO sales, InvoiceProductDTO perches, int soldQuantity){
+        // calculate the product perches totalPrice
+        BigDecimal totalPerches = calculateTotal(perches.getPrice(),
+                soldQuantity,perches.getTax());
+
+        // calculate sales totalPrice
+        BigDecimal totalSale = calculateTotal(sales.getPrice(),
+                soldQuantity,sales.getTax());
+
+        // calculate the profitLoss and save to database than exit the loop
+        sales.setProfitLoss(totalSale.subtract(totalPerches));
+        invoiceProductService.save(sales);
+    }
+
+    private BigDecimal calculateTotal(BigDecimal price, int quantity, int taxRate){
+        BigDecimal totalPrice = price.multiply(BigDecimal.valueOf(quantity));
+        BigDecimal taxRateMod = BigDecimal.valueOf(taxRate)
+                .divide(PERCENTAGE_DIVISOR,2,RoundingMode.HALF_UP);
+        return totalPrice.add(totalPrice.multiply(taxRateMod));
+    }
+
+    private void decreaseProductQuantityInStock(List<InvoiceProductDTO> invoiceProductList) {
+        invoiceProductList.forEach(invoiceProductDTO -> {
+            ProductDTO product = invoiceProductDTO.getProduct();
+            Integer quantity = invoiceProductDTO.getQuantity();
+            productService.decreaseProductQuantityInStock(product.getId(), quantity);
+        });
+    }
+    private void increaseProductQuantityInStock(List<InvoiceProductDTO> invoiceProductList) {
         invoiceProductList.forEach(invoiceProductDTO -> {
             ProductDTO product = invoiceProductDTO.getProduct();
             Integer quantity = invoiceProductDTO.getQuantity();
