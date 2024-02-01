@@ -30,4 +30,6 @@ public interface ProductService {
     BindingResult addProductNameValidation(ProductDTO productDTO, BindingResult bindingResult);
 
     BindingResult addUpdateProductNameValidation(ProductDTO product, BindingResult bindingResult);
+
+    void checkProductLowLimitAlert(Long invoiceId);
 }

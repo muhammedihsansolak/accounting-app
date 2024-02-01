@@ -30,10 +30,10 @@
                                                             </tr>
                                                             </thead>
                                                             <tbody>
-                                                            <tr th:each="month, comStat : ${monthlyProfitLossDataMap.keySet()}">
+                                                            <tr th:each="entry, comStat : ${monthlyProfitLossDataMap}">
                                                                 <td th:text="${comStat.count}"></td>
-                                                                <td th:text="${month}"></td>
-                                                                <td th:text="${monthlyProfitLossDataMap.get(month)}"></td>
+                                                                <td th:text="${entry.key}"></td>
+                                                                <td th:text="${entry.value}"></td>
                                                             </tr>
                                                             </tbody>
                                                         </table>
