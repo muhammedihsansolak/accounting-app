@@ -12,10 +12,10 @@ import com.cydeo.service.CategoryService;
 import com.cydeo.service.CompanyService;
 import com.cydeo.service.ProductService;
 import com.cydeo.service.SecurityService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -28,7 +28,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final ProductService productService;
 
 
-    public CategoryServiceImpl(CategoryRepository categoryRepository, MapperUtil mapperUtil, CompanyService companyService, SecurityService securityService, ProductService productService) {
+    public CategoryServiceImpl(CategoryRepository categoryRepository, MapperUtil mapperUtil, SecurityService securityService, @Lazy ProductService productService) {
         this.categoryRepository = categoryRepository;
         this.mapperUtil = mapperUtil;
         this.securityService = securityService;
@@ -44,17 +44,10 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDTO> findAll() {
-        List<Category> categoryList = categoryRepository.findAllByIsDeleted(false);
-        return categoryList.stream().map(category -> mapperUtil.convert(category, new CategoryDTO())).collect(Collectors.toList());
-    }
-
-
-    @Override
     public List<CategoryDTO> listAllCategories() {
         CompanyDTO companyDTO = securityService.getLoggedInUser().getCompany();
         Company company = mapperUtil.convert(companyDTO, new Company());
-        List<Category> categoryList = categoryRepository.findAllByCompanyAndIsDeleted(company, false);
+        List<Category> categoryList = categoryRepository.findAllByCompany(company);
 
         return categoryList.stream().map(category -> mapperUtil.convert(category, new CategoryDTO())).
                 collect(Collectors.toList());
@@ -63,10 +56,12 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDTO save(CategoryDTO dto) {
-        Category category = mapperUtil.convert(dto, new Category());
-        categoryRepository.save(category);
-        return mapperUtil.convert(category, new CategoryDTO());
+        CompanyDTO companyDTO = securityService.getLoggedInUser().getCompany();
+        dto.setCompany(companyDTO);
+        Category categoryToSave = mapperUtil.convert(dto, new Category());
 
+        Category savedCategory = categoryRepository.save(categoryToSave);
+        return mapperUtil.convert(savedCategory, new CategoryDTO());
     }
 
     @Override
@@ -85,9 +80,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public boolean isCategoryDescriptionUnique(String description) {
-        Category category = categoryRepository.findByDescription(description);
+        CompanyDTO company = securityService.getLoggedInUser().getCompany();
+        Company convertedCompany = mapperUtil.convert(company, new Company());
+
+        Category category = categoryRepository.findByDescriptionAndCompany(description, convertedCompany);
         return category != null;
     }
+
 
     @Override
     public void delete(Long id) {
