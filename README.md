@@ -113,3 +113,14 @@ Admins can manage monthly subscription payments on the membership page, utilizin
 ![Admin User](src/main/resources/static/images/app-view/payment3.png)
 
 ![Admin User](src/main/resources/static/images/app-view/payment4.png)
+
+### Contributors
+
+- [Muhammed Ihsan SOLAK](https://github.com/muhammedihsansolak)
+- [Ziya Kaşgari](https://github.com/koltikin)
+- [Osman Mert](https://github.com/OsmanMertGH)
+- [Elif Denk](https://github.com/elifdnk)
+- [Jusra Bajrami](https://github.com/Jusrab)
+- [Efe Çağrı Şen](https://github.com/efecagrisen)
+- [Aysegul Yilmaz](https://github.com/Aysegulky)
+- [Arbresha Rexha](https://github.com/arbresharexhacydeo)
